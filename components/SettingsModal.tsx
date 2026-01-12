@@ -14,8 +14,13 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
 
     useEffect(() => {
         setMounted(true);
-        const savedKey = localStorage.getItem("gemini_api_key");
-        if (savedKey) setApiKey(savedKey);
+    }, []);
+
+    useEffect(() => {
+        if (isOpen) {
+            const savedKey = localStorage.getItem("gemini_api_key");
+            if (savedKey) setApiKey(savedKey);
+        }
     }, [isOpen]);
 
     const handleSave = () => {

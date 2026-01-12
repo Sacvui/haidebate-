@@ -105,15 +105,15 @@ export const GuideModal = ({ isOpen, onClose }: GuideModalProps) => {
                                     <ul className="space-y-3">
                                         <li className="flex gap-3">
                                             <span className="font-semibold text-slate-800 min-w-[150px]">Giảng viên hướng dẫn:</span>
-                                            <span>"Em có làm đúng tiến độ và quy định không?". Muốn thấy sự nỗ lực và tuân thủ.</span>
+                                            <span>&quot;Em có làm đúng tiến độ và quy định không?&quot;. Muốn thấy sự nỗ lực và tuân thủ.</span>
                                         </li>
                                         <li className="flex gap-3">
                                             <span className="font-semibold text-slate-800 min-w-[150px]">Hội đồng phản biện:</span>
-                                            <span>"Tại sao lại chọn phương pháp này mà không phải phương pháp kia?". Họ đóng vai trò "Devil's Advocate" để thử thách sự vững chắc của lập luận.</span>
+                                            <span>&quot;Tại sao lại chọn phương pháp này mà không phải phương pháp kia?&quot;. Họ đóng vai trò &quot;Devil's Advocate&quot; để thử thách sự vững chắc của lập luận.</span>
                                         </li>
                                         <li className="flex gap-3">
                                             <span className="font-semibold text-slate-800 min-w-[150px]">Reviewer Quốc tế:</span>
-                                            <span>"Bài này có gì mới so với thế giới không?". Họ quan tâm đến giá trị đóng góp toàn cầu (Global Contribution).</span>
+                                            <span>&quot;Bài này có gì mới so với thế giới không?&quot;. Họ quan tâm đến giá trị đóng góp toàn cầu (Global Contribution).</span>
                                         </li>
                                     </ul>
                                 </div>

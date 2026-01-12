@@ -198,7 +198,7 @@ export class AgentSession {
 
       return data?.candidates?.[0]?.content?.parts?.[0]?.text || "Lỗi: Không có phản hồi từ AI.";
 
-    } catch (error: any) {
+    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
       // Network errors -> Retry or Fail
       if (retries > 0 && !error.message.includes("quota")) { // Retry network glitches
         await new Promise(resolve => setTimeout(resolve, 2000));
