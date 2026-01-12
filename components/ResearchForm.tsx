@@ -10,11 +10,14 @@ interface ResearchFormProps {
     isPreview?: boolean;
 }
 
+import { HumorousGuideModal } from './HumorousGuideModal';
+
 export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: ResearchFormProps) => {
     const [topic, setTopic] = useState("");
     const [goal, setGoal] = useState("Nghiên cứu khoa học/Đăng báo");
     const [audience, setAudience] = useState("Chuyên gia/Nhà nghiên cứu");
     const [level, setLevel] = useState<AcademicLevel>("MASTER");
+    const [showHumor, setShowHumor] = useState(false);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -32,6 +35,8 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
 
     return (
         <div className={`space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 ${isPreview ? 'opacity-80 pointer-events-none grayscale-[0.3]' : ''}`}>
+            <HumorousGuideModal isOpen={showHumor} onClose={() => setShowHumor(false)} />
+
             <div className="text-center space-y-4">
                 <h2 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
                     Quy Trình Nghiên Cứu <br />
@@ -81,8 +86,8 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
                                 type="button"
                                 onClick={() => handleLevelSelect(lvl)}
                                 className={`py-2 rounded-lg text-xs font-bold transition-all ${level === lvl
-                                        ? 'bg-white text-blue-700 shadow-sm ring-1 ring-black/5'
-                                        : 'text-slate-500 hover:text-slate-700'
+                                    ? 'bg-white text-blue-700 shadow-sm ring-1 ring-black/5'
+                                    : 'text-slate-500 hover:text-slate-700'
                                     }`}
                             >
                                 {lvl === 'UNDERGRAD' && "Sinh Viên"}
@@ -95,7 +100,17 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <label className="text-sm font-semibold text-slate-700">Loại hình bài viết (Output)</label>
+                        <div className="flex justify-between items-center">
+                            <label className="text-sm font-semibold text-slate-700">Loại hình bài viết</label>
+                            <button
+                                type="button"
+                                onClick={() => setShowHumor(true)}
+                                className="text-xs text-indigo-600 font-bold flex items-center gap-1 hover:underline animate-pulse"
+                            >
+                                <Sparkles size={14} /> Giải ngố thuật ngữ? 🤔
+                            </button>
+                        </div>
+
                         <select
                             value={goal}
                             onChange={(e) => setGoal(e.target.value)}

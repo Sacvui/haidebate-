@@ -78,10 +78,12 @@ export default function Home() {
               <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white mb-4 shadow-lg shadow-blue-500/30">
                 <Sparkles size={24} />
               </div>
-              <h1 className="text-3xl font-extrabold text-slate-900 leading-tight mb-2">
-                Hải Debate <br />
-                <span className="text-blue-600">Research Assistant</span>
-              </h1>
+              <a href="/" className="block group">
+                <h1 className="text-3xl font-extrabold text-slate-900 leading-tight mb-2 group-hover:opacity-80 transition-opacity">
+                  Hải Debate <br />
+                  <span className="text-blue-600">Research Assistant</span>
+                </h1>
+              </a>
               <p className="text-slate-500">
                 Trợ lý AI chuyên sâu cho Nghiên cứu khoa học, Luận văn & Công bố quốc tế.
               </p>
