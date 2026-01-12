@@ -8,7 +8,6 @@ import { MermaidChart } from './MermaidChart';
 import { FinalReport } from './FinalReport';
 import { ThinkingAnimation } from './ThinkingAnimation';
 import { ShareableCard } from './ShareableCard';
-import html2canvas from 'html2canvas';
 import { motion } from 'framer-motion';
 
 interface DebateManagerProps {

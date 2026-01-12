@@ -1,6 +1,5 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import mermaid from 'mermaid';
 import { RotateCw } from 'lucide-react';
 
 interface MermaidChartProps {
@@ -13,13 +12,14 @@ export const MermaidChart = ({ chart }: MermaidChartProps) => {
     const [isRendered, setIsRendered] = useState(false);
 
     useEffect(() => {
-        mermaid.initialize({
-            startOnLoad: false,
-            theme: 'default',
-            securityLevel: 'loose',
-        });
+        const initAndRender = async () => {
+            const mermaid = (await import('mermaid')).default;
+            mermaid.initialize({
+                startOnLoad: false,
+                theme: 'default',
+                securityLevel: 'loose',
+            });
 
-        const renderChart = async () => {
             try {
                 if (chartRef.current && chart) {
                     const { svg } = await mermaid.render(svgId, chart);
@@ -34,7 +34,7 @@ export const MermaidChart = ({ chart }: MermaidChartProps) => {
             }
         };
 
-        renderChart();
+        initAndRender();
     }, [chart, svgId]);
 
     return (
