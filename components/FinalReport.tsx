@@ -2,6 +2,8 @@
 import React from 'react';
 import { Download, CheckCircle, FileText, ArrowLeft, Printer } from 'lucide-react';
 import { MermaidChart } from './MermaidChart';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface FinalReportProps {
     topic: string;
@@ -64,9 +66,10 @@ export const FinalReport = ({ topic, goal, audience, finalContent, variableChart
                     )}
 
                     {/* Main Content */}
-                    <div className="prose prose-slate max-w-none font-serif prose-headings:font-sans prose-headings:font-bold prose-p:text-justify prose-a:text-blue-600">
-                        {/* Simplified markdown rendering for demo - in prod use react-markdown */}
-                        <div dangerouslySetInnerHTML={{ __html: finalContent.replace(/\n/g, '<br/>').replace(/# (.*?)\<br\/\>/g, '<h1>$1</h1>').replace(/## (.*?)\<br\/\>/g, '<h2>$1</h2>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
+                    <div className="prose prose-slate max-w-none font-serif prose-headings:font-sans prose-headings:font-bold prose-p:text-justify prose-a:text-blue-600 prose-ul:list-disc prose-ol:list-decimal">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {finalContent}
+                        </ReactMarkdown>
                     </div>
 
                     {/* Footer */}
