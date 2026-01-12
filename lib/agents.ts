@@ -93,7 +93,11 @@ const getCriticPersona = (level: AcademicLevel) => {
 
 const TOPIC_WRITER_PROMPT = `
 NHIỆM VỤ: Đề xuất hoặc tinh chỉnh Tên Đề Tài nghiên cứu.
-YÊU CẦU: Ngắn gọn, súc tích, có tính mới.
+QUY TRÌNH SUY NGHĨ (CHAIN OF THOUGHT):
+1. Phân tích từ khóa: Xác định các từ khóa chính và mối quan hệ.
+2. Xác định khoảng trống (Gap): Tìm điểm mới so với các nghiên cứu cũ.
+3. Đề xuất: Đưa ra 3 phương án tên đề tài (Sáng tạo - An toàn - Cân bằng).
+YÊU CẦU: Ngắn gọn, súc tích, có tính mới. Kết quả trả về danh sách có giải thích ngắn.
 `;
 
 const TOPIC_CRITIC_PROMPT = `
@@ -106,12 +110,20 @@ NHIỆM VỤ: Xây dựng Cơ sở lý thuyết và Mô hình nghiên cứu.
 TRÌNH ĐỘ YÊU CẦU: ${level}
 ${getModelRequirements(level)}
 
-YÊU CẦU CHUNG:
-1. Xác định mô hình nền tảng.
-2. Đề xuất biến và giả thuyết (H1, H2...).
-3. VẼ SƠ ĐỒ MERMAID (Graph LR/TD, khối chữ nhật).
-LƯU Ý: Trích dẫn nguồn gốc (Citation).
-FORMAT: LaTeX phương trình.
+QUY TRÌNH SUY NGHĨ:
+1. Xác định lý thuyết nền (Base Theory) phù hợp nhất.
+2. Biện luận các giả thuyết (Hypothesis Development) dựa trên lý thuyết.
+3. Xây dựng mô hình khái niệm.
+
+YÊU CẦU ĐẦU RA:
+1. Giải thích lý thuyết nền ngắn gọn.
+2. Danh sách biến và giả thuyết (H1, H2...).
+3. SƠ ĐỒ MERMAID (BẮT BUỘC):
+   - Sử dụng 'graph LR' hoặc 'graph TD'.
+   - Node phải nằm trong ngoặc vuông [Tên Biến].
+   - Mũi tên --> có nhãn nếu cần.
+4. Trích dẫn nguồn (Citation) dạng giả định chuẩn APA.
+FORMAT: LaTeX cho phương trình nếu có.
 `;
 
 const getModelCriticPrompt = (level: AcademicLevel) => `
@@ -127,6 +139,16 @@ const getOutlineWriterPrompt = (outputType: string) => `
 NHIỆM VỤ: Lập Đề cương chi tiết (Detailed Outline).
 CHUẨN FORMAT: APA 7th Edition.
 LOẠI HÌNH BÀI VIẾT: ${outputType}
+
+CHIẾN LƯỢC THỰC HIỆN (CHAIN OF THOUGHT):
+Bước 1 (Brainstorm): Liệt kê 3 hướng tiếp cận logic cho đề tài này.
+Bước 2 (Select): Chọn hướng tiếp cận tốt nhất, đảm bảo tính mạch lạc (Coherence).
+Bước 3 (Elaborate): Viết chi tiết đề cương dựa trên hướng đã chọn.
+
+YÊU CẦU CHI TIẾT:
+- Chia chương mục rõ ràng (Chương -> Mục lớn -> Mục nhỏ).
+- Mỗi mục phải có mô tả ngắn về nội dung dự kiến viết (Key Points).
+- Đảm bảo logic dòng chảy: Vấn đề -> Nguyên nhân -> Giải pháp/Kết quả.
 ${getOutlineStructure(outputType)}
 `;
 
@@ -204,7 +226,7 @@ export class AgentSession {
 
         const prompt = `${sysPrompt}\n\nBÀI LÀM CỦA WRITER:\n${writerDraft}\n\nHãy đóng vai trò Critic và đưa ra nhận xét chi tiết, khắt khe.`;
 
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${geminiKey}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${geminiKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
