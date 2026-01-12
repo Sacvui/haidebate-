@@ -9,6 +9,13 @@ interface GuideModalProps {
 }
 
 export const GuideModal = ({ isOpen, onClose }: GuideModalProps) => {
+    const [mounted, setMounted] = React.useState(false);
+
+    React.useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) return null;
 
     return createPortal(
         <AnimatePresence>
