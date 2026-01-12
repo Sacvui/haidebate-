@@ -9,7 +9,7 @@ interface MermaidChartProps {
 
 export const MermaidChart = ({ chart }: MermaidChartProps) => {
     const chartRef = useRef<HTMLDivElement>(null);
-    const [svgId] = useState(`mermaid-${Math.random().toString(36).substr(2, 9)}`);
+    const [svgId] = useState(() => `mermaid-${Math.random().toString(36).substr(2, 9)}`);
     const [isRendered, setIsRendered] = useState(false);
 
     useEffect(() => {

@@ -43,11 +43,11 @@ export const ShareableCard = React.forwardRef<HTMLDivElement, ShareableCardProps
                 </div>
 
                 <div className="bg-white/10 backdrop-blur-md p-10 rounded-3xl border border-white/10 shadow-2xl relative">
-                    <div className="absolute -top-6 -left-6 text-8xl text-blue-400 opacity-50 font-serif">"</div>
+                    <div className="absolute -top-6 -left-6 text-8xl text-blue-400 opacity-50 font-serif">&quot;</div>
                     <p className="text-3xl leading-relaxed text-slate-100 font-light italic opacity-90 line-clamp-6">
                         {content}
                     </p>
-                    <div className="absolute -bottom-10 -right-4 text-8xl text-orange-400 opacity-50 font-serif rotate-180">"</div>
+                    <div className="absolute -bottom-10 -right-4 text-8xl text-orange-400 opacity-50 font-serif rotate-180">&quot;</div>
                 </div>
             </div>
 
