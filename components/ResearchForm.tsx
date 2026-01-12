@@ -124,7 +124,10 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
                         </select>
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-semibold text-slate-700">Đối tượng độc giả</label>
+                        <div className="flex justify-between items-center">
+                            <label className="text-sm font-semibold text-slate-700">Đối tượng độc giả</label>
+                            {/* Placeholder to ensure alignment or if we want to add something later */}
+                        </div>
                         <select
                             value={audience}
                             onChange={(e) => setAudience(e.target.value)}
