@@ -28,8 +28,10 @@ const ROUNDS_CONFIG = {
 
 // Helper: Extract Mermaid code
 const extractMermaidCode = (text: string) => {
-    const match = text.match(/```mermaid([\s\S]*?)```/);
-    return match ? match[1].trim() : null;
+    // Match typescript/mermaid block
+    const match = text.match(/```mermaid\s*([\s\S]*?)```/);
+    if (match) return match[1].trim();
+    return null;
 };
 
 export default function DebateManager({ topic, goal, audience, level, language, apiKey }: DebateManagerProps) {
