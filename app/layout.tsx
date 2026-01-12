@@ -15,10 +15,24 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Hải Debate - Trợ lý AI Nghiên cứu Khoa học",
   description: "Công cụ hỗ trợ viết luận văn và nghiên cứu khoa học chuyên sâu với AI Phản biện. Được phát triển bởi Dr. Hai Show & Hải Rong Chơi.",
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/og-image.jpg', // Using OG image as a placeholder for apple touch icon if we don't have a specific one
+  },
   openGraph: {
     title: "Hải Debate - Trợ lý AI Nghiên cứu Khoa học",
     description: "Công cụ hỗ trợ viết luận văn và nghiên cứu khoa học chuyên sâu với AI Phản biện.",
-    images: ["/og-image.jpg"], // Placeholder, will default if not found or can be updated later
+    url: 'https://haidebate-ocsd.vercel.app', // Explicitly setting the URL if known or using a default
+    siteName: 'Hải Debate',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Hải Debate Social Card',
+      },
+    ],
     type: "website",
   },
 };
