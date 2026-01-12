@@ -48,23 +48,32 @@ export const GuideModal = ({ isOpen, onClose }: GuideModalProps) => {
                     <div className="space-y-4">
                         <div className="flex items-center gap-3 text-base font-bold text-slate-900 uppercase tracking-wide">
                             <BookOpen size={18} className="text-blue-600" />
-                            <h3>1. Loại hình bài viết (Output)</h3>
+                            <h3>1. Loại hình bài viết (Structure & Insight)</h3>
                         </div>
-                        <div className="bg-slate-50 p-5 rounded-lg space-y-3 text-sm text-slate-600 border border-slate-100">
-                            <ul className="space-y-3">
-                                <li className="flex gap-3">
-                                    <span className="font-semibold text-slate-800 min-w-[140px]">Tiểu luận/Khóa luận:</span>
-                                    <span>Yêu cầu cơ bản về cấu trúc, độ dài 3.000 - 10.000 từ. Tập trung vào tổng quan tài liệu và phân tích sơ bộ.</span>
-                                </li>
-                                <li className="flex gap-3">
-                                    <span className="font-semibold text-slate-800 min-w-[140px]">Luận văn Thạc sĩ:</span>
-                                    <span>Yêu cầu tính mới (Novelty) và đóng góp thực tiễn/lý luận. Cần mô hình nghiên cứu và kiểm định giả thuyết chặt chẽ.</span>
-                                </li>
-                                <li className="flex gap-3">
-                                    <span className="font-semibold text-slate-800 min-w-[140px]">Bài báo Quốc tế:</span>
-                                    <span>Tiêu chuẩn khắt khe nhất (ISI/Scopus). Đòi hỏi phương pháp luận vững chắc, đóng góp học thuật rõ ràng và văn phong tiếng Anh học thuật chuẩn mực.</span>
-                                </li>
-                            </ul>
+                        <div className="bg-slate-50 p-5 rounded-lg space-y-4 text-sm text-slate-600 border border-slate-100">
+                            <div className="space-y-2">
+                                <div className="font-semibold text-slate-800 text-base">📘 Tiểu luận / Khóa luận</div>
+                                <ul className="list-disc pl-5 space-y-1">
+                                    <li><strong>Cấu trúc:</strong> Mở bài (Đặt vấn đề) → Thân bài (Phân tích, Tổng hợp) → Kết luận.</li>
+                                    <li><strong>Insight:</strong> Giảng viên tìm kiếm khả năng <em>tổng hợp kiến thức</em> và tư duy logic cơ bản. Không cần quá nhiều tính mới, nhưng phải trích dẫn nguồn chuẩn xác.</li>
+                                </ul>
+                            </div>
+                            <div className="w-full h-px bg-slate-200"></div>
+                            <div className="space-y-2">
+                                <div className="font-semibold text-slate-800 text-base">🎓 Luận văn Thạc sĩ (Master's Thesis)</div>
+                                <ul className="list-disc pl-5 space-y-1">
+                                    <li><strong>Cấu trúc:</strong> Intro → Literature Review (Khe hổng nghiên cứu) → Methodology → Results → Discussion.</li>
+                                    <li><strong>Insight:</strong> Từ khóa là <em>"Khe hổng nghiên cứu" (Research Gap)</em>. Bạn phải chỉ ra các nghiên cứu trước chưa làm được gì và bài của bạn lấp đầy khoảng trống đó như thế nào.</li>
+                                </ul>
+                            </div>
+                            <div className="w-full h-px bg-slate-200"></div>
+                            <div className="space-y-2">
+                                <div className="font-semibold text-slate-800 text-base">🌍 Bài báo Quốc tế (ISI/Scopus)</div>
+                                <ul className="list-disc pl-5 space-y-1">
+                                    <li><strong>Cấu trúc:</strong> IMRaD (Introduction - Methods - Results - Discussion). Cực kỳ chặt chẽ.</li>
+                                    <li><strong>Insight:</strong> Reviewer quốc tế "soi" rất kỹ phần <em>Phương pháp luận (Methodology)</em> và <em>Đóng góp mới (Novelty)</em>. Số liệu phải tin cậy, biện luận phải sắc bén.</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
 
@@ -72,21 +81,21 @@ export const GuideModal = ({ isOpen, onClose }: GuideModalProps) => {
                     <div className="space-y-4">
                         <div className="flex items-center gap-3 text-base font-bold text-slate-900 uppercase tracking-wide">
                             <Users size={18} className="text-blue-600" />
-                            <h3>2. Đối tượng độc giả</h3>
+                            <h3>2. Đối tượng độc giả (Họ muốn nghe gì?)</h3>
                         </div>
                         <div className="bg-slate-50 p-5 rounded-lg space-y-3 text-sm text-slate-600 border border-slate-100">
                             <ul className="space-y-3">
                                 <li className="flex gap-3">
-                                    <span className="font-semibold text-slate-800 min-w-[140px]">Giảng viên hướng dẫn:</span>
-                                    <span>Quan tâm đến tiến độ, tuân thủ quy trình và sự phù hợp của đề tài với hướng nghiên cứu.</span>
+                                    <span className="font-semibold text-slate-800 min-w-[150px]">Giảng viên hướng dẫn:</span>
+                                    <span>"Em có làm đúng tiến độ và quy định không?". Muốn thấy sự nỗ lực và tuân thủ.</span>
                                 </li>
                                 <li className="flex gap-3">
-                                    <span className="font-semibold text-slate-800 min-w-[140px]">Hội đồng phản biện:</span>
-                                    <span>Tập trung soi xét các "lỗ hổng" logic, phương pháp nghiên cứu và tính xác thực của dữ liệu. Cần lập luận chặt chẽ để thuyết phục.</span>
+                                    <span className="font-semibold text-slate-800 min-w-[150px]">Hội đồng phản biện:</span>
+                                    <span>"Tại sao lại chọn phương pháp này mà không phải phương pháp kia?". Họ đóng vai trò "Devil's Advocate" để thử thách sự vững chắc của lập luận.</span>
                                 </li>
                                 <li className="flex gap-3">
-                                    <span className="font-semibold text-slate-800 min-w-[140px]">Cộng đồng học thuật:</span>
-                                    <span>Quan tâm đến đóng góp mới của bài viết vào kho tàng tri thức chung.</span>
+                                    <span className="font-semibold text-slate-800 min-w-[150px]">Reviewer Quốc tế:</span>
+                                    <span>"Bài này có gì mới so với thế giới không?". Họ quan tâm đến giá trị đóng góp toàn cầu (Global Contribution).</span>
                                 </li>
                             </ul>
                         </div>
