@@ -80,7 +80,7 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
                         </button>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-2 p-1 bg-slate-100 rounded-xl">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 p-1 bg-slate-100 rounded-xl">
                         {(['UNDERGRAD', 'MASTER', 'PHD'] as AcademicLevel[]).map((lvl) => (
                             <button
                                 key={lvl}
@@ -99,7 +99,7 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <div className="flex justify-between items-center h-6">
                             <label className="text-sm font-semibold text-slate-700">Loại hình bài viết</label>
@@ -126,7 +126,7 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <div className="flex justify-between items-center h-6">
                             <label className="text-sm font-semibold text-slate-700">Đối tượng độc giả</label>

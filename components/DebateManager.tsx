@@ -272,10 +272,11 @@ export default function DebateManager({ topic, goal, audience, level, language, 
                 <div ref={bottomRef} />
             </div>
 
-            {/* Thinking Animation Overlay or Bottom */}
+            {/* Thinking Animation Overlay - Sticky Top */}
             {isProcessing && (
-                <div className="bg-white/50 backdrop-blur-sm p-4 rounded-xl border border-slate-100 mb-6 mx-6 animate-in fade-in slide-in-from-bottom-4">
+                <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-white/90 backdrop-blur-md px-6 py-4 rounded-full border border-blue-100 shadow-2xl animate-in fade-in slide-in-from-top-4 flex items-center gap-3">
                     <ThinkingAnimation />
+                    <span className="text-sm font-bold text-slate-600 animate-pulse">AI đang suy luận...</span>
                 </div>
             )}
 
