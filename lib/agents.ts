@@ -255,7 +255,7 @@ export class AgentSession {
         const prompt = `${sysPrompt}\n\nBÀI LÀM CỦA WRITER:\n${writerDraft}\n\nHãy đóng vai trò Critic và đưa ra nhận xét chi tiết, khắt khe.`;
 
         // Use Helper with retry & fallback
-        return await this.callGeminiAPI('gemini-3-flash-preview', prompt, geminiKey);
+        return await this.callGeminiAPI('gemini-3-pro-preview', prompt, geminiKey);
 
       } catch (error) {
         return `Lỗi Critic (Quota/Network): ${error}`;
