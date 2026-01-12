@@ -15,7 +15,7 @@ export default function Home() {
   const [showSettings, setShowSettings] = useState(false);
   const [isGateOpen, setIsGateOpen] = useState(false);
   const [userProfile, setUserProfile] = useState<{ email: string; referralCode?: string } | null>(null);
-  const [apiKey, setApiKey] = useState("");
+  const [apiKey, setApiKey] = useState(process.env.NEXT_PUBLIC_GEMINI_API_KEY || "");
 
   // Form State for DebateManager (Lifted up)
   const [formData, setFormData] = useState<any>(null);
@@ -65,7 +65,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 font-sans overflow-x-hidden">
+    <main className="min-h-screen bg-slate-50 text-slate-900 font-sans overflow-x-hidden flex flex-col">
       <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
       <LevelGuidelines isOpen={showGuidelines} onClose={() => setShowGuidelines(false)} onSelectLevel={() => { }} />
 
