@@ -189,10 +189,10 @@ export class AgentSession {
             await new Promise(resolve => setTimeout(resolve, 3000));
             return this.callGeminiAPI(model, prompt, key, retries - 1);
           } else {
-            // Fallback to Gemini 1.5 Flash if retries exhausted
-            if (model !== 'gemini-1.5-flash') {
-              console.warn(`Switching to Fallback Model (gemini-1.5-flash) due to quota.`);
-              return this.callGeminiAPI('gemini-1.5-flash', prompt, key, 0);
+            // Fallback to Gemini 2.0 Flash if retries exhausted
+            if (model !== 'gemini-2.0-flash') {
+              console.warn(`Switching to Fallback Model (gemini-2.0-flash) due to quota.`);
+              return this.callGeminiAPI('gemini-2.0-flash', prompt, key, 0);
             }
           }
           throw new Error(data.error.message);
