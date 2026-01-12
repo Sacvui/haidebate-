@@ -1,11 +1,14 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { AgentSession, AgentMessage, WorkflowStep, AcademicLevel } from '../lib/agents';
-import { Bot, User, Play, RotateCw, CheckCircle, ArrowRight, FileText } from 'lucide-react';
+import { Bot, User, Play, RotateCw, CheckCircle, ArrowRight, FileText, Camera } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StepIndicator } from './StepIndicator';
 import { MermaidChart } from './MermaidChart';
 import { FinalReport } from './FinalReport';
+import { ThinkingAnimation } from './ThinkingAnimation';
+import { ShareableCard } from './ShareableCard';
+import html2canvas from 'html2canvas';
 
 interface DebateManagerProps {
     topic: string;
@@ -43,6 +46,7 @@ export default function DebateManager({ topic, goal, audience, level, apiKey }: 
     const [finalContent, setFinalContent] = useState("");
 
     const bottomRef = useRef<HTMLDivElement>(null);
+    const exportRef = useRef<HTMLDivElement>(null); // Ref for the shareable card
 
     const maxRounds = ROUNDS_CONFIG[currentStep];
 
@@ -65,12 +69,12 @@ export default function DebateManager({ topic, goal, audience, level, apiKey }: 
             let writerContent = "";
 
             // Initial Writer Turn
-            addMessage('writer', "Đang suy nghĩ...");
+            // addMessage('writer', "Đang suy nghĩ..."); // Removed text loading
             writerContent = await session.generateWriterTurn(currentStep);
             setMessages(prev => {
-                const newMsgs = [...prev];
-                newMsgs.pop(); // Remove "Thinking..."
-                return [...newMsgs, { role: 'writer', content: writerContent, timestamp: Date.now() }];
+                // const newMsgs = [...prev]; // No longer need to pop
+                // newMsgs.pop(); 
+                return [...prev, { role: 'writer', content: writerContent, timestamp: Date.now() }];
             });
 
             // Phase 3: Check for Mermaid chart in Model step
@@ -88,23 +92,23 @@ export default function DebateManager({ topic, goal, audience, level, apiKey }: 
                 setRoundCount(currentRound);
 
                 // Critic Turn
-                addMessage('critic', `Đang phản biện (Vòng ${currentRound}/${maxRounds})...`);
+                // addMessage('critic', `Đang phản biện (Vòng ${currentRound}/${maxRounds})...`);
                 const criticFeedback = await session.generateCriticTurn(currentStep, writerContent);
                 setMessages(prev => {
-                    const newMsgs = [...prev];
-                    newMsgs.pop();
-                    return [...newMsgs, { role: 'critic', content: criticFeedback, timestamp: Date.now() }];
+                    // const newMsgs = [...prev];
+                    // newMsgs.pop();
+                    return [...prev, { role: 'critic', content: criticFeedback, timestamp: Date.now() }];
                 });
                 lastCriticFeedback = criticFeedback;
 
                 // Writer Updates (if not last round)
                 if (currentRound < maxRounds) {
-                    addMessage('writer', "Đang tiếp thu và chỉnh sửa...");
+                    // addMessage('writer', "Đang tiếp thu và chỉnh sửa...");
                     writerContent = await session.generateWriterTurn(currentStep, lastCriticFeedback);
                     setMessages(prev => {
-                        const newMsgs = [...prev];
-                        newMsgs.pop();
-                        return [...newMsgs, { role: 'writer', content: writerContent, timestamp: Date.now() }];
+                        // const newMsgs = [...prev];
+                        // newMsgs.pop();
+                        return [...prev, { role: 'writer', content: writerContent, timestamp: Date.now() }];
                     });
 
                     if (currentStep === '2_MODEL') {
@@ -266,6 +270,24 @@ export default function DebateManager({ topic, goal, audience, level, apiKey }: 
                 })}
                 <div ref={bottomRef} />
             </div>
+
+            {/* Thinking Animation Overlay or Bottom */}
+            {isProcessing && (
+                <div className="bg-white/50 backdrop-blur-sm p-4 rounded-xl border border-slate-100 mb-6 mx-6 animate-in fade-in slide-in-from-bottom-4">
+                    <ThinkingAnimation />
+                </div>
+            )}
         </div>
+            {/* Hidden Export Card */ }
+    <div className="fixed top-0 left-0 -z-50 opacity-0 pointer-events-none">
+        <ShareableCard
+            ref={exportRef}
+            topic={topic}
+            level={level}
+            goal={goal}
+            content={messages.filter(m => m.role === 'writer').slice(-1)[0]?.content.slice(0, 300) + "..." || "..."}
+        />
+    </div>
+        </div >
     );
 }
