@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { BookOpen, GraduationCap, HelpCircle, Sparkles } from 'lucide-react';
+import { BookOpen, GraduationCap, HelpCircle, Sparkles, Info } from 'lucide-react';
 import { AcademicLevel } from '@/lib/agents';
 
 interface ResearchFormProps {
