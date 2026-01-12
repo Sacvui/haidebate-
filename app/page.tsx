@@ -15,6 +15,7 @@ export default function Home() {
   const [showSettings, setShowSettings] = useState(false);
   const [isGateOpen, setIsGateOpen] = useState(false);
   const [userProfile, setUserProfile] = useState<{ email: string; referralCode?: string } | null>(null);
+  const [apiKey, setApiKey] = useState("");
 
   // Form State for DebateManager (Lifted up)
   const [formData, setFormData] = useState<any>(null);
@@ -29,6 +30,8 @@ export default function Home() {
       setUserProfile(JSON.parse(savedUser));
       setIsGateOpen(true);
     }
+    const savedKey = localStorage.getItem("gemini_api_key");
+    if (savedKey) setApiKey(savedKey);
   }, []);
 
   const handleStart = (data: any) => {
@@ -199,11 +202,25 @@ export default function Home() {
                 goal={formData.goal}
                 audience={formData.audience}
                 level={formData.level}
+                apiKey={apiKey}
               />
             )}
           </div>
         </>
-      )}
-    </main>
+            {/* Footer */}
+      <footer className="py-8 text-center text-slate-400 text-sm border-t border-slate-100 mt-auto bg-slate-50">
+        <p>© 2024 Hải Debate. Powered by <span className="font-bold text-slate-600">Dr. Hai Show</span> & <span className="font-bold text-slate-600">Hải Rong Chơi</span>.</p>
+        <div className="flex justify-center gap-4 mt-2 opacity-60 hover:opacity-100 transition-opacity">
+          <a href="#" className="hover:text-blue-600">Điều khoản</a>
+          <span>•</span>
+          <a href="#" className="hover:text-blue-600">Chính sách bảo mật</a>
+          <span>•</span>
+          <a href="#" className="hover:text-blue-600">Liên hệ</a>
+        </div>
+      </footer>
+    </>
+  )
+}
+    </main >
   );
 }

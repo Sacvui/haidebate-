@@ -143,13 +143,14 @@ export class AgentSession {
     public topic: string,
     public goal: string = "Nghiên cứu khoa học",
     public audience: string = "Chuyên gia/Nhà nghiên cứu",
-    public level: AcademicLevel = "MASTER"
+    public level: AcademicLevel = "MASTER",
+    private apiKey?: string
   ) { }
 
   async generateWriterTurn(step: WorkflowStep, previousCriticFeedback?: string): Promise<string> {
     try {
-      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-      if (!apiKey) return "E: Vui lòng cấu hình NEXT_PUBLIC_GEMINI_API_KEY trong .env";
+      const finalKey = this.apiKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+      if (!finalKey) return "E: Vui lòng cấu hình API Key (Trong Cài Đặt hoặc .env)";
 
       let sysPrompt = "";
       switch (step) {

@@ -28,7 +28,8 @@ export const LevelGuidelines = ({ isOpen, onClose, onSelectLevel }: LevelGuideli
                 "Không yêu cầu biến trung gian",
                 "Phù hợp: Bài tập lớn, Khóa luận"
             ],
-            example: "4P Marketing -> Doanh thu trà Atisô."
+            example: "4P Marketing -> Doanh thu trà Atisô.",
+            hasDiagram: true
         },
         {
             id: 'MASTER',
@@ -46,7 +47,7 @@ export const LevelGuidelines = ({ isOpen, onClose, onSelectLevel }: LevelGuideli
                 "Phù hợp: Luận văn, Báo trong nước"
             ],
             example: "Bao bì xanh -> Tin tưởng -> Mua.",
-            hasDiagram: true // Flag to render diagram
+            hasDiagram: true
         },
         {
             id: 'PHD',
@@ -62,7 +63,8 @@ export const LevelGuidelines = ({ isOpen, onClose, onSelectLevel }: LevelGuideli
                 "Giải quyết Gap/Mâu thuẫn lý thuyết",
                 "Phù hợp: Luận án, ISI/Scopus Q1-Q2"
             ],
-            example: "Cơ chế kép: Tin tưởng vs Hoài nghi xanh."
+            example: "Cơ chế kép: Tin tưởng vs Hoài nghi xanh.",
+            hasDiagram: true
         }
     ];
 
@@ -118,28 +120,66 @@ export const LevelGuidelines = ({ isOpen, onClose, onSelectLevel }: LevelGuideli
                                     {/* Optional Diagram for Master Level */}
                                     {/* @ts-ignore */}
                                     {lvl.hasDiagram && (
-                                        <div className="bg-white p-2 rounded-lg border border-slate-100 flex justify-center py-4 shadow-sm">
-                                            <svg width="200" height="60" viewBox="0 0 200 60" className="w-full h-auto">
-                                                {/* Nodes */}
-                                                <rect x="10" y="15" width="50" height="30" rx="4" fill="#EEF2FF" stroke="#4F46E5" strokeWidth="1.5" />
-                                                <text x="35" y="35" fontSize="10" textAnchor="middle" fill="#4338ca" fontWeight="bold">X</text>
+                                        <div className="bg-white p-2 rounded-lg border border-slate-100 flex justify-center py-4 shadow-sm min-h-[90px] items-center">
+                                            {/* UNDERGRAD: X -> Y */}
+                                            {lvl.id === 'UNDERGRAD' && (
+                                                <svg width="180" height="40" viewBox="0 0 180 40">
+                                                    <rect x="10" y="5" width="50" height="30" rx="4" fill="#F0FDFA" stroke="#0D9488" strokeWidth="1.5" />
+                                                    <text x="35" y="25" fontSize="10" textAnchor="middle" fill="#0F766E" fontWeight="bold">IV</text>
+                                                    <rect x="120" y="5" width="50" height="30" rx="4" fill="#F0FDFA" stroke="#0D9488" strokeWidth="1.5" />
+                                                    <text x="145" y="25" fontSize="10" textAnchor="middle" fill="#0F766E" fontWeight="bold">DV</text>
+                                                    <defs>
+                                                        <marker id="arrow-teal" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                                                            <path d="M0,0 L0,6 L6,3 z" fill="#14B8A6" />
+                                                        </marker>
+                                                    </defs>
+                                                    <line x1="60" y1="20" x2="120" y2="20" stroke="#14B8A6" strokeWidth="1.5" markerEnd="url(#arrow-teal)" />
+                                                </svg>
+                                            )}
 
-                                                <rect x="75" y="15" width="50" height="30" rx="4" fill="#EEF2FF" stroke="#4F46E5" strokeWidth="1.5" strokeDasharray="4" />
-                                                <text x="100" y="35" fontSize="10" textAnchor="middle" fill="#4338ca" fontWeight="bold">Mediator</text>
+                                            {/* MASTER: X -> M -> Y */}
+                                            {lvl.id === 'MASTER' && (
+                                                <svg width="200" height="50" viewBox="0 0 200 50">
+                                                    <rect x="5" y="10" width="45" height="30" rx="4" fill="#EEF2FF" stroke="#4F46E5" strokeWidth="1.5" />
+                                                    <text x="27.5" y="29" fontSize="9" textAnchor="middle" fill="#4338ca" fontWeight="bold">IV</text>
+                                                    <rect x="77.5" y="10" width="45" height="30" rx="4" fill="#EEF2FF" stroke="#4F46E5" strokeWidth="1.5" strokeDasharray="4" />
+                                                    <text x="100" y="29" fontSize="9" textAnchor="middle" fill="#4338ca" fontWeight="bold">Med</text>
+                                                    <rect x="150" y="10" width="45" height="30" rx="4" fill="#EEF2FF" stroke="#4F46E5" strokeWidth="1.5" />
+                                                    <text x="172.5" y="29" fontSize="9" textAnchor="middle" fill="#4338ca" fontWeight="bold">DV</text>
+                                                    <defs>
+                                                        <marker id="arrow-indigo" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                                                            <path d="M0,0 L0,6 L6,3 z" fill="#6366f1" />
+                                                        </marker>
+                                                    </defs>
+                                                    <line x1="50" y1="25" x2="77.5" y2="25" stroke="#6366f1" strokeWidth="1.5" markerEnd="url(#arrow-indigo)" />
+                                                    <line x1="122.5" y1="25" x2="150" y2="25" stroke="#6366f1" strokeWidth="1.5" markerEnd="url(#arrow-indigo)" />
+                                                </svg>
+                                            )}
 
-                                                <rect x="140" y="15" width="50" height="30" rx="4" fill="#EEF2FF" stroke="#4F46E5" strokeWidth="1.5" />
-                                                <text x="165" y="35" fontSize="10" textAnchor="middle" fill="#4338ca" fontWeight="bold">Y</text>
+                                            {/* PHD: Complex Moderated Mediation */}
+                                            {lvl.id === 'PHD' && (
+                                                <svg width="200" height="60" viewBox="0 0 200 60">
+                                                    <rect x="5" y="25" width="40" height="25" rx="4" fill="#F1F5F9" stroke="#334155" strokeWidth="1.5" />
+                                                    <text x="25" y="41" fontSize="8" textAnchor="middle" fill="#1e293b" fontWeight="bold">IV</text>
+                                                    <rect x="75" y="25" width="50" height="25" rx="4" fill="#F1F5F9" stroke="#334155" strokeWidth="1.5" strokeDasharray="3" />
+                                                    <text x="100" y="41" fontSize="8" textAnchor="middle" fill="#1e293b" fontWeight="bold">Med</text>
+                                                    <rect x="155" y="25" width="40" height="25" rx="4" fill="#F1F5F9" stroke="#334155" strokeWidth="1.5" />
+                                                    <text x="175" y="41" fontSize="8" textAnchor="middle" fill="#1e293b" fontWeight="bold">DV</text>
 
-                                                {/* Arrows */}
-                                                <defs>
-                                                    <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-                                                        <path d="M0,0 L0,6 L6,3 z" fill="#6366f1" />
-                                                    </marker>
-                                                </defs>
-                                                <line x1="60" y1="30" x2="75" y2="30" stroke="#6366f1" strokeWidth="1.5" markerEnd="url(#arrow)" />
-                                                <line x1="125" y1="30" x2="140" y2="30" stroke="#6366f1" strokeWidth="1.5" markerEnd="url(#arrow)" />
+                                                    {/* Moderator */}
+                                                    <rect x="80" y="0" width="40" height="20" rx="4" fill="#E2E8F0" stroke="#64748B" strokeWidth="1" />
+                                                    <text x="100" y="14" fontSize="8" textAnchor="middle" fill="#334155" fontWeight="bold">Mod</text>
 
-                                            </svg>
+                                                    <defs>
+                                                        <marker id="arrow-slate" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                                                            <path d="M0,0 L0,6 L6,3 z" fill="#475569" />
+                                                        </marker>
+                                                    </defs>
+                                                    <line x1="45" y1="37.5" x2="75" y2="37.5" stroke="#475569" strokeWidth="1.5" markerEnd="url(#arrow-slate)" />
+                                                    <line x1="125" y1="37.5" x2="155" y2="37.5" stroke="#475569" strokeWidth="1.5" markerEnd="url(#arrow-slate)" />
+                                                    <line x1="100" y1="20" x2="100" y2="25" stroke="#475569" strokeWidth="1" strokeDasharray="2" markerEnd="url(#arrow-slate)" />
+                                                </svg>
+                                            )}
                                         </div>
                                     )}
 
