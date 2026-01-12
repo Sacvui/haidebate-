@@ -166,6 +166,7 @@ export class AgentSession {
     public goal: string = "Nghiên cứu khoa học",
     public audience: string = "Chuyên gia/Nhà nghiên cứu",
     public level: AcademicLevel = "MASTER",
+    public language: 'vi' | 'en' = 'vi',
     private apiKey?: string
   ) { }
 
@@ -224,7 +225,7 @@ export class AgentSession {
         case '3_OUTLINE': sysPrompt = getOutlineWriterPrompt(this.goal); break;
       }
 
-      const context = `CHỦ ĐỀ GỐC: ${this.topic}\nLOẠI HÌNH (OUTPUT): ${this.goal}\nĐỐI TƯỢNG: ${this.audience}\nTRÌNH ĐỘ: ${this.level}`;
+      const context = `CHỦ ĐỀ GỐC: ${this.topic}\nLOẠI HÌNH (OUTPUT): ${this.goal}\nĐỐI TƯỢNG: ${this.audience}\nTRÌNH ĐỘ: ${this.level}\nNGÔN NGỮ ĐẦU RA (OUTPUT LANGUAGE): ${this.language === 'en' ? 'ENGLISH (100%)' : 'VIETNAMESE (100%)'}`;
 
       const prompt = previousCriticFeedback
         ? `${context}\n\nPHẢN HỒI CỦA CRITIC (Vòng trước): ${previousCriticFeedback}\n\n${sysPrompt}\nHãy cải thiện/viết tiếp dựa trên phản hồi này.`

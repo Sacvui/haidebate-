@@ -15,6 +15,7 @@ interface DebateManagerProps {
     goal: string;
     audience: string;
     level: AcademicLevel;
+    language: 'vi' | 'en';
     apiKey?: string;
 }
 
@@ -31,8 +32,8 @@ const extractMermaidCode = (text: string) => {
     return match ? match[1].trim() : null;
 };
 
-export default function DebateManager({ topic, goal, audience, level, apiKey }: DebateManagerProps) {
-    const [session] = useState(() => new AgentSession(topic, goal, audience, level, apiKey));
+export default function DebateManager({ topic, goal, audience, level, language, apiKey }: DebateManagerProps) {
+    const [session] = useState(() => new AgentSession(topic, goal, audience, level, language, apiKey));
 
     const [currentStep, setCurrentStep] = useState<WorkflowStep>('1_TOPIC');
     const [messages, setMessages] = useState<AgentMessage[]>([]);

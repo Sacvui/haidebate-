@@ -4,7 +4,7 @@ import { BookOpen, GraduationCap, HelpCircle, Sparkles, Info } from 'lucide-reac
 import { AcademicLevel } from '@/lib/agents';
 
 interface ResearchFormProps {
-    onStart: (data: { topic: string; level: AcademicLevel; goal: string; audience: string }) => void;
+    onStart: (data: { topic: string; level: AcademicLevel; goal: string; audience: string; language: 'vi' | 'en' }) => void;
     onOpenGuidelines: () => void;
     // Visual props for Preview Mode
     isPreview?: boolean;
@@ -17,12 +17,13 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
     const [goal, setGoal] = useState("Nghiên cứu khoa học/Đăng báo");
     const [audience, setAudience] = useState("Chuyên gia/Nhà nghiên cứu");
     const [level, setLevel] = useState<AcademicLevel>("MASTER");
+    const [language, setLanguage] = useState<'vi' | 'en'>('vi');
     const [showGuide, setShowGuide] = useState(false);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (topic.trim()) {
-            onStart({ topic, level, goal, audience });
+            onStart({ topic, level, goal, audience, language });
         }
     };
 
@@ -123,6 +124,9 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
                             <option>Đề xuất dự án (Grant Proposal)</option>
                         </select>
                     </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <div className="flex justify-between items-center h-6">
                             <label className="text-sm font-semibold text-slate-700">Đối tượng độc giả</label>
@@ -137,6 +141,27 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
                             <option>Giảng viên hướng dẫn</option>
                             <option>Cộng đồng học thuật</option>
                         </select>
+                    </div>
+                    <div className="space-y-2">
+                        <div className="flex justify-between items-center h-6">
+                            <label className="text-sm font-semibold text-slate-700">Ngôn ngữ đầu ra</label>
+                        </div>
+                        <div className="flex bg-slate-100 p-1 rounded-xl">
+                            <button
+                                type="button"
+                                onClick={() => setLanguage('vi')}
+                                className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${language === 'vi' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                            >
+                                🇻🇳 Tiếng Việt
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setLanguage('en')}
+                                className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${language === 'en' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                            >
+                                🇺🇸 English
+                            </button>
+                        </div>
                     </div>
                 </div>
 

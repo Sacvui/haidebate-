@@ -204,6 +204,7 @@ export default function Home() {
                 goal={formData.goal}
                 audience={formData.audience}
                 level={formData.level}
+                language={formData.language}
                 apiKey={apiKey}
               />
             )}
