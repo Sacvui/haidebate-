@@ -9,6 +9,7 @@ import { FinalReport } from './FinalReport';
 import { ThinkingAnimation } from './ThinkingAnimation';
 import { ShareableCard } from './ShareableCard';
 import html2canvas from 'html2canvas';
+import { motion } from 'framer-motion';
 
 interface DebateManagerProps {
     topic: string;
@@ -237,10 +238,16 @@ export default function DebateManager({ topic, goal, audience, level, language, 
                     const contentWithoutChart = msg.content.replace(/```mermaid[\s\S]*?```/, '');
 
                     return (
-                        <div key={idx} className={cn(
-                            "flex gap-4 max-w-4xl",
-                            msg.role === 'writer' ? "mr-auto" : "ml-auto flex-row-reverse"
-                        )}>
+                        <motion.div
+                            key={idx}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.4 }}
+                            className={cn(
+                                "flex gap-4 max-w-4xl",
+                                msg.role === 'writer' ? "mr-auto" : "ml-auto flex-row-reverse"
+                            )}
+                        >
                             <div className={cn(
                                 "w-10 h-10 rounded-full flex items-center justify-center shrink-0 shadow-sm",
                                 msg.role === 'writer' ? "bg-blue-100 text-blue-600" : "bg-orange-100 text-orange-600"
@@ -266,7 +273,7 @@ export default function DebateManager({ topic, goal, audience, level, language, 
                                     </div>
                                 )}
                             </div>
-                        </div>
+                        </motion.div>
                     );
                 })}
                 <div ref={bottomRef} />
