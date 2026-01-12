@@ -277,7 +277,7 @@ export default function DebateManager({ topic, goal, audience, level, apiKey }: 
                     <ThinkingAnimation />
                 </div>
             )}
-            )}
+
             {/* Hidden Export Card */}
             <div className="fixed top-0 left-0 -z-50 opacity-0 pointer-events-none">
                 <ShareableCard
