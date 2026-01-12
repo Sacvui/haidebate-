@@ -169,6 +169,49 @@ export class AgentSession {
     private apiKey?: string
   ) { }
 
+  private async callGeminiAPI(model: string, prompt: string, key: string, retries = 2): Promise<string> {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        // Handle Rate Limit (429)
+        if (data.error.code === 429 || data.error.message.includes("quota")) {
+          if (retries > 0) {
+            console.warn(`Rate limit hit for ${model}. Retrying in 3s...`);
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            return this.callGeminiAPI(model, prompt, key, retries - 1);
+          } else {
+            // Fallback to Gemini 1.5 Flash if retries exhausted
+            if (model !== 'gemini-1.5-flash') {
+              console.warn(`Switching to Fallback Model (gemini-1.5-flash) due to quota.`);
+              return this.callGeminiAPI('gemini-1.5-flash', prompt, key, 0);
+            }
+          }
+          throw new Error(data.error.message);
+        }
+        throw new Error(data.error.message);
+      }
+
+      return data?.candidates?.[0]?.content?.parts?.[0]?.text || "Lỗi: Không có phản hồi từ AI.";
+
+    } catch (error: any) {
+      // Network errors -> Retry or Fail
+      if (retries > 0 && !error.message.includes("quota")) { // Retry network glitches
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        return this.callGeminiAPI(model, prompt, key, retries - 1);
+      }
+      throw error;
+    }
+  }
+
   async generateWriterTurn(step: WorkflowStep, previousCriticFeedback?: string): Promise<string> {
     try {
       const finalKey = this.apiKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
@@ -187,28 +230,12 @@ export class AgentSession {
         ? `${context}\n\nPHẢN HỒI CỦA CRITIC (Vòng trước): ${previousCriticFeedback}\n\n${sysPrompt}\nHãy cải thiện/viết tiếp dựa trên phản hồi này.`
         : `${context}\n\n${sysPrompt}\nHãy bắt đầu thực hiện nhiệm vụ cho giai đoạn này.`;
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${finalKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }]
-        })
-      });
-
-      const data = await response.json();
-
-      if (data.error) {
-        return `Lỗi API Gemini (Writer): ${data.error.message}`;
-      }
-
-      const content = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-      if (!content) return "Lỗi: Không nhận được phản hồi từ Gemini.";
-      return content;
+      // Use Helper with retry & fallback
+      return await this.callGeminiAPI('gemini-3-flash-preview', prompt, finalKey);
 
     } catch (error) {
       console.error("Gemini Writer Error:", error);
-      return `Lỗi Network/Code khi gọi Gemini Writer: ${error}`;
+      return `Hệ thống đang quá tải (Rate Limit). Vui lòng thử lại sau 30s. (${error})`;
     }
   }
 
@@ -226,23 +253,11 @@ export class AgentSession {
 
         const prompt = `${sysPrompt}\n\nBÀI LÀM CỦA WRITER:\n${writerDraft}\n\nHãy đóng vai trò Critic và đưa ra nhận xét chi tiết, khắt khe.`;
 
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${geminiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }]
-          })
-        });
+        // Use Helper with retry & fallback
+        return await this.callGeminiAPI('gemini-3-flash-preview', prompt, geminiKey);
 
-        const data = await response.json();
-        if (data.error) {
-          return `Lỗi API Gemini (Critic): ${data.error.message}`;
-        }
-
-        const content = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (content) return content;
       } catch (error) {
-        return `Lỗi Network/Code khi gọi Gemini Critic: ${error}`;
+        return `Lỗi Critic (Quota/Network): ${error}`;
       }
     }
 
