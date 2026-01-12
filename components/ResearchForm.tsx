@@ -10,14 +10,14 @@ interface ResearchFormProps {
     isPreview?: boolean;
 }
 
-import { HumorousGuideModal } from './HumorousGuideModal';
+import { GuideModal } from './GuideModal';
 
 export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: ResearchFormProps) => {
     const [topic, setTopic] = useState("");
     const [goal, setGoal] = useState("Nghiên cứu khoa học/Đăng báo");
     const [audience, setAudience] = useState("Chuyên gia/Nhà nghiên cứu");
     const [level, setLevel] = useState<AcademicLevel>("MASTER");
-    const [showHumor, setShowHumor] = useState(false);
+    const [showGuide, setShowGuide] = useState(false);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -35,7 +35,7 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
 
     return (
         <div className={`space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 ${isPreview ? 'opacity-80 pointer-events-none grayscale-[0.3]' : ''}`}>
-            <HumorousGuideModal isOpen={showHumor} onClose={() => setShowHumor(false)} />
+            <GuideModal isOpen={showGuide} onClose={() => setShowGuide(false)} />
 
             <div className="text-center space-y-4">
                 <h2 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
@@ -104,10 +104,10 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
                             <label className="text-sm font-semibold text-slate-700">Loại hình bài viết</label>
                             <button
                                 type="button"
-                                onClick={() => setShowHumor(true)}
-                                className="text-xs text-indigo-600 font-bold flex items-center gap-1 hover:underline animate-pulse"
+                                onClick={() => setShowGuide(true)}
+                                className="text-xs text-slate-400 font-medium flex items-center gap-1 hover:text-blue-600 transition-colors"
                             >
-                                <Sparkles size={14} /> Giải ngố thuật ngữ? 🤔
+                                <Info size={12} /> Hướng dẫn: Output & Độc giả
                             </button>
                         </div>
 
