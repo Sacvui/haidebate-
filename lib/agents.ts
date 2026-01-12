@@ -183,20 +183,15 @@ export class AgentSession {
       const data = await response.json();
 
       if (data.error) {
-        // Handle Rate Limit (429)
+        // Handle Rate Limit (429) or Quota
         if (data.error.code === 429 || data.error.message.includes("quota")) {
           if (retries > 0) {
-            console.warn(`Rate limit hit for ${model}. Retrying in 3s...`);
-            await new Promise(resolve => setTimeout(resolve, 3000));
+            const waitTime = 4000 * (3 - retries); // 4s, 8s
+            console.warn(`Rate limit for ${model}. Retrying in ${waitTime / 1000}s...`);
+            await new Promise(resolve => setTimeout(resolve, waitTime));
             return this.callGeminiAPI(model, prompt, key, retries - 1);
-          } else {
-            // Fallback to Gemini 2.0 Flash if retries exhausted
-            if (model !== 'gemini-2.0-flash') {
-              console.warn(`Switching to Fallback Model (gemini-2.0-flash) due to quota.`);
-              return this.callGeminiAPI('gemini-2.0-flash', prompt, key, 0);
-            }
           }
-          throw new Error(data.error.message);
+          throw new Error(`Hết lượt (Quota Exceeded) cho model ${model}. Vui lòng thử lại sau.`);
         }
         throw new Error(data.error.message);
       }
