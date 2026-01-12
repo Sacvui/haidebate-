@@ -1,34 +1,49 @@
 import React from 'react';
+import { motion } from 'framer-motion';
+import { Sparkles } from 'lucide-react';
 
 export const ThinkingAnimation = () => {
     return (
-        <div className="flex flex-col items-center justify-center py-12 space-y-6">
-            <div className="relative w-24 h-24">
-                {/* Ring 1: Blue - Writer */}
-                <div className="absolute inset-0 rounded-full border-[3px] border-transparent border-t-blue-500/80 border-l-blue-500/80 animate-[spin_2s_linear_infinite]"></div>
+        <div className="flex flex-col items-center justify-center py-8 space-y-6">
+            <div className="relative w-16 h-16 flex items-center justify-center">
+                {/* Soft Glowing Orbs (Pulse) */}
+                <motion.div
+                    className="absolute inset-0 bg-blue-500/20 rounded-full blur-lg"
+                    animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                />
 
-                {/* Ring 2: Orange - Critic (Offset and reverse speed) */}
-                <div className="absolute inset-2 rounded-full border-[3px] border-transparent border-b-orange-500/80 border-r-orange-500/80 animate-[spin_3s_linear_infinite_reverse]"></div>
+                {/* Rotating Rings (Elegant & Thin) */}
+                <motion.div
+                    className="absolute inset-0 border border-blue-300/50 rounded-full"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                />
+                <motion.div
+                    className="absolute inset-1 border border-orange-300/50 rounded-full"
+                    animate={{ rotate: -360 }}
+                    transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+                />
 
-                {/* Core: Intersection */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-3 h-3 bg-indigo-600/50 rounded-full animate-ping"></div>
-                </div>
-
-                {/* Orbital Particles */}
-                <div className="absolute inset-0 animate-[spin_4s_linear_infinite]">
-                    <div className="w-2 h-2 bg-blue-400 rounded-full absolute -top-1 left-1/2 -translate-x-1/2 shadow-[0_0_8px_rgba(96,165,250,0.6)]"></div>
-                </div>
-                <div className="absolute inset-0 animate-[spin_4s_linear_infinite_reverse]">
-                    <div className="w-2 h-2 bg-orange-400 rounded-full absolute -bottom-1 left-1/2 -translate-x-1/2 shadow-[0_0_8px_rgba(251,146,60,0.6)]"></div>
-                </div>
+                {/* Center Icon (Floating) */}
+                <motion.div
+                    className="relative z-10 bg-white p-2 rounded-full shadow-sm border border-slate-100"
+                    animate={{ y: [0, -2, 0] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                >
+                    <Sparkles size={16} className="text-indigo-600" />
+                </motion.div>
             </div>
 
             <div className="text-center space-y-2">
-                <h3 className="text-base font-medium text-slate-800 tracking-wide">AI đang suy luận...</h3>
-                <p className="text-xs text-slate-500 font-light animate-pulse">
-                    Đang phân tích cấu trúc và luận điểm nghiên cứu
-                </p>
+                <h3 className="text-sm font-semibold text-slate-700 tracking-wide uppercase">AI đang phân tích</h3>
+                <div className="flex items-center justify-center gap-2 text-xs text-slate-400 font-light">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                    <span>Tổng hợp dữ liệu</span>
+                    <span className="text-slate-300">•</span>
+                    <span>Phản biện đa chiều</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
+                </div>
             </div>
         </div>
     );
