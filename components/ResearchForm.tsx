@@ -100,14 +100,14 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <div className="flex justify-between items-center">
+                        <div className="flex justify-between items-center h-6">
                             <label className="text-sm font-semibold text-slate-700">Loại hình bài viết</label>
                             <button
                                 type="button"
                                 onClick={() => setShowGuide(true)}
-                                className="text-xs text-slate-400 font-medium flex items-center gap-1 hover:text-blue-600 transition-colors"
+                                className="text-xs text-slate-400 font-medium flex items-center gap-1 hover:text-blue-600 transition-colors whitespace-nowrap"
                             >
-                                <Info size={12} /> Hướng dẫn: Output & Độc giả
+                                <Info size={12} /> Hướng dẫn
                             </button>
                         </div>
 
@@ -124,9 +124,8 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
                         </select>
                     </div>
                     <div className="space-y-2">
-                        <div className="flex justify-between items-center">
+                        <div className="flex justify-between items-center h-6">
                             <label className="text-sm font-semibold text-slate-700">Đối tượng độc giả</label>
-                            {/* Placeholder to ensure alignment or if we want to add something later */}
                         </div>
                         <select
                             value={audience}
