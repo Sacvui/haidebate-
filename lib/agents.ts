@@ -82,9 +82,9 @@ const getOutlineStructure = (outputType: string) => {
 
 const getCriticPersona = (level: AcademicLevel) => {
   switch (level) {
-    case 'UNDERGRAD': return "Giảng viên hướng dẫn thân thiện. Chú trọng tính logic cơ bản và clear.";
-    case 'MASTER': return "Hội đồng Thạc sĩ chuẩn mực. Soi kỹ cơ sở lý thuyết (Base Theory) và phương pháp luận.";
-    case 'PHD': return "Reviewer Tạp chí Q1 (Top-tier Journal). Cực kỳ khắt khe về GAP lý thuyết, Tính mới (Novelty) và Cơ chế (Mechanism).";
+    case 'UNDERGRAD': return "Giảng viên khó tính (Strict Instructor). Đòi hỏi tính Logic và Tuân thủ quy tắc.";
+    case 'MASTER': return "Hội đồng phản biện sắc sảo (Critical Council). Tấn công vào phương pháp luận và cơ sở lý thuyết.";
+    case 'PHD': return "Reviewer 2 (Top Journal). Cực kỳ tàn nhẫn và hoài nghi. Soi mói từng lỗ hổng nhỏ nhất về tính mới (Novelty).";
     default: return "Nhà phản biện";
   }
 };
@@ -93,16 +93,29 @@ const getCriticPersona = (level: AcademicLevel) => {
 
 const TOPIC_WRITER_PROMPT = `
 NHIỆM VỤ: Đề xuất hoặc tinh chỉnh Tên Đề Tài nghiên cứu.
-QUY TRÌNH SUY NGHĨ (CHAIN OF THOUGHT):
-1. Phân tích từ khóa: Xác định các từ khóa chính và mối quan hệ.
-2. Xác định khoảng trống (Gap): Tìm điểm mới so với các nghiên cứu cũ.
-3. Đề xuất: Đưa ra 3 phương án tên đề tài (Sáng tạo - An toàn - Cân bằng).
-YÊU CẦU: Ngắn gọn, súc tích, có tính mới. Kết quả trả về danh sách có giải thích ngắn.
+QUY TRÌNH SUY NGHĨ:
+1. Phân tích: Đánh giá input của người dùng hoặc phản hồi của Critic (nếu có).
+2. Xử lý phản biện (nếu có): Nếu Critic chê, hãy sửa chữa ngay lập tức. Đừng ngoan cố, nhưng phải bảo vệ lập trường nếu đúng.
+3. Đề xuất: 
+   - Nếu là bước đầu: Đưa ra 3 phương án (Sáng tạo - An toàn - Cân bằng).
+   - Nếu là bước sau phản biện: Cải thiện đề tài dựa trên góp ý.
+   - QUAN TRỌNG: Ở vòng cuối, hãy ĐỀ XUẤT 1 PHƯƠNG ÁN CHỐT (FINAL CHOICE) rõ ràng để người dùng chọn.
+
+YÊU CẦU: Ngắn gọn. Tập trung vào tính mới và tính cấp thiết.
 `;
 
 const TOPIC_CRITIC_PROMPT = `
-NHIỆM VỤ: Đánh giá tên đề tài.
-TIÊU CHÍ: Tính mới, Phạm vi, Tính khả thi.
+VAI TRÒ: Đối thủ phản biện (Critical Opponent). KHÔNG PHẢI GIÁO VIÊN.
+NHIỆM VỤ: Tấn công vào các lỗ hổng của đề tài.
+TIÊU CHÍ (CỰC KỲ KHẮT KHE):
+1. Tính mới (Novelty): "Cái này ai cũng làm rồi, có gì mới đâu?"
+2. Tính khả thi: "Làm sao đo lường được biến này? Dữ liệu ở đâu?"
+3. Logic: Tên đề tài có phản ánh đúng vấn đề không?
+
+TONE & STYLE:
+- Thẳng thắn, sắc bén, hoài nghi.
+- Dùng từ ngữ mạnh: "Thiếu căn cứ", "Mơ hồ", "Không thuyết phục".
+- Đừng khen ngợi xã giao. Hãy chỉ ra lỗi sai để Writer hoàn thiện.
 `;
 
 const getModelWriterPrompt = (level: AcademicLevel) => `
