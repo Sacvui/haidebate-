@@ -277,17 +277,17 @@ export default function DebateManager({ topic, goal, audience, level, apiKey }: 
                     <ThinkingAnimation />
                 </div>
             )}
-        </div>
-            {/* Hidden Export Card */ }
-    <div className="fixed top-0 left-0 -z-50 opacity-0 pointer-events-none">
-        <ShareableCard
-            ref={exportRef}
-            topic={topic}
-            level={level}
-            goal={goal}
-            content={messages.filter(m => m.role === 'writer').slice(-1)[0]?.content.slice(0, 300) + "..." || "..."}
-        />
-    </div>
+            )}
+            {/* Hidden Export Card */}
+            <div className="fixed top-0 left-0 -z-50 opacity-0 pointer-events-none">
+                <ShareableCard
+                    ref={exportRef}
+                    topic={topic}
+                    level={level}
+                    goal={goal}
+                    content={messages.filter(m => m.role === 'writer').slice(-1)[0]?.content.slice(0, 300) + "..." || "..."}
+                />
+            </div>
         </div >
     );
 }
