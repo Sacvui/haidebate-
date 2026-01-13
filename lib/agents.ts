@@ -111,6 +111,7 @@ PHẢN BIỆN ĐỀ TÀI:
 1. Tính mới: So với nghiên cứu hiện có?
 2. Khả thi: Dữ liệu/Phương pháp đo?
 3. Rõ ràng: Tên đề tài hiểu ngay?
+4. **TRÍCH DẪN:** Kiểm tra nguồn tồn tại + Bắt buộc có DOI (nếu có)
 
 OUTPUT:
 ❌ Lỗi: [Vấn đề]
@@ -155,7 +156,7 @@ PHẢN BIỆN MÔ HÌNH (${level}):
 
 1. Độ phức tạp: Đúng tầm ${level}?
 2. Logic: Quan hệ biến hợp lý?
-3. Trích dẫn: Có thực tế?
+3. Trích dẫn: Có thực tế? **Bắt buộc có DOI**
 
 OUTPUT:
 ❌ Lỗi: [Vấn đề]
@@ -185,6 +186,7 @@ PHẢN BIỆN ĐỀ CƯƠNG:
 1. Cấu trúc: Logic dòng chảy?
 2. Format: APA 7 chuẩn?
 3. Đầy đủ: Thiếu mục nào?
+4. **TÀI LIỆU THAM KHẢO:** Kiểm tra tồn tại + **Bắt buộc có DOI**
 
 OUTPUT:
 ❌ Lỗi: [Vấn đề]
