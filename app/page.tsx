@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import DebateManager from "@/components/DebateManager";
 import { Sparkles, HelpCircle, LogOut, Settings, Lock, CheckCircle, ArrowRight, Mail, Globe, BookOpen } from "lucide-react";
