@@ -31,9 +31,6 @@ export default function Home() {
   // Login State
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  // Login State
-  const [loginEmail, setLoginEmail] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
   const [isLoginLoading, setIsLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState("");
 
