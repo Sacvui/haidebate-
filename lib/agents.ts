@@ -3,6 +3,7 @@ export interface AgentMessage {
   role: 'writer' | 'critic';
   content: string;
   timestamp: number;
+  round?: number;
 }
 
 export type WorkflowStep = '1_TOPIC' | '2_MODEL' | '3_OUTLINE';
