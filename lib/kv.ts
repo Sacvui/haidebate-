@@ -148,10 +148,12 @@ export async function getAllUsers(limit = 100): Promise<User[]> {
     return users;
 }
 
-return {
-    totalUsers: total,
-    // Add more stats as needed
-};
+export async function getUserStats() {
+    const total = await getTotalUsers();
+
+    return {
+        totalUsers: total,
+    };
 }
 
 // ============================================
