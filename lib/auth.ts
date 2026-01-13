@@ -72,16 +72,14 @@ export const config = {
                 const existingUser = await getUserByEmail(user.email);
 
                 if (!existingUser) {
-                    // Get referral code from cookies (Safe access - Temporarily disabled for stability)
-                    const referralCode = undefined;
-                    /* 
+                    // Get referral code from cookies (Safe access)
+                    let referralCode = undefined;
                     try {
                         const cookieStore = cookies();
                         referralCode = cookieStore.get("referral_code")?.value;
                     } catch (e) {
-                        // Ignore cookie errors
+                        // Ignore cookie errors handles cases where cookies() is not available
                     }
-                    */
 
                     // Create new user (No password for OAuth users)
                     await createUser(user.email, undefined, referralCode);
