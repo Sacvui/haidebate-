@@ -22,11 +22,11 @@ interface DebateManagerProps {
     apiKeyCritic?: string;
 }
 
-// Config rounds per step
+// Config rounds per step - Increased for more thorough refinement
 const ROUNDS_CONFIG = {
-    '1_TOPIC': 2,
-    '2_MODEL': 3,
-    '3_OUTLINE': 3
+    '1_TOPIC': 5,    // Increased from 2 to 5
+    '2_MODEL': 5,    // Increased from 3 to 5
+    '3_OUTLINE': 5   // Increased from 3 to 5
 };
 
 // Helper: Extract Mermaid code
