@@ -63,10 +63,6 @@ export const config = {
         }
     ],
     callbacks: {
-
-
-        // ...
-
         async signIn({ user, account, profile }) {
             if (!user.email) return false;
 
@@ -76,9 +72,6 @@ export const config = {
 
                 if (!existingUser) {
                     // Create new user (No password for OAuth users)
-                    // Note: createUser now requires password as 2nd arg? No, I made it optional?
-                    // Let's check kv.ts signature.
-                    // It was: createUser(email, password?, referredBy?)
                     await createUser(user.email, undefined, undefined);
                 }
                 return true;
