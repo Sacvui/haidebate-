@@ -2,6 +2,7 @@
 import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
 import type { NextAuthConfig } from "next-auth"
+import { getUserByEmail, createUser } from "@/lib/kv";
 
 // Define ORCID Provider manually if not exported or standard OIDC
 const OrcidProvider = {
@@ -62,7 +63,7 @@ export const config = {
         }
     ],
     callbacks: {
-        import { getUserByEmail, createUser } from "@/lib/kv";
+
 
         // ...
 
