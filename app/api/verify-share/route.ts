@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { validateShareUrl, canShare, submitShare } from '@/lib/kv';
+import { NextResponse } from 'next/server';
+import { validateShareUrl, tryClaimShareReward } from '@/lib/kv';
 
 export async function POST(req: Request) {
     try {
@@ -17,16 +18,14 @@ export async function POST(req: Request) {
             }, { status: 400 });
         }
 
-        // 2. Check daily limit
-        const allowed = await canShare(userId);
-        if (!allowed) {
+        // 2. Submit and Claim Reward (Atomic Check)
+        const result = await tryClaimShareReward(userId, postUrl);
+
+        if (!result.success) {
             return NextResponse.json({
-                error: 'Bạn đã hết lượt nhận điểm chia sẻ hôm nay (3/3).'
+                error: result.reason
             }, { status: 429 });
         }
-
-        // 3. Submit and award points
-        await submitShare(userId, postUrl);
 
         return NextResponse.json({ success: true, message: 'Đã cộng 30 điểm!' });
     } catch (error) {

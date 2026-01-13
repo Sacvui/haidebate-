@@ -59,6 +59,12 @@ class KVAdapter {
         if (this.redis) return this.redis.keys(pattern);
         return [];
     }
+
+    async sismember(key: string, member: any): Promise<number> {
+        if (this.useVercelKV) return vercelKv.sismember(key, member);
+        if (this.redis) return this.redis.sismember(key, member);
+        return 0;
+    }
 }
 
 export const kv = new KVAdapter();
@@ -231,33 +237,51 @@ export async function getUserStats() {
 // ============================================
 
 export async function validateShareUrl(url: string): Promise<boolean> {
-    // Basic validation for FB/Zalo/LinkedIn
-    const validDomains = ['facebook.com', 'zalo.me', 'linkedin.com', 'twitter.com'];
-    if (!validDomains.some(domain => url.includes(domain))) {
+    try {
+        const parsed = new URL(url);
+        // Basic validation for FB/Zalo/LinkedIn
+        const validDomains = ['facebook.com', 'zalo.me', 'linkedin.com', 'twitter.com', 'x.com'];
+        if (!validDomains.some(domain => parsed.hostname.includes(domain))) {
+            return false;
+        }
+        return true;
+    } catch (e) {
         return false;
     }
-    return true;
 }
 
-export async function canShare(userId: string): Promise<boolean> {
-    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-    const shareCount = await kv.get<number>(`shares:${userId}:${today}`) || 0;
-    return shareCount < 3; // Max 3 shares/day
-}
-
-export async function submitShare(userId: string, postUrl: string): Promise<void> {
+// Atomic rate limiting: returns true if allowed, false if limit exceeded
+export async function tryClaimShareReward(userId: string, postUrl: string): Promise<{ success: boolean; reason?: string }> {
     const today = new Date().toISOString().split('T')[0];
 
-    // Log share
+    // 1. Check for duplicate URL (Anti-spam)
+    const urlKey = `shares:urls:${userId}:${today}`;
+    const isDuplicate = await kv.sismember(urlKey, postUrl);
+    if (isDuplicate) {
+        return { success: false, reason: "Link này đã được tính điểm hôm nay rồi." };
+    }
+
+    // 2. Atomic Increment & Check Limit
+    const countKey = `shares:count:${userId}:${today}`;
+    const currentCount = await kv.incr(countKey);
+
+    if (currentCount > 3) {
+        // Revert increment (optional, but keeps count accurate-ish) or just ignore
+        return { success: false, reason: "Bạn đã hết lượt nhận điểm chia sẻ hôm nay (3/3)." };
+    }
+
+    // 3. Mark URL as used
+    await kv.sadd(urlKey, postUrl);
+
+    // 4. Log share
     await kv.lpush(`share_logs:${userId}`, {
         url: postUrl,
         timestamp: Date.now(),
         date: today
     });
 
-    // Increment daily counter
-    await kv.incr(`shares:${userId}:${today}`);
-
-    // Auto-award points (simplified for MVP)
+    // 5. Award points
     await addPoints(userId, 30, 'Chia sẻ bài viết công khai');
+
+    return { success: true };
 }
