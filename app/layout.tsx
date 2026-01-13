@@ -10,7 +10,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://haidebate-ocsd.vercel.app'),
-  title: "Hải Debate - Trợ lý AI Nghiên cứu Khoa học",
+  title: "Hải Debate - Cãi tay đôi với Reviewer",
   description: "Công cụ hỗ trợ viết luận văn và nghiên cứu khoa học chuyên sâu với AI Phản biện. Được phát triển bởi Dr. Hai Show & Hải Rong Chơi.",
   icons: {
     icon: '/favicon.ico',
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     apple: '/og-image.jpg', // Using OG image as a placeholder for apple touch icon if we don't have a specific one
   },
   openGraph: {
-    title: "Hải Debate - Trợ lý AI Nghiên cứu Khoa học",
+    title: "Hải Debate - Cãi tay đôi với Reviewer",
     description: "Công cụ hỗ trợ viết luận văn và nghiên cứu khoa học chuyên sâu với AI Phản biện.",
     url: 'https://haidebate-ocsd.vercel.app', // Explicitly setting the URL if known or using a default
     siteName: 'Hải Debate',

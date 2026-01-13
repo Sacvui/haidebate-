@@ -90,8 +90,8 @@ export default function Home() {
                   <span className="text-blue-600">Research Assistant</span>
                 </h1>
               </a>
-              <p className="text-slate-500">
-                Trợ lý AI chuyên sâu cho Nghiên cứu khoa học, Luận văn & Công bố quốc tế.
+              <p className="text-slate-500 italic">
+                "Để nghiên cứu thực sự là một cuộc rong chơi."
               </p>
             </div>
 
