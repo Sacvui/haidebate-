@@ -1,7 +1,15 @@
-import { kv } from "@vercel/kv";
+import { kv } from "@/lib/kv";
 import { NextResponse } from "next/server";
 
 export async function GET() {
+    const envStatus = {
+        KV_REST_API_URL: process.env.KV_REST_API_URL ? "Set" : "Missing",
+        KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN ? "Set" : "Missing",
+        REDIS_URL: process.env.REDIS_URL ? "Set (Custom)" : "Missing",
+        AUTH_SECRET: process.env.AUTH_SECRET ? "Set" : "Missing",
+        AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID ? "Set" : "Missing",
+    };
+
     try {
         const start = Date.now();
         await kv.set("debug_ping", "pong");
@@ -13,22 +21,14 @@ export async function GET() {
             message: "KV Connection Successful",
             value,
             duration: `${duration}ms`,
-            env: {
-                KV_REST_API_URL: process.env.KV_REST_API_URL ? "Set" : "Missing",
-                KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN ? "Set" : "Missing",
-                AUTH_SECRET: process.env.AUTH_SECRET ? "Set" : "Missing",
-                AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID ? "Set" : "Missing",
-            }
+            env: envStatus
         });
     } catch (error) {
         return NextResponse.json({
             status: "error",
             message: "KV Connection Failed",
             error: String(error),
-            env: {
-                KV_REST_API_URL: process.env.KV_REST_API_URL ? "Set" : "Missing",
-                KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN ? "Set" : "Missing"
-            }
+            env: envStatus
         }, { status: 500 });
     }
 }

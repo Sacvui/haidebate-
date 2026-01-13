@@ -61,7 +61,7 @@ class KVAdapter {
     }
 }
 
-const kv = new KVAdapter();
+export const kv = new KVAdapter();
 
 // ============================================
 // USER MANAGEMENT
