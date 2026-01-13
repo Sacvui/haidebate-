@@ -191,7 +191,7 @@ export class AgentSession {
     console.log("Topic updated to:", newTopic);
   }
 
-  private async callGeminiAPI(model: string, prompt: string, key: string, retries = 2): Promise<string> {
+  private async callGeminiAPI(model: string, prompt: string, key: string, retries = 3): Promise<string> {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
 
     try {
@@ -205,14 +205,14 @@ export class AgentSession {
 
       if (data.error) {
         // Handle Rate Limit (429) or Quota
-        if (data.error.code === 429 || data.error.message.toLowerCase().includes("quota")) {
+        if (data.error.code === 429 || data.error.message.toLowerCase().includes("quota") || data.error.message.toLowerCase().includes("overloaded")) {
           if (retries > 0) {
-            const waitTime = 5000 * (3 - retries); // Wait 5s, then 10s
-            console.warn(`Quota hit for ${model}. Retrying in ${waitTime / 1000}s...`);
+            const waitTime = 5000 * (4 - retries); // Exponential: 5s, 10s, 15s
+            console.warn(`⚠️ Quota hit for ${model}. Retrying in ${waitTime / 1000}s... (${retries} retries left)`);
             await new Promise(resolve => setTimeout(resolve, waitTime));
             return this.callGeminiAPI(model, prompt, key, retries - 1);
           }
-          throw new Error(`Model ${model} đang quá tải (Quota). Vui lòng thử lại sau.`);
+          throw new Error(`Model ${model} đang quá tải. Vui lòng chờ vài phút hoặc dùng Key khác.`);
         }
         throw new Error(data.error.message);
       }
@@ -220,9 +220,9 @@ export class AgentSession {
       return data?.candidates?.[0]?.content?.parts?.[0]?.text || "Lỗi: Không có phản hồi từ AI.";
 
     } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-      // Network errors -> Retry or Fail
-      if (retries > 0 && !error.message.includes("quota")) { // Retry network glitches
-        await new Promise(resolve => setTimeout(resolve, 2000));
+      // Network errors -> Retry Same Model
+      if (retries > 0) {
+        await new Promise(resolve => setTimeout(resolve, 3000));
         return this.callGeminiAPI(model, prompt, key, retries - 1);
       }
       throw error;
@@ -247,8 +247,8 @@ export class AgentSession {
         ? `${context}\n\nPHẢN HỒI CỦA CRITIC (Vòng trước): ${previousCriticFeedback}\n\n${sysPrompt}\nHãy cải thiện/viết tiếp dựa trên phản hồi này.`
         : `${context}\n\n${sysPrompt}\nHãy bắt đầu thực hiện nhiệm vụ cho giai đoạn này.`;
 
-      // Use Helper with retry (Model 2.0 Flash Exp -> Fallback 1.5 Flash)
-      return await this.callGeminiAPI('gemini-2.0-flash-exp', prompt, finalKey);
+      // Use Gemini 3 Flash Preview (Latest)
+      return await this.callGeminiAPI('gemini-3-flash-preview', prompt, finalKey);
 
     } catch (error) {
       console.error("Gemini Writer Error:", error);
@@ -271,8 +271,8 @@ export class AgentSession {
 
         const prompt = `${sysPrompt}\n\nBÀI LÀM CỦA WRITER:\n${writerDraft}\n\nHãy đóng vai trò Critic và đưa ra nhận xét chi tiết, khắt khe.`;
 
-        // Use Helper with retry (Model 2.0 Flash Exp -> Fallback 1.5 Flash)
-        return await this.callGeminiAPI('gemini-2.0-flash-exp', prompt, geminiKey);
+        // Use Gemini 3 Flash Preview (Latest)
+        return await this.callGeminiAPI('gemini-3-flash-preview', prompt, geminiKey);
 
       } catch (error) {
         return `Lỗi Critic (Quota/Network): ${error}`;
