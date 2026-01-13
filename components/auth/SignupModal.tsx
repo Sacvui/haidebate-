@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import { getTotalUsers, validateReferralCode } from '@/lib/kv';
+import { useState, useEffect } from 'react';
 
 interface SignupModalProps {
     isOpen: boolean;
@@ -16,7 +15,7 @@ export function SignupModal({ isOpen, onClose, onSuccess }: SignupModalProps) {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    useState(() => {
+    useEffect(() => {
         checkSignupStatus();
     }, []);
 
