@@ -217,17 +217,40 @@ export class AgentSession {
       const data = await response.json();
 
       if (data.error) {
+        const errorCode = data.error.code;
+        const errorMsg = data.error.message;
+
+        // Log full error for debugging
+        console.error(`🚨 Gemini API Error:`, {
+          model,
+          code: errorCode,
+          message: errorMsg,
+          retriesLeft: retries
+        });
+
         // Handle Rate Limit (429) or Quota
-        if (data.error.code === 429 || data.error.message.toLowerCase().includes("quota") || data.error.message.toLowerCase().includes("overloaded")) {
+        if (errorCode === 429 || errorMsg.toLowerCase().includes("quota") || errorMsg.toLowerCase().includes("overloaded")) {
           if (retries > 0) {
-            const waitTime = 5000 * (4 - retries); // Exponential: 5s, 10s, 15s
-            console.warn(`⚠️ Quota hit for ${model}. Retrying in ${waitTime / 1000}s... (${retries} retries left)`);
+            const waitTime = 10000 * (4 - retries); // 10s, 20s, 30s
+            console.warn(`⚠️ Quota/Rate Limit for ${model}. Retrying in ${waitTime / 1000}s... (${retries} retries left)`);
             await new Promise(resolve => setTimeout(resolve, waitTime));
             return this.callGeminiAPI(model, prompt, key, retries - 1);
           }
           throw new Error(`Model ${model} đang quá tải. Vui lòng chờ vài phút hoặc dùng Key khác.`);
         }
-        throw new Error(data.error.message);
+
+        // Model not found (404)
+        if (errorCode === 404) {
+          throw new Error(`Model "${model}" không tồn tại. Vui lòng kiểm tra tên model.`);
+        }
+
+        // Invalid API Key (401, 403)
+        if (errorCode === 401 || errorCode === 403) {
+          throw new Error(`API Key không hợp lệ hoặc hết hạn. Vui lòng kiểm tra lại.`);
+        }
+
+        // Other errors
+        throw new Error(`Lỗi API (${errorCode}): ${errorMsg}`);
       }
 
       return data?.candidates?.[0]?.content?.parts?.[0]?.text || "Lỗi: Không có phản hồi từ AI.";
