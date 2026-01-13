@@ -93,6 +93,9 @@ export default function DebateManager({ topic, goal, audience, level, language, 
 
             // Debate Loop
             while (currentRound < maxRounds) {
+                // Rate Limit Buffer: Wait 4s before next turn to avoid hitting RPM limit
+                await new Promise(resolve => setTimeout(resolve, 4000));
+
                 currentRound++;
                 setRoundCount(currentRound);
 
@@ -108,6 +111,9 @@ export default function DebateManager({ topic, goal, audience, level, language, 
 
                 // Writer Updates (if not last round)
                 if (currentRound < maxRounds) {
+                    // Buffer again for Writer
+                    await new Promise(resolve => setTimeout(resolve, 4000));
+
                     // addMessage('writer', "Đang tiếp thu và chỉnh sửa...");
                     writerContent = await session.generateWriterTurn(currentStep, lastCriticFeedback);
                     setMessages(prev => {
@@ -130,7 +136,7 @@ export default function DebateManager({ topic, goal, audience, level, language, 
 
         } catch (error) {
             console.error("Error running debate:", error);
-            addMessage('critic', "Hệ thống gặp lỗi kết nối. Vui lòng thử lại.");
+            addMessage('critic', "Hệ thống gặp lỗi kết nối (Rate Limit). Đang thử lại...");
         } finally {
             setIsProcessing(false);
         }
