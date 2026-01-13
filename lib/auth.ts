@@ -33,36 +33,34 @@ export const config = {
         logo: "https://next-auth.js.org/img/logo/logo-sm.png",
     },
     providers: [
-        providers: [
-            Google({
-                clientId: process.env.AUTH_GOOGLE_ID,
-                clientSecret: process.env.AUTH_GOOGLE_SECRET,
-                allowDangerousEmailAccountLinking: true,
-            }),
-            {
-                id: "orcid",
-                name: "ORCID",
-                type: "oauth",
-                clientId: process.env.ORCID_CLIENT_ID,
-                clientSecret: process.env.ORCID_CLIENT_SECRET,
-                authorization: {
-                    url: "https://orcid.org/oauth/authorize",
-                    params: { scope: "/authenticate" },
-                },
-                token: "https://orcid.org/oauth/token",
-                userinfo: {
-                    url: "https://pub.orcid.org/v3.0/expanded-search",
-                },
-                profile(profile) {
-                    return {
-                        id: profile.orcid,
-                        name: profile.name || profile.given_name,
-                        email: null,
-                    }
-                },
-                allowDangerousEmailAccountLinking: true,
-            }
-        ],
+        Google({
+            clientId: process.env.AUTH_GOOGLE_ID,
+            clientSecret: process.env.AUTH_GOOGLE_SECRET,
+            allowDangerousEmailAccountLinking: true,
+        }),
+        {
+            id: "orcid",
+            name: "ORCID",
+            type: "oauth",
+            clientId: process.env.ORCID_CLIENT_ID,
+            clientSecret: process.env.ORCID_CLIENT_SECRET,
+            authorization: {
+                url: "https://orcid.org/oauth/authorize",
+                params: { scope: "/authenticate" },
+            },
+            token: "https://orcid.org/oauth/token",
+            userinfo: {
+                url: "https://pub.orcid.org/v3.0/expanded-search",
+            },
+            profile(profile) {
+                return {
+                    id: profile.orcid,
+                    name: profile.name || profile.given_name,
+                    email: null,
+                }
+            },
+            allowDangerousEmailAccountLinking: true,
+        }
     ],
     callbacks: {
 
