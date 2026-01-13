@@ -1,5 +1,67 @@
-import { kv } from '@vercel/kv';
+import { kv as vercelKv } from '@vercel/kv';
+import Redis from 'ioredis';
 import { hash } from 'bcryptjs';
+
+// Adapter to handle both Vercel KV (HTTP) and Standard Redis (TCP)
+class KVAdapter {
+    private redis: Redis | null = null;
+    private useVercelKV: boolean = false;
+
+    constructor() {
+        if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+            this.useVercelKV = true;
+        } else if (process.env.REDIS_URL) {
+            this.redis = new Redis(process.env.REDIS_URL);
+        } else {
+            console.warn("KV/Redis not configured");
+        }
+    }
+
+    async get<T>(key: string): Promise<T | null> {
+        if (this.useVercelKV) return vercelKv.get<T>(key);
+        if (this.redis) {
+            const val = await this.redis.get(key);
+            return val ? JSON.parse(val) : null;
+        }
+        return null;
+    }
+
+    async set(key: string, value: any): Promise<void> {
+        if (this.useVercelKV) {
+            await vercelKv.set(key, value);
+        } else if (this.redis) {
+            await this.redis.set(key, JSON.stringify(value));
+        }
+    }
+
+    async incr(key: string): Promise<number> {
+        if (this.useVercelKV) return vercelKv.incr(key);
+        if (this.redis) return this.redis.incr(key);
+        return 0;
+    }
+
+    async sadd(key: string, value: any): Promise<number> {
+        if (this.useVercelKV) return vercelKv.sadd(key, value);
+        if (this.redis) return this.redis.sadd(key, value);
+        return 0;
+    }
+
+    async lpush(key: string, value: any): Promise<number> {
+        if (this.useVercelKV) return vercelKv.lpush(key, value);
+        if (this.redis) {
+            return this.redis.lpush(key, JSON.stringify(value));
+        }
+        return 0;
+    }
+
+    async keys(pattern: string): Promise<string[]> {
+        if (this.useVercelKV) return vercelKv.keys(pattern);
+        if (this.redis) return this.redis.keys(pattern);
+        return [];
+    }
+}
+
+const kv = new KVAdapter();
 
 // ============================================
 // USER MANAGEMENT
