@@ -34,6 +34,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { AuthProvider } from "@/components/auth/AuthProvider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -44,7 +46,9 @@ export default function RootLayout({
       <body
         className={`${inter.variable} antialiased font-sans`} // Use Inter variable and safe defaults
       >
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
