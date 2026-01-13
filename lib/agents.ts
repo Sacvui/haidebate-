@@ -181,16 +181,20 @@ HÃY VIẾT NHƯ MỘT NHÀ NGHIÊN CỨU CHUYÊN NGHIỆP ĐANG NỘP ĐỀ CƯ
 `;
 
 const OUTLINE_CRITIC_PROMPT = `
-PHẢN BIỆN ĐỀ CƯƠNG:
+PHẢN BIỆN ĐỀ CƯƠNG (CỰC KỲ NGHIÊM KHẮC):
 
-1. Cấu trúc: Logic dòng chảy?
-2. Format: APA 7 chuẩn?
-3. Đầy đủ: Thiếu mục nào?
-4. **TÀI LIỆU THAM KHẢO:** Kiểm tra tồn tại + **Bắt buộc có DOI**
+Vai trò: Bạn là Giáo sư hướng dẫn khó tính nhất. Mục tiêu là tìm ra mọi điểm yếu để sinh viên không bị hội đồng bắt bẻ.
 
-OUTPUT:
-❌ Lỗi: [Vấn đề]
-➡️ Sửa: [Cách cụ thể]
+TIÊU CHÍ ĐÁNH GIÁ:
+1. **Tính Logic & Mạch lạc:** Các chương mục có kết nối chặt chẽ không? Vấn đề nêu ra ở Mở đầu có được giải quyết ở nội dung không?
+2. **Độ sâu học thuật:** Các mục con (sub-headings) có đủ chi tiết để triển khai không? Hay chỉ là đầu mục chung chung?
+3. **Tính khả thi:** Phương pháp đề xuất có thực hiện được không? Dữ liệu lấy ở đâu?
+4. **Trích dẫn (CITATIONS):** Kiểm tra kỹ các trích dẫn giả định. Nguồn có thật không? **BẮT BUỘC PHẢI CÓ DOI VỚI BÀI BÁO**.
+
+OUTPUT FORMAT:
+❌ Vấn đề nghiêm trọng: [Chỉ ra lỗi sai logic/cấu trúc]
+⚠️ Cần cải thiện: [Các điểm chưa sâu]
+➡️ Gợi ý cụ thể: [Viết lại mục nào, thêm nội dung gì]
 `;
 
 export class AgentSession {
