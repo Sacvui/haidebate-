@@ -62,20 +62,29 @@ export const config = {
         }
     ],
     callbacks: {
+        import { getUserByEmail, createUser } from "@/lib/kv";
+
+        // ...
+
         async signIn({ user, account, profile }) {
-            // Logic to sync with KV
-            // If Google login:
-            if (account?.provider === 'google') {
-                const email = user.email;
-                if (email) {
-                    // Check KV, create if needed
-                    // We cannot import 'createUser' here directly if it functionality relies on 'server-only' or similar context?
-                    // Actually lib/kv.ts is safely usable on server.
-                    // 1. Get user by email
-                    // 2. If not exists, create with random password/null password
+            if (!user.email) return false;
+
+            try {
+                // Check if user exists in KV
+                const existingUser = await getUserByEmail(user.email);
+
+                if (!existingUser) {
+                    // Create new user (No password for OAuth users)
+                    // Note: createUser now requires password as 2nd arg? No, I made it optional?
+                    // Let's check kv.ts signature.
+                    // It was: createUser(email, password?, referredBy?)
+                    await createUser(user.email, undefined, undefined);
                 }
+                return true;
+            } catch (error) {
+                console.error("Error syncing OAuth user:", error);
+                return false;
             }
-            return true;
         },
         authorized({ request, auth }) {
             return true
