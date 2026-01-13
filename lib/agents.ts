@@ -247,8 +247,8 @@ export class AgentSession {
         ? `${context}\n\nPHẢN HỒI CỦA CRITIC (Vòng trước): ${previousCriticFeedback}\n\n${sysPrompt}\nHãy cải thiện/viết tiếp dựa trên phản hồi này.`
         : `${context}\n\n${sysPrompt}\nHãy bắt đầu thực hiện nhiệm vụ cho giai đoạn này.`;
 
-      // Use Helper with retry (No fallback switching)
-      return await this.callGeminiAPI('gemini-2.0-flash', prompt, finalKey);
+      // Use Helper with retry (Model 2.0 Flash Exp -> Fallback 1.5 Flash)
+      return await this.callGeminiAPI('gemini-2.0-flash-exp', prompt, finalKey);
 
     } catch (error) {
       console.error("Gemini Writer Error:", error);
@@ -271,8 +271,8 @@ export class AgentSession {
 
         const prompt = `${sysPrompt}\n\nBÀI LÀM CỦA WRITER:\n${writerDraft}\n\nHãy đóng vai trò Critic và đưa ra nhận xét chi tiết, khắt khe.`;
 
-        // Use Helper with retry (No fallback switching)
-        return await this.callGeminiAPI('gemini-2.0-flash', prompt, geminiKey);
+        // Use Helper with retry (Model 2.0 Flash Exp -> Fallback 1.5 Flash)
+        return await this.callGeminiAPI('gemini-2.0-flash-exp', prompt, geminiKey);
 
       } catch (error) {
         return `Lỗi Critic (Quota/Network): ${error}`;
