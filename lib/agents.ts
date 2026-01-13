@@ -168,9 +168,15 @@ ${getOutlineStructure(outputType)}
 `;
 
 const OUTLINE_CRITIC_PROMPT = `
-VAI TRÒ: Thư ký tòa soạn (Editorial Office).
-NHIỆM VỤ: Soát lỗi cấu trúc và format.
-TIÊU CHÍ: Logic dòng chảy, Format APA 7.
+PHẢN BIỆN ĐỀ CƯƠNG:
+
+1. Cấu trúc: Logic dòng chảy?
+2. Format: APA 7 chuẩn?
+3. Đầy đủ: Thiếu mục nào?
+
+OUTPUT:
+❌ Lỗi: [Vấn đề]
+➡️ Sửa: [Cách cụ thể]
 `;
 
 export class AgentSession {
