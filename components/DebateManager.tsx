@@ -312,30 +312,31 @@ export default function DebateManager({ topic, goal, audience, level, language, 
                                     )}
                                 </div>
                             </motion.div>
-                            );
+                        </React.Fragment>
+                    );
                 })}
-                            <div ref={bottomRef} />
-                        </div>
+                <div ref={bottomRef} />
+            </div>
 
-            {/* Thinking Animation Overlay - Sticky Top */ }
-                    {
-                        isProcessing && (
-                            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-white/95 backdrop-blur-sm px-5 py-3 rounded-full border border-blue-100 shadow-2xl animate-in fade-in slide-in-from-bottom-4 flex items-center gap-3">
-                                <ThinkingAnimation />
-                            </div>
-                        )
-                    }
-
-                    {/* Hidden Export Card */ }
-                    <div className="fixed top-0 left-0 -z-50 opacity-0 pointer-events-none">
-                        <ShareableCard
-                            ref={exportRef}
-                            topic={topic}
-                            level={level}
-                            goal={goal}
-                            content={messages.filter(m => m.role === 'writer').slice(-1)[0]?.content.slice(0, 300) + "..." || "..."}
-                        />
+            {/* Thinking Animation Overlay - Sticky Top */}
+            {
+                isProcessing && (
+                    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-white/95 backdrop-blur-sm px-5 py-3 rounded-full border border-blue-100 shadow-2xl animate-in fade-in slide-in-from-bottom-4 flex items-center gap-3">
+                        <ThinkingAnimation />
                     </div>
+                )
+            }
+
+            {/* Hidden Export Card */}
+            <div className="fixed top-0 left-0 -z-50 opacity-0 pointer-events-none">
+                <ShareableCard
+                    ref={exportRef}
+                    topic={topic}
+                    level={level}
+                    goal={goal}
+                    content={messages.filter(m => m.role === 'writer').slice(-1)[0]?.content.slice(0, 300) + "..." || "..."}
+                />
+            </div>
         </div >
-            );
+    );
 }

@@ -16,6 +16,7 @@ export default function Home() {
   const [isGateOpen, setIsGateOpen] = useState(false);
   const [userProfile, setUserProfile] = useState<{ email: string; referralCode?: string } | null>(null);
   const [apiKey, setApiKey] = useState(process.env.NEXT_PUBLIC_GEMINI_API_KEY || "");
+  const [apiKeyCritic, setApiKeyCritic] = useState<string | undefined>(undefined);
 
   // Form State for DebateManager (Lifted up)
   const [formData, setFormData] = useState<any>(null);
