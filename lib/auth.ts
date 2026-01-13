@@ -55,8 +55,9 @@ export const config = {
             profile(profile) {
                 return {
                     id: profile.orcid,
-                    name: profile.name || profile.given_name,
-                    email: null,
+                    name: profile.name || profile.given_name || "ORCID User",
+                    email: profile.email || `${profile.orcid}@orcid.local`,
+                    image: null,
                 }
             },
             allowDangerousEmailAccountLinking: true,
@@ -71,9 +72,14 @@ export const config = {
                 const existingUser = await getUserByEmail(user.email);
 
                 if (!existingUser) {
-                    // Get referral code from cookies
-                    const cookieStore = cookies();
-                    const referralCode = cookieStore.get("referral_code")?.value;
+                    // Get referral code from cookies (Safe access)
+                    let referralCode = undefined;
+                    try {
+                        const cookieStore = cookies();
+                        referralCode = cookieStore.get("referral_code")?.value;
+                    } catch (e) {
+                        // Ignore cookie errors
+                    }
 
                     // Create new user (No password for OAuth users)
                     await createUser(user.email, undefined, referralCode);
