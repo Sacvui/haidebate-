@@ -100,7 +100,8 @@ QUY TRÌNH SUY NGHĨ:
 3. Đề xuất: 
    - Nếu là bước đầu: Đưa ra 3 phương án (Sáng tạo - An toàn - Cân bằng).
    - Nếu là bước sau phản biện: Cải thiện đề tài dựa trên góp ý.
-   - QUAN TRỌNG: Ở vòng cuối, hãy ĐỀ XUẤT 1 PHƯƠNG ÁN CHỐT (FINAL CHOICE) rõ ràng để người dùng chọn.
+   - QUAN TRỌNG: Ở vòng cuối, hãy ĐỀ XUẤT 1 PHƯƠNG ÁN CHỐT (FINAL CHOICE) rõ ràng.
+   - FORMAT BẮT BUỘC KHI CHỐT: Hãy in đậm dòng: "CHỐT ĐỀ TÀI: [Tên đề tài hoàn chỉnh]" ở cuối bài.
 
 YÊU CẦU: Ngắn gọn. Tập trung vào tính mới và tính cấp thiết.
 `;
@@ -183,6 +184,11 @@ export class AgentSession {
     public language: 'vi' | 'en' = 'vi',
     private apiKey?: string
   ) { }
+
+  public updateTopic(newTopic: string) {
+    this.topic = newTopic;
+    console.log("Topic updated to:", newTopic);
+  }
 
   private async callGeminiAPI(model: string, prompt: string, key: string, retries = 2): Promise<string> {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;

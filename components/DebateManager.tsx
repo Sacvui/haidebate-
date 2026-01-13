@@ -137,12 +137,25 @@ export default function DebateManager({ topic, goal, audience, level, language, 
     };
 
     const handleNextStep = () => {
+        // Step 1 -> 2: Finalize Topic
+        if (currentStep === '1_TOPIC') {
+            const lastWriterMsg = messages.filter(m => m.role === 'writer').pop();
+            if (lastWriterMsg) {
+                // Regex to find "CHỐT ĐỀ TÀI: ..."
+                const match = lastWriterMsg.content.match(/CHỐT ĐỀ TÀI:\s*(.*)/i) || lastWriterMsg.content.match(/\*\*CHỐT ĐỀ TÀI:\*\*\s*(.*)/i);
+                if (match && match[1]) {
+                    const newTopic = match[1].trim();
+                    session.updateTopic(newTopic);
+                    // Optional: Notify via toast or log?
+                }
+            }
+            setCurrentStep('2_MODEL');
+        }
+        else if (currentStep === '2_MODEL') setCurrentStep('3_OUTLINE');
+
         setMessages([]); // Clear chat for next step
         setRoundCount(0);
         setStepCompleted(false);
-
-        if (currentStep === '1_TOPIC') setCurrentStep('2_MODEL');
-        else if (currentStep === '2_MODEL') setCurrentStep('3_OUTLINE');
     };
 
     const getStepNumber = (step: WorkflowStep) => {
