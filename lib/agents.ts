@@ -234,6 +234,8 @@ export class AgentSession {
       const finalKey = this.writerKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
       if (!finalKey) return "E: Vui lòng cấu hình API Key Writer";
 
+      console.log(`🔑 Writer using key: ${finalKey.substring(0, 10)}... (Source: ${this.writerKey ? 'Custom Writer Key' : 'Env/Default'})`);
+
       let sysPrompt = "";
       switch (step) {
         case '1_TOPIC': sysPrompt = TOPIC_WRITER_PROMPT; break;
@@ -261,6 +263,7 @@ export class AgentSession {
     const geminiKey = this.criticKey || this.writerKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
     if (geminiKey) {
+      console.log(`🔑 Critic using key: ${geminiKey.substring(0, 10)}... (Source: ${this.criticKey ? 'Custom Critic Key' : this.writerKey ? 'Writer Key (Fallback)' : 'Env/Default'})`);
       try {
         let sysPrompt = "";
         switch (step) {
