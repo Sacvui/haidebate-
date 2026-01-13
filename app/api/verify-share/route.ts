@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { NextResponse } from 'next/server';
 import { validateShareUrl, tryClaimShareReward } from '@/lib/kv';
 
 export async function POST(req: Request) {

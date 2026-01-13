@@ -78,8 +78,8 @@ export default function Home() {
           {/* LEFT COLUMN: LOGIN */}
           <div className="w-full md:w-[480px] bg-white border-r border-slate-200 p-8 flex flex-col justify-center relative z-20 shadow-2xl">
             <div className="mb-8">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white mb-4 shadow-lg shadow-blue-500/30">
-                <Sparkles size={24} />
+              <div className="w-16 h-16 mb-4 shadow-lg shadow-blue-500/20 rounded-2xl overflow-hidden">
+                <img src="/favicon.ico" alt="Hải Debate Logo" className="w-full h-full object-cover" />
               </div>
               <a href="/" className="block group">
                 <h1 className="text-3xl font-extrabold text-slate-900 leading-tight mb-2 group-hover:opacity-80 transition-opacity">
@@ -97,10 +97,10 @@ export default function Home() {
 
               {/* Referral Input */}
               <div className="relative">
-                <label className="block text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">Mã giới thiệu (Nếu có)</label>
+                <label className="block text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">Thư tiến cử số (Nếu có)</label>
                 <input
                   type="text"
-                  placeholder="Nhập mã referral..."
+                  placeholder="Nhập Số trên thư tiến cử..."
                   value={referralCode}
                   onChange={handleManualReferral}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all font-mono text-center tracking-widest text-slate-700 font-bold"
@@ -157,8 +157,8 @@ export default function Home() {
           <header className="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-slate-200 z-50 animate-in slide-in-from-top-4 duration-500">
             <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
-                  <Sparkles className="w-5 h-5" />
+                <div className="w-10 h-10 shadow-md shadow-blue-500/20 rounded-lg overflow-hidden">
+                  <img src="/favicon.ico" alt="Logo" className="w-full h-full object-cover" />
                 </div>
                 <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-700">
                   Hải Debate
