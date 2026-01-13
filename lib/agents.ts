@@ -93,31 +93,34 @@ const getCriticPersona = (level: AcademicLevel) => {
 // --- BASE PROMPTS ---
 
 const TOPIC_WRITER_PROMPT = `
-NHIỆM VỤ: Đề xuất hoặc tinh chỉnh Tên Đề Tài nghiên cứu.
-QUY TRÌNH SUY NGHĨ:
-1. Phân tích: Đánh giá input của người dùng hoặc phản hồi của Critic (nếu có).
-2. Xử lý phản biện (nếu có): Nếu Critic chê, hãy sửa chữa ngay lập tức. Đừng ngoan cố, nhưng phải bảo vệ lập trường nếu đúng.
-3. Đề xuất: 
-   - Nếu là bước đầu: Đưa ra 3 phương án (Sáng tạo - An toàn - Cân bằng).
-   - Nếu là bước sau phản biện: Cải thiện đề tài dựa trên góp ý.
-   - QUAN TRỌNG: Ở vòng cuối, hãy ĐỀ XUẤT 1 PHƯƠNG ÁN CHỐT (FINAL CHOICE) rõ ràng.
-   - FORMAT BẮT BUỘC KHI CHỐT: Hãy in đậm dòng: "CHỐT ĐỀ TÀI: [Tên đề tài hoàn chỉnh]" ở cuối bài.
+NHIỆM VỤ: Đề xuất/tinh chỉnh Tên Đề Tài nghiên cứu.
 
-YÊU CẦU: Ngắn gọn. Tập trung vào tính mới và tính cấp thiết.
+QUY TRÌNH:
+1. Phân tích input/phản biện
+2. Đề xuất:
+   - Lần đầu: 3 phương án (Sáng tạo | An toàn | Cân bằng)
+   - Sau phản biện: Cải thiện theo góp ý
+   - Vòng cuối: In đậm "CHỐT ĐỀ TÀI: [Tên đề tài]"
+
+YÊU CẦU: Ngắn gọn, tập trung tính mới và cấp thiết.
 `;
 
 const TOPIC_CRITIC_PROMPT = `
-VAI TRÒ: Đối thủ phản biện (Critical Opponent). KHÔNG PHẢI GIÁO VIÊN.
-NHIỆM VỤ: Tấn công vào các lỗ hổng của đề tài.
-TIÊU CHÍ (CỰC KỲ KHẮT KHE):
-1. Tính mới (Novelty): "Cái này ai cũng làm rồi, có gì mới đâu?"
-2. Tính khả thi: "Làm sao đo lường được biến này? Dữ liệu ở đâu?"
-3. Logic: Tên đề tài có phản ánh đúng vấn đề không?
+VAI TRÒ: Phản biện khắt khe (Reviewer 2 Style)
 
-TONE & STYLE:
-- Thẳng thắn, sắc bén, hoài nghi.
-- Dùng từ ngữ mạnh: "Thiếu căn cứ", "Mơ hồ", "Không thuyết phục".
-- Đừng khen ngợi xã giao. Hãy chỉ ra lỗi sai để Writer hoàn thiện.
+TIÊU CHÍ:
+1. Tính mới: Đề tài có gì khác biệt?
+2. Khả thi: Dữ liệu/Phương pháp đo lường?
+3. Logic: Tên đề tài rõ ràng?
+
+FORMAT OUTPUT:
+❌ VẤN ĐỀ:
+- [Vấn đề cụ thể]
+
+💡 GỢI Ý:
+- [Cách sửa]
+
+TONE: Thẳng thắn, sắc bén. Dùng "Thiếu căn cứ", "Mơ hồ", "Không thuyết phục".
 `;
 
 const getModelWriterPrompt = (level: AcademicLevel) => `
@@ -189,6 +192,13 @@ export class AgentSession {
   public updateTopic(newTopic: string) {
     this.topic = newTopic;
     console.log("Topic updated to:", newTopic);
+  }
+
+  public isUsingSameKey(): boolean {
+    // Check if Writer and Critic are using the same API key
+    const writerKey = this.writerKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    const criticKey = this.criticKey || this.writerKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    return writerKey === criticKey;
   }
 
   private async callGeminiAPI(model: string, prompt: string, key: string, retries = 3): Promise<string> {

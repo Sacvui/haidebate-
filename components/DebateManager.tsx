@@ -94,8 +94,9 @@ export default function DebateManager({ topic, goal, audience, level, language, 
 
             // Debate Loop
             while (currentRound < maxRounds) {
-                // Rate Limit Buffer: Wait 4s before next turn to avoid hitting RPM limit
-                await new Promise(resolve => setTimeout(resolve, 4000));
+                // Smart Delay: 4s if same key (avoid RPM), 1s if different keys (just for UX)
+                const delayTime = session.isUsingSameKey() ? 4000 : 1000;
+                await new Promise(resolve => setTimeout(resolve, delayTime));
 
                 currentRound++;
                 setRoundCount(currentRound);
@@ -112,8 +113,9 @@ export default function DebateManager({ topic, goal, audience, level, language, 
 
                 // Writer Updates (if not last round)
                 if (currentRound < maxRounds) {
-                    // Buffer again for Writer
-                    await new Promise(resolve => setTimeout(resolve, 4000));
+                    // Smart Delay again
+                    const delayTime = session.isUsingSameKey() ? 4000 : 1000;
+                    await new Promise(resolve => setTimeout(resolve, delayTime));
 
                     // addMessage('writer', "Đang tiếp thu và chỉnh sửa...");
                     writerContent = await session.generateWriterTurn(currentStep, lastCriticFeedback);
