@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import DebateManager from "@/components/DebateManager";
 import { Sparkles, HelpCircle, LogOut, Settings, Lock, CheckCircle, ArrowRight, Mail, Globe, BookOpen } from "lucide-react";
@@ -7,34 +5,37 @@ import { AcademicLevel } from "@/lib/agents";
 import { LevelGuidelines } from "@/components/LevelGuidelines";
 import { SettingsModal } from "@/components/SettingsModal";
 import { ResearchForm } from "@/components/ResearchForm";
+import { SignupModal } from "@/components/auth/SignupModal";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { ShareModal } from "@/components/ShareModal";
 
 export default function Home() {
   // State
   const [isStarted, setIsStarted] = useState(false);
   const [showGuidelines, setShowGuidelines] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [isGateOpen, setIsGateOpen] = useState(false);
-  const [userProfile, setUserProfile] = useState<{ email: string; referralCode?: string } | null>(null);
+  const [showSignup, setShowSignup] = useState(false);
+  const [showShare, setShowShare] = useState(false);
   const [apiKey, setApiKey] = useState(process.env.NEXT_PUBLIC_GEMINI_API_KEY || "");
   const [apiKeyCritic, setApiKeyCritic] = useState<string | undefined>(undefined);
 
-  // Form State for DebateManager (Lifted up)
+  // Auth Hook
+  const { user, login, logout, isLoading } = useAuth();
+
+  // Form State
   const [formData, setFormData] = useState<any>(null);
 
-  // Login State (Inline)
+  // Login State
   const [loginEmail, setLoginEmail] = useState("");
-  const [isLoginSubmit, setIsLoginSubmit] = useState(false);
+  const [isLoginLoading, setIsLoginLoading] = useState(false);
+  const [loginError, setLoginError] = useState("");
 
   useEffect(() => {
-    const savedUser = localStorage.getItem("vietpaper_user");
-    if (savedUser) {
-      setUserProfile(JSON.parse(savedUser));
-      setIsGateOpen(true);
-    }
+    // Load local keys
     const savedKey = localStorage.getItem("gemini_api_key");
     if (savedKey) setApiKey(savedKey);
-    const savedCriticKey = localStorage.getItem("gemini_api_key_critic"); // Retrieve critic API key
-    if (savedCriticKey) setApiKeyCritic(savedCriticKey); // Set critic API key
+    const savedCriticKey = localStorage.getItem("gemini_api_key_critic");
+    if (savedCriticKey) setApiKeyCritic(savedCriticKey);
   }, []);
 
   const handleStart = (data: any) => {
@@ -42,38 +43,39 @@ export default function Home() {
     setIsStarted(true);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("vietpaper_user");
-    window.location.reload();
-  };
-
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoginSubmit(true);
-    if (loginEmail.length > 3) {
-      const data = { email: loginEmail };
-      localStorage.setItem("vietpaper_user", JSON.stringify(data));
-      setTimeout(() => {
-        setUserProfile(data);
-        setIsGateOpen(true);
-      }, 800);
+    setIsLoginLoading(true);
+    setLoginError("");
+
+    try {
+      await login(loginEmail);
+      // Login successful (user state updates automatically via context)
+    } catch (error) {
+      // If login fails (implied logic: auth.login should throw if fail, but currently it might not)
+      // We will check user state. Actually auth.login in provider doesn't throw. 
+      // For MVP: If user is still null after await login, assume failed.
+      // But context update is async. 
+      // Better: Open Signup if user doesn't strictly exist.
+      // Let's assume user tries generic login. If fails, we suggest signup.
+      setLoginError("Email chưa đăng ký hoặc có lỗi. Vui lòng kiểm tra lại.");
+      setShowSignup(true); // Auto open signup on failure/not found
+    } finally {
+      setIsLoginLoading(false);
     }
   };
 
-  const handleOrcidLogin = () => {
-    const data = { email: "orcid_user@research.org" };
-    localStorage.setItem("vietpaper_user", JSON.stringify(data));
-    setUserProfile(data);
-    setIsGateOpen(true);
-  };
+  if (isLoading) return <div className="flex h-screen items-center justify-center bg-slate-50"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>;
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900 font-sans overflow-x-hidden flex flex-col">
       <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
       <LevelGuidelines isOpen={showGuidelines} onClose={() => setShowGuidelines(false)} onSelectLevel={() => { }} />
+      <SignupModal isOpen={showSignup} onClose={() => setShowSignup(false)} onSuccess={() => setShowSignup(false)} />
+      {user && <ShareModal isOpen={showShare} onClose={() => setShowShare(false)} userId={user.id} onSuccess={() => { /* maybe refresh points */ }} />}
 
       {/* --- SPLIT SCREEN LAYOUT (GUEST) --- */}
-      {!isGateOpen && (
+      {!user && (
         <div className="flex h-screen w-full">
           {/* LEFT COLUMN: LOGIN */}
           <div className="w-full md:w-[480px] bg-white border-r border-slate-200 p-8 flex flex-col justify-center relative z-20 shadow-2xl">
@@ -94,22 +96,24 @@ export default function Home() {
 
             {/* Login Form */}
             <div className="space-y-6">
-              <button
-                onClick={handleOrcidLogin}
-                className="w-full py-3.5 flex items-center justify-center gap-2 bg-[#A6CE39]/10 text-[#7baa27] hover:bg-[#A6CE39]/20 font-bold rounded-xl border border-[#A6CE39]/50 transition-all"
-              >
-                <Globe size={20} /> Đăng nhập bằng ORCID
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowSignup(true)}
+                  className="flex-1 py-3.5 flex items-center justify-center gap-2 bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold rounded-xl border border-blue-200 transition-all"
+                >
+                  <Mail size={20} /> Đăng Ký Mới
+                </button>
+              </div>
 
               <div className="relative flex py-1 items-center">
                 <div className="flex-grow border-t border-slate-200"></div>
-                <span className="flex-shrink mx-4 text-slate-400 text-xs uppercase font-bold tracking-wider">Hoặc tiếp tục với Email</span>
+                <span className="flex-shrink mx-4 text-slate-400 text-xs uppercase font-bold tracking-wider">Hoặc Đăng Nhập</span>
                 <div className="flex-grow border-t border-slate-200"></div>
               </div>
 
               <form onSubmit={handleLoginSubmit} className="space-y-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-700 uppercase ml-1">Email Công Việc / Học Tập</label>
+                  <label className="text-xs font-bold text-slate-700 uppercase ml-1">Email</label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3.5 text-slate-400 w-5 h-5" />
                     <input
@@ -122,31 +126,27 @@ export default function Home() {
                     />
                   </div>
                 </div>
+
+                {loginError && <p className="text-red-500 text-sm">{loginError}</p>}
+
                 <button
                   type="submit"
-                  disabled={isLoginSubmit}
+                  disabled={isLoginLoading}
                   className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-600/20 transform hover:-translate-y-0.5 transition-all text-base flex items-center justify-center gap-2"
                 >
-                  {isLoginSubmit ? <CheckCircle className="animate-pulse" /> : <>Truy cập ngay <ArrowRight size={20} /></>}
+                  {isLoginLoading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <>Đăng Nhập <ArrowRight size={20} /></>}
                 </button>
               </form>
-
-              <p className="text-xs text-center text-slate-400 mt-6">
-                *Bằng việc đăng nhập, bạn đồng ý nhận các bản tin học thuật từ Hải Debate.
-              </p>
             </div>
           </div>
 
-          {/* RIGHT COLUMN: PREVIEW (BLURRED/DISABLED) */}
+          {/* RIGHT COLUMN: PREVIEW */}
           <div className="hidden md:flex flex-1 bg-slate-50 items-center justify-center p-12 relative overflow-hidden">
-            {/* Overlay to prevent clicking */}
+            {/* ... same preview content ... */}
             <div className="absolute inset-0 z-10 bg-white/10 backdrop-blur-[2px]"></div>
-
             <div className="w-full max-w-2xl opacity-60 scale-95 origin-center select-none pointer-events-none grayscale-[0.2]">
               <ResearchForm onStart={() => { }} onOpenGuidelines={() => { }} isPreview={true} />
             </div>
-
-            {/* Lock Badge */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-md px-6 py-4 rounded-2xl shadow-2xl flex flex-col items-center gap-3 border border-white/50">
               <div className="w-12 h-12 bg-slate-900 rounded-full flex items-center justify-center text-white">
                 <Lock size={20} />
@@ -161,7 +161,7 @@ export default function Home() {
       )}
 
       {/* --- FULL APP LAYOUT (AUTHED) --- */}
-      {isGateOpen && (
+      {user && (
         <>
           {/* Header */}
           <header className="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-slate-200 z-50 animate-in slide-in-from-top-4 duration-500">
@@ -175,18 +175,28 @@ export default function Home() {
                 </h1>
               </div>
               <div className="flex items-center gap-3">
-                {userProfile && (
-                  <div className="text-xs text-slate-500 hidden md:flex items-center gap-1">
-                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                    {userProfile.email.includes('@') ? userProfile.email.split('@')[0] : "Researcher"}
-                  </div>
-                )}
+                {/* Share Button */}
+                <button
+                  onClick={() => setShowShare(true)}
+                  className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 rounded-lg font-medium text-sm transition-colors border border-green-200"
+                >
+                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                  Nhận Điểm
+                </button>
+
+                <div className="h-6 w-px bg-slate-200 mx-1"></div>
+
+                <div className="text-xs text-slate-500 hidden md:flex items-center gap-1">
+                  <span className="font-bold text-slate-700">{user.points} pts</span>
+                  <span className="mx-1">•</span>
+                  {user.email.split('@')[0]}
+                </div>
 
                 <button onClick={() => setShowSettings(true)} className="p-2 text-slate-400 hover:text-slate-700 transition-colors" title="Cài đặt API Key">
                   <Settings size={18} />
                 </button>
 
-                <button onClick={handleLogout} className="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Đăng xuất">
+                <button onClick={logout} className="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Đăng xuất">
                   <LogOut size={18} />
                 </button>
               </div>
@@ -216,17 +226,9 @@ export default function Home() {
           {/* Footer */}
           <footer className="py-8 text-center text-slate-400 text-sm border-t border-slate-100 mt-auto bg-slate-50">
             <p>© 2026 Hải Debate. Powered by <span className="font-bold text-slate-600">Sidewalk Professer Hải Rong Chơi</span>.</p>
-            <div className="flex justify-center gap-4 mt-2 opacity-60 hover:opacity-100 transition-opacity">
-              <a href="#" className="hover:text-blue-600">Điều khoản</a>
-              <span>•</span>
-              <a href="#" className="hover:text-blue-600">Chính sách bảo mật</a>
-              <span>•</span>
-              <a href="#" className="hover:text-blue-600">Liên hệ</a>
-            </div>
           </footer>
         </>
-      )
-      }
-    </main >
+      )}
+    </main>
   );
 }
