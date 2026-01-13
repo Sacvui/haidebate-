@@ -72,22 +72,16 @@ export const config = {
                 const existingUser = await getUserByEmail(user.email);
 
                 if (!existingUser) {
-                    // Get referral code from cookies (Safe access)
-                    let referralCode = undefined;
-                    try {
-                        const cookieStore = cookies();
-                        referralCode = cookieStore.get("referral_code")?.value;
-                    } catch (e) {
-                        // Ignore cookie errors handles cases where cookies() is not available
-                    }
-
                     // Create new user (No password for OAuth users)
-                    await createUser(user.email, undefined, referralCode);
+                    // Note: We disabled cookie-based referral for stability. 
+                    // Users can add referral code manually later if needed.
+                    await createUser(user.email, undefined, undefined);
                 }
                 return true;
             } catch (error) {
                 console.error("Error syncing OAuth user:", error);
-                return false;
+                // FAILSAFE: Allow login even if KV sync fails to prevent AccessDenied
+                return true;
             }
         },
         async session({ session, token }) {
