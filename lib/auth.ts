@@ -1,4 +1,4 @@
-// Force Vercel Rebuild: 2026-01-13 21:40
+// Force Vercel Rebuild: 2026-01-13 22:10 (ORCID Keys Added)
 import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
 import type { NextAuthConfig } from "next-auth"
