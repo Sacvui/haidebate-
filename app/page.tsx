@@ -10,6 +10,7 @@ import { ResearchForm } from "@/components/ResearchForm";
 import { SignupModal } from "@/components/auth/SignupModal";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { ShareModal } from "@/components/ShareModal";
+import { signIn } from "next-auth/react";
 
 export default function Home() {
   // State
@@ -30,10 +31,10 @@ export default function Home() {
   // Login State
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  const [isLoggingIn, setIsLoginLoading] = useState(false); // Map isLoggingIn to isLoginLoading var name or keys
-  // Actually, I introduced isLoggingIn in previous edit but file has isLoginLoading. 
-  // I should standardize. usage in form is isLoggingIn.
-  // Let's use isLoggingIn to match the form replacement I did.
+  // Login State
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [isLoginLoading, setIsLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState("");
 
   useEffect(() => {
@@ -97,10 +98,6 @@ export default function Home() {
               </p>
             </div>
 
-            import {signIn} from "next-auth/react";
-
-            // ... (inside Home component)
-
             {/* Login Form */}
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-3">
@@ -161,10 +158,10 @@ export default function Home() {
 
                 <button
                   type="submit"
-                  disabled={isLoggingIn}
+                  disabled={isLoginLoading}
                   className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:shadow-lg hover:translate-y-[-2px] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoggingIn ? "Đang xử lý..." : "Đăng Nhập"}
+                  {isLoginLoading ? "Đang xử lý..." : "Đăng Nhập"}
                 </button>
               </form>
             </div>
