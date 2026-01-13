@@ -98,18 +98,35 @@ export default function Home() {
 
             {/* Login Form */}
             <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => alert("Tính năng Google Login đang phát triển!")}
+                  className="flex items-center justify-center gap-2 py-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all text-slate-700 font-bold text-sm shadow-sm"
+                >
+                  <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="Google" />
+                  Google
+                </button>
+                <button
+                  onClick={() => alert("Tính năng ORCID Login đang phát triển!")}
+                  className="flex items-center justify-center gap-2 py-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all text-slate-700 font-bold text-sm shadow-sm"
+                >
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/0/06/ORCID_iD.svg" className="w-5 h-5" alt="ORCID" />
+                  ORCID
+                </button>
+              </div>
+
               <div className="flex gap-2">
                 <button
                   onClick={() => setShowSignup(true)}
                   className="flex-1 py-3.5 flex items-center justify-center gap-2 bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold rounded-xl border border-blue-200 transition-all"
                 >
-                  <Mail size={20} /> Đăng Ký Mới
+                  <Mail size={20} /> Đăng Ký Bằng Email
                 </button>
               </div>
 
               <div className="relative flex py-1 items-center">
                 <div className="flex-grow border-t border-slate-200"></div>
-                <span className="flex-shrink mx-4 text-slate-400 text-xs uppercase font-bold tracking-wider">Hoặc Đăng Nhập</span>
+                <span className="flex-shrink mx-4 text-slate-400 text-xs uppercase font-bold tracking-wider">Hoặc Login Email</span>
                 <div className="flex-grow border-t border-slate-200"></div>
               </div>
 
