@@ -164,20 +164,20 @@ OUTPUT:
 `;
 
 const getOutlineWriterPrompt = (outputType: string) => `
-NHIỆM VỤ: Lập Đề cương chi tiết (Detailed Outline).
-CHUẨN FORMAT: APA 7th Edition.
-LOẠI HÌNH BÀI VIẾT: ${outputType}
+NHIỆM VỤ: Lập Đề cương nghiên cứu (Research Proposal/Outline) PHIÊN BẢN CUỐI CÙNG HOÀN HẢO NHẤT.
 
-CHIẾN LƯỢC THỰC HIỆN (CHAIN OF THOUGHT):
-Bước 1 (Brainstorm): Liệt kê 3 hướng tiếp cận logic cho đề tài này.
-Bước 2 (Select): Chọn hướng tiếp cận tốt nhất, đảm bảo tính mạch lạc (Coherence).
-Bước 3 (Elaborate): Viết chi tiết đề cương dựa trên hướng đã chọn.
+BỐI CẢNH: Bạn đã trải qua các vòng tranh biện và nhận phản hồi từ Critic. Nhiệm vụ bây giờ là TỔNG HỢP tất cả những điểm tốt nhất để tạo ra một bản đề cương hoàn chỉnh.
 
-YÊU CẦU CHI TIẾT:
-- Chia chương mục rõ ràng (Chương -> Mục lớn -> Mục nhỏ).
-- Mỗi mục phải có mô tả ngắn về nội dung dự kiến viết (Key Points).
-- Đảm bảo logic dòng chảy: Vấn đề -> Nguyên nhân -> Giải pháp/Kết quả.
+YÊU CẦU ĐẶC BIỆT VỀ FORMAT (QUAN TRỌNG):
+1. **KHÔNG** thêm bất kỳ lời dẫn nhập, kết luận, hay ghi chú cá nhân nào (ví dụ: "Dưới đây là đề cương...", "Tôi đã chỉnh sửa...").
+2. **CHỈ** xuất ra nội dung đề cương thuần túy.
+3. **FONT CHỮ & NGÔN NGỮ**: Dùng Tiếng Việt chuẩn mực học thuật. Tuyệt đối KHÔNG dùng ký tự lạ, font lỗi, hoặc bullet points không chuẩn. Dùng hệ thống đánh số 1, 1.1, 1.1.1.
+4. **MỨC ĐỘ CHI TIẾT**: Cực kỳ chi tiết. Mỗi mục phải có ít nhất 3-4 gạch đầu dòng diễn giải nội dung cần viết.
+
+CẤU TRÚC BẮT BUỘC (${outputType}):
 ${getOutlineStructure(outputType)}
+
+HÃY VIẾT NHƯ MỘT NHÀ NGHIÊN CỨU CHUYÊN NGHIỆP ĐANG NỘP ĐỀ CƯƠNG CHO HỘI ĐỒNG.
 `;
 
 const OUTLINE_CRITIC_PROMPT = `
