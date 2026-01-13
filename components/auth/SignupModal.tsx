@@ -104,11 +104,37 @@ export function SignupModal({ isOpen, onClose, onSuccess }: SignupModalProps) {
                         </div>
                     )}
 
+                    {/* ... previous error ... */}
                     {error && (
                         <div className="bg-red-50 text-red-600 p-3 rounded mb-4">
                             {error}
                         </div>
                     )}
+
+                    <div className="mb-4 grid grid-cols-2 gap-3">
+                        <button
+                            type="button"
+                            className="flex items-center justify-center gap-2 py-2.5 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium text-slate-700"
+                            onClick={() => alert("Tính năng Google Login đang phát triển!")}
+                        >
+                            <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="Google" />
+                            Google
+                        </button>
+                        <button
+                            type="button"
+                            className="flex items-center justify-center gap-2 py-2.5 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium text-slate-700"
+                            onClick={() => alert("Tính năng ORCID Login đang phát triển!")}
+                        >
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/0/06/ORCID_iD.svg" className="w-5 h-5" alt="ORCID" />
+                            ORCID
+                        </button>
+                    </div>
+
+                    <div className="relative flex py-2 items-center mb-4">
+                        <div className="flex-grow border-t border-slate-200"></div>
+                        <span className="flex-shrink mx-4 text-slate-400 text-xs uppercase font-bold tracking-wider">Hoặc Email</span>
+                        <div className="flex-grow border-t border-slate-200"></div>
+                    </div>
 
                     <button
                         type="submit"

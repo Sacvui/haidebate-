@@ -2,39 +2,56 @@
 import { kv } from "@vercel/kv";
 import { NextResponse } from "next/server";
 
+// ... imports
+
 export async function GET() {
-    const userId = "seed-user-hailp";
-    const user = {
-        id: userId,
-        email: "hailp@test.com",
-        referralCode: "HAILP100K",
-        referredBy: "admin",
-        points: 100000,
-        createdAt: new Date().toISOString()
-    };
+    const usersToSeed = [
+        {
+            id: "seed-user-hailp",
+            email: "hailp@test.com",
+            referralCode: "HAILP100K",
+            referredBy: "admin",
+            points: 100000,
+            username: "hailp"
+        },
+        {
+            id: "seed-user-tinng",
+            email: "TinNg@test.com",
+            referralCode: "TINNG100K",
+            referredBy: "admin",
+            points: 100000,
+            username: "TinNg"
+        }
+    ];
 
     try {
-        // 1. Create User
-        await kv.set(`user:${userId}`, user);
+        const results = [];
+        for (const u of usersToSeed) {
+            const user = {
+                id: u.id,
+                email: u.email,
+                referralCode: u.referralCode,
+                referredBy: u.referredBy,
+                points: u.points,
+                createdAt: new Date().toISOString()
+            };
 
-        // 2. Map Email to ID (for login)
-        // NOTE: Our login logic might search by scanning keys or a specific index. 
-        // Let's check how login works. 
-        // If login is currently "Enter Email -> Search DB", we need to make sure 'hailp@test.com' is findable.
-        // Assuming simple KV structure or we need an email-to-id index.
-        // Let's create an index just in case: email:{email} -> userId
-        await kv.set(`email:hailp@test.com`, userId);
+            // 1. Create User
+            await kv.set(`user:${u.id}`, user);
 
-        // Also map "hailp" as an email for convenience if the user just types "hailp"
-        await kv.set(`email:hailp`, userId);
+            // 2. Map Email/Username to ID
+            await kv.set(`email:${u.email}`, u.id);
+            await kv.set(`email:${u.username}`, u.id); // For easy login
 
-        // 3. User List Index (optional but good for admin)
-        await kv.sadd("users", userId);
+            // 3. User List Index
+            await kv.sadd("users", u.id);
+
+            results.push(u.username);
+        }
 
         return NextResponse.json({
             success: true,
-            message: "Seeded user 'hailp' with 100,000 points!",
-            user
+            message: `Seeded users: ${results.join(', ')} with 100,000 points each!`,
         });
     } catch (error) {
         return NextResponse.json({ success: false, error: String(error) }, { status: 500 });
