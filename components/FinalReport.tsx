@@ -10,10 +10,11 @@ interface FinalReportProps {
     audience: string;
     finalContent: string;
     variableChart?: string;
+    surveyContent?: string; // New Prop
     onBack: () => void;
 }
 
-export const FinalReport = ({ topic, goal, audience, finalContent, variableChart, onBack }: FinalReportProps) => {
+export const FinalReport = ({ topic, goal, audience, finalContent, variableChart, surveyContent, onBack }: FinalReportProps) => {
     const [includeChart, setIncludeChart] = useState(true);
 
     const handlePrint = () => {
@@ -91,6 +92,20 @@ export const FinalReport = ({ topic, goal, audience, finalContent, variableChart
                             {finalContent}
                         </ReactMarkdown>
                     </div>
+
+                    {/* Survey Section - New Step 4 Content */}
+                    {surveyContent && (
+                        <div className="mt-12 pt-8 border-t-4 border-slate-200 page-break-before-always">
+                            <h3 className="text-2xl font-bold text-slate-900 mb-6 uppercase print:text-black font-serif">
+                                Phụ Lục: Thang Đo & Bảng Câu Hỏi
+                            </h3>
+                            <div className="prose prose-slate max-w-none font-serif prose-headings:font-sans prose-headings:font-bold prose-p:text-justify prose-a:text-blue-600 prose-ul:list-disc prose-ol:list-decimal print:prose-black print:text-justify">
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                    {surveyContent}
+                                </ReactMarkdown>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Footer */}
                     <div className="mt-20 pt-8 border-t border-slate-200 text-center text-xs text-slate-400 print:hidden">

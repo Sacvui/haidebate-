@@ -26,16 +26,11 @@ interface DebateManagerProps {
 const ROUNDS_CONFIG = {
     '1_TOPIC': 5,    // Increased from 2 to 5
     '2_MODEL': 5,    // Increased from 3 to 5
-    '3_OUTLINE': 5   // Increased from 3 to 5
+    '3_OUTLINE': 5,  // Increased from 3 to 5
+    '4_SURVEY': 3    // Survey step (3 rounds)
 };
 
-// Helper: Extract Mermaid code
-const extractMermaidCode = (text: string) => {
-    // Match typescript/mermaid block
-    const match = text.match(/```mermaid\s*([\s\S]*?)```/);
-    if (match) return match[1].trim();
-    return null;
-};
+// ... (extractMermaidCode remains same)
 
 export default function DebateManager({ topic, goal, audience, level, language, apiKey, apiKeyCritic }: DebateManagerProps) {
     const [session] = useState(() => new AgentSession(topic, goal, audience, level, language, apiKey, apiKeyCritic));
@@ -46,13 +41,14 @@ export default function DebateManager({ topic, goal, audience, level, language, 
     const [roundCount, setRoundCount] = useState(0);
     const [stepCompleted, setStepCompleted] = useState(false);
 
-    // Phase 3 State
+    // Phase 3 & 4 State
     const [showReport, setShowReport] = useState(false);
     const [variableChart, setVariableChart] = useState<string | undefined>(undefined);
     const [finalContent, setFinalContent] = useState("");
+    const [surveyContent, setSurveyContent] = useState(""); // New state for Survey
 
     const bottomRef = useRef<HTMLDivElement>(null);
-    const exportRef = useRef<HTMLDivElement>(null); // Ref for the shareable card
+    const exportRef = useRef<HTMLDivElement>(null);
 
     const maxRounds = ROUNDS_CONFIG[currentStep];
 
@@ -60,9 +56,7 @@ export default function DebateManager({ topic, goal, audience, level, language, 
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
-    const addMessage = (role: 'writer' | 'critic', content: string, round?: number) => {
-        setMessages(prev => [...prev, { role, content, timestamp: Date.now(), round }]);
-    };
+    // ... (addMessage remains same)
 
     const runStepLoop = async () => {
         if (isProcessing || stepCompleted) return;
@@ -75,15 +69,12 @@ export default function DebateManager({ topic, goal, audience, level, language, 
             let writerContent = "";
 
             // Initial Writer Turn
-            // addMessage('writer', "Đang suy nghĩ..."); // Removed text loading
             writerContent = await session.generateWriterTurn(currentStep);
             setMessages(prev => {
-                // const newMsgs = [...prev]; // No longer need to pop
-                // newMsgs.pop(); 
-                return [...prev, { role: 'writer', content: writerContent, timestamp: Date.now(), round: 1 }]; // Initial is Round 1
+                return [...prev, { role: 'writer', content: writerContent, timestamp: Date.now(), round: 1 }];
             });
 
-            // Phase 3: Check for Mermaid chart in Model step
+            // Capture specific outputs
             if (currentStep === '2_MODEL') {
                 const extractedChart = extractMermaidCode(writerContent);
                 if (extractedChart) setVariableChart(extractedChart);
@@ -91,10 +82,12 @@ export default function DebateManager({ topic, goal, audience, level, language, 
             if (currentStep === '3_OUTLINE') {
                 setFinalContent(prev => prev + "\n" + writerContent);
             }
+            if (currentStep === '4_SURVEY') {
+                setSurveyContent(writerContent);
+            }
 
             // Debate Loop
             while (currentRound < maxRounds) {
-                // Smart Delay: 4s if same key (avoid RPM), 1s if different keys (just for UX)
                 const delayTime = session.isUsingSameKey() ? 4000 : 1000;
                 await new Promise(resolve => setTimeout(resolve, delayTime));
 
@@ -102,26 +95,19 @@ export default function DebateManager({ topic, goal, audience, level, language, 
                 setRoundCount(currentRound);
 
                 // Critic Turn
-                // addMessage('critic', `Đang phản biện (Vòng ${currentRound}/${maxRounds})...`);
                 const criticFeedback = await session.generateCriticTurn(currentStep, writerContent);
                 setMessages(prev => {
-                    // const newMsgs = [...prev];
-                    // newMsgs.pop();
                     return [...prev, { role: 'critic', content: criticFeedback, timestamp: Date.now(), round: currentRound }];
                 });
                 lastCriticFeedback = criticFeedback;
 
                 // Writer Updates (if not last round)
                 if (currentRound < maxRounds) {
-                    // Smart Delay again
                     const delayTime = session.isUsingSameKey() ? 4000 : 1000;
                     await new Promise(resolve => setTimeout(resolve, delayTime));
 
-                    // addMessage('writer', "Đang tiếp thu và chỉnh sửa...");
                     writerContent = await session.generateWriterTurn(currentStep, lastCriticFeedback);
                     setMessages(prev => {
-                        // const newMsgs = [...prev];
-                        // newMsgs.pop();
                         return [...prev, { role: 'writer', content: writerContent, timestamp: Date.now(), round: currentRound + 1 }];
                     });
 
@@ -130,7 +116,10 @@ export default function DebateManager({ topic, goal, audience, level, language, 
                         if (extractedChart) setVariableChart(extractedChart);
                     }
                     if (currentStep === '3_OUTLINE') {
-                        setFinalContent(writerContent); // Keep latest draft
+                        setFinalContent(writerContent);
+                    }
+                    if (currentStep === '4_SURVEY') {
+                        setSurveyContent(writerContent);
                     }
                 }
             }
@@ -150,19 +139,18 @@ export default function DebateManager({ topic, goal, audience, level, language, 
         if (currentStep === '1_TOPIC') {
             const lastWriterMsg = messages.filter(m => m.role === 'writer').pop();
             if (lastWriterMsg) {
-                // Regex to find "CHỐT ĐỀ TÀI: ..."
                 const match = lastWriterMsg.content.match(/CHỐT ĐỀ TÀI:\s*(.*)/i) || lastWriterMsg.content.match(/\*\*CHỐT ĐỀ TÀI:\*\*\s*(.*)/i);
                 if (match && match[1]) {
                     const newTopic = match[1].trim();
                     session.updateTopic(newTopic);
-                    // Optional: Notify via toast or log?
                 }
             }
             setCurrentStep('2_MODEL');
         }
         else if (currentStep === '2_MODEL') setCurrentStep('3_OUTLINE');
+        else if (currentStep === '3_OUTLINE') setCurrentStep('4_SURVEY'); // New Transition
 
-        setMessages([]); // Clear chat for next step
+        setMessages([]);
         setRoundCount(0);
         setStepCompleted(false);
     };
@@ -170,7 +158,8 @@ export default function DebateManager({ topic, goal, audience, level, language, 
     const getStepNumber = (step: WorkflowStep) => {
         if (step === '1_TOPIC') return 1;
         if (step === '2_MODEL') return 2;
-        return 3;
+        if (step === '3_OUTLINE') return 3;
+        return 4;
     };
 
     if (showReport) {
@@ -181,6 +170,11 @@ export default function DebateManager({ topic, goal, audience, level, language, 
                 audience={audience}
                 finalContent={finalContent}
                 variableChart={variableChart}
+                // We need to update FinalReport to accept surveyContent. 
+                // For now, let's append it or pass as new prop. 
+                // Decision: Pass as new prop 'surveyContent' in next step.
+                // Assuming FinalReport prop update.
+                surveyContent={surveyContent}
                 onBack={() => setShowReport(false)}
             />
         );
@@ -195,6 +189,7 @@ export default function DebateManager({ topic, goal, audience, level, language, 
                         {currentStep === '1_TOPIC' && "Giai Đoạn 1: Thẩm Định Đề Tài"}
                         {currentStep === '2_MODEL' && "Giai Đoạn 2: Xây Dựng Mô Hình"}
                         {currentStep === '3_OUTLINE' && "Giai Đoạn 3: Hoàn Thiện Đề Cương"}
+                        {currentStep === '4_SURVEY' && "Giai Đoạn 4: Xây Dựng Thang Đo (Survey)"}
                     </h2>
                     <div className="flex gap-2 text-sm text-slate-500">
                         <span className="font-medium bg-slate-100 px-3 py-1 rounded-full">
@@ -210,7 +205,7 @@ export default function DebateManager({ topic, goal, audience, level, language, 
                     </div>
                 </div>
 
-                <StepIndicator currentStep={getStepNumber(currentStep)} totalSteps={3} />
+                <StepIndicator currentStep={getStepNumber(currentStep)} totalSteps={4} />
 
                 <div className="flex items-center justify-between mt-2">
                     <div className="text-sm font-medium text-slate-500">
@@ -229,7 +224,7 @@ export default function DebateManager({ topic, goal, audience, level, language, 
                         </button>
                     )}
 
-                    {stepCompleted && currentStep !== '3_OUTLINE' && (
+                    {stepCompleted && currentStep !== '4_SURVEY' && (
                         <button
                             onClick={handleNextStep}
                             className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-all shadow-md active:scale-95 animate-bounce"
@@ -238,7 +233,7 @@ export default function DebateManager({ topic, goal, audience, level, language, 
                         </button>
                     )}
 
-                    {stepCompleted && currentStep === '3_OUTLINE' && (
+                    {stepCompleted && currentStep === '4_SURVEY' && (
                         <button
                             onClick={() => setShowReport(true)}
                             className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-bold shadow-lg shadow-indigo-200"

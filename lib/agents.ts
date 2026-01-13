@@ -181,20 +181,35 @@ HÃY VIẾT NHƯ MỘT NHÀ NGHIÊN CỨU CHUYÊN NGHIỆP ĐANG NỘP ĐỀ CƯ
 `;
 
 const OUTLINE_CRITIC_PROMPT = `
-PHẢN BIỆN ĐỀ CƯƠNG (CỰC KỲ NGHIÊM KHẮC):
+PHẢN BIỆN ĐỀ CƯƠNG (CỰC KỲ NGHIÊM KHẮC - RULE 9/10):
 
-Vai trò: Bạn là Giáo sư hướng dẫn khó tính nhất. Mục tiêu là tìm ra mọi điểm yếu để sinh viên không bị hội đồng bắt bẻ.
+Vai trò: Bạn là Chủ tịch Hội đồng Phản biện. Tiêu chuẩn rất cao.
 
-TIÊU CHÍ ĐÁNH GIÁ:
-1. **Tính Logic & Mạch lạc:** Các chương mục có kết nối chặt chẽ không? Vấn đề nêu ra ở Mở đầu có được giải quyết ở nội dung không?
-2. **Độ sâu học thuật:** Các mục con (sub-headings) có đủ chi tiết để triển khai không? Hay chỉ là đầu mục chung chung?
-3. **Tính khả thi:** Phương pháp đề xuất có thực hiện được không? Dữ liệu lấy ở đâu?
-4. **Trích dẫn (CITATIONS):** Kiểm tra kỹ các trích dẫn giả định. Nguồn có thật không? **BẮT BUỘC PHẢI CÓ DOI VỚI BÀI BÁO**.
+NHIỆM VỤ: Đánh giá đề cương theo thang điểm 10.
+Nếu tổng điểm hoặc điểm thành phần < 9/10 => KHÔNG DUYỆT (REJECT).
 
-OUTPUT FORMAT:
-❌ Vấn đề nghiêm trọng: [Chỉ ra lỗi sai logic/cấu trúc]
-⚠️ Cần cải thiện: [Các điểm chưa sâu]
-➡️ Gợi ý cụ thể: [Viết lại mục nào, thêm nội dung gì]
+TIÊU CHÍ CHẤM ĐIỂM (BẮT BUỘC XUẤT RA ĐIỂM SỐ):
+1. **Tính Logic (Logic Flow):** [Điểm/10] - Mạch lạc giữa Vấn đề -> Mục tiêu -> Phương pháp?
+2. **Format (APA Style):** [Điểm/10] - Cấu trúc chuẩn không? Trình bày chuyên nghiệp không?
+3. **Độ đầy đủ (Completeness):** [Điểm/10] - Các mục con có chi tiết không?
+4. **Trích dẫn (Citations):** [Pass/Fail] - Có DOI không? Nguồn có thật không?
+
+NẾU CÓ ĐIỂM NÀO < 9:
+- HÃY YÊU CẦU VIẾT LẠI NGAY LẬP TỨC.
+- CHỈ RA LỖI CỤ THỂ ĐỂ SỬA.
+
+OUTPUT FORM:
+📊 ĐÁNH GIÁ:
+- Logic: .../10
+- Format: .../10
+- Đầy đủ: .../10
+- Citation: ...
+
+❌ LỖI NGHIÊM TRỌNG:
+...
+
+➡️ HƯỚNG DẪN REVIEWER (WRITER) CẦN LÀM GÌ TIẾP THEO:
+...
 `;
 
 export class AgentSession {
@@ -295,6 +310,7 @@ export class AgentSession {
         case '1_TOPIC': sysPrompt = TOPIC_WRITER_PROMPT; break;
         case '2_MODEL': sysPrompt = getModelWriterPrompt(this.level); break;
         case '3_OUTLINE': sysPrompt = getOutlineWriterPrompt(this.goal); break;
+        case '4_SURVEY': sysPrompt = getSurveyWriterPrompt(this.level); break;
       }
 
       const context = `CHỦ ĐỀ GỐC: ${this.topic}\nLOẠI HÌNH (OUTPUT): ${this.goal}\nĐỐI TƯỢNG: ${this.audience}\nTRÌNH ĐỘ: ${this.level}\nNGÔN NGỮ ĐẦU RA (OUTPUT LANGUAGE): ${this.language === 'en' ? 'ENGLISH (100%)' : 'VIETNAMESE (100%)'}`;
@@ -324,6 +340,7 @@ export class AgentSession {
           case '1_TOPIC': sysPrompt = TOPIC_CRITIC_PROMPT; break;
           case '2_MODEL': sysPrompt = getModelCriticPrompt(this.level); break;
           case '3_OUTLINE': sysPrompt = OUTLINE_CRITIC_PROMPT; break;
+          case '4_SURVEY': sysPrompt = SURVEY_CRITIC_PROMPT; break;
         }
 
         const prompt = `${sysPrompt}\n\nBÀI LÀM CỦA WRITER:\n${writerDraft}\n\nHãy đóng vai trò Critic và đưa ra nhận xét chi tiết, khắt khe.`;
