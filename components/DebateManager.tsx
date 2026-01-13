@@ -19,6 +19,7 @@ interface DebateManagerProps {
     level: AcademicLevel;
     language: 'vi' | 'en';
     apiKey?: string;
+    apiKeyCritic?: string;
 }
 
 // Config rounds per step
@@ -36,8 +37,8 @@ const extractMermaidCode = (text: string) => {
     return null;
 };
 
-export default function DebateManager({ topic, goal, audience, level, language, apiKey }: DebateManagerProps) {
-    const [session] = useState(() => new AgentSession(topic, goal, audience, level, language, apiKey));
+export default function DebateManager({ topic, goal, audience, level, language, apiKey, apiKeyCritic }: DebateManagerProps) {
+    const [session] = useState(() => new AgentSession(topic, goal, audience, level, language, apiKey, apiKeyCritic));
 
     const [currentStep, setCurrentStep] = useState<WorkflowStep>('1_TOPIC');
     const [messages, setMessages] = useState<AgentMessage[]>([]);

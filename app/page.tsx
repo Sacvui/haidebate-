@@ -32,6 +32,8 @@ export default function Home() {
     }
     const savedKey = localStorage.getItem("gemini_api_key");
     if (savedKey) setApiKey(savedKey);
+    const savedCriticKey = localStorage.getItem("gemini_api_key_critic"); // Retrieve critic API key
+    if (savedCriticKey) setApiKeyCritic(savedCriticKey); // Set critic API key
   }, []);
 
   const handleStart = (data: any) => {
@@ -206,6 +208,7 @@ export default function Home() {
                 level={formData.level}
                 language={formData.language}
                 apiKey={apiKey}
+                apiKeyCritic={apiKeyCritic}
               />
             )}
           </div>

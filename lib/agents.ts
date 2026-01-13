@@ -182,7 +182,8 @@ export class AgentSession {
     public audience: string = "Chuyên gia/Nhà nghiên cứu",
     public level: AcademicLevel = "MASTER",
     public language: 'vi' | 'en' = 'vi',
-    private apiKey?: string
+    private writerKey?: string,
+    private criticKey?: string
   ) { }
 
   public updateTopic(newTopic: string) {
@@ -230,8 +231,8 @@ export class AgentSession {
 
   async generateWriterTurn(step: WorkflowStep, previousCriticFeedback?: string): Promise<string> {
     try {
-      const finalKey = this.apiKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-      if (!finalKey) return "E: Vui lòng cấu hình API Key (Trong Cài Đặt hoặc .env)";
+      const finalKey = this.writerKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+      if (!finalKey) return "E: Vui lòng cấu hình API Key Writer";
 
       let sysPrompt = "";
       switch (step) {
@@ -256,7 +257,8 @@ export class AgentSession {
   }
 
   async generateCriticTurn(step: WorkflowStep, writerDraft: string): Promise<string> {
-    const geminiKey = this.apiKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    // Use Critic Key if available, else fallback to Writer Key
+    const geminiKey = this.criticKey || this.writerKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
     if (geminiKey) {
       try {
