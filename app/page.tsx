@@ -10,7 +10,6 @@ import { ResearchForm } from "@/components/ResearchForm";
 import { SignupModal } from "@/components/auth/SignupModal";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { ShareModal } from "@/components/ShareModal";
-import { ShareModal } from "@/components/ShareModal";
 import { signIn } from "next-auth/react";
 import Cookies from "js-cookie";
 

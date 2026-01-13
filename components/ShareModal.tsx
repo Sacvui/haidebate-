@@ -1,4 +1,7 @@
-// ... imports
+'use client';
+
+import { useState } from 'react';
+import { X, Share2, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface ShareModalProps {
     isOpen: boolean;
