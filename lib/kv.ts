@@ -148,11 +148,44 @@ export async function getAllUsers(limit = 100): Promise<User[]> {
     return users;
 }
 
-export async function getUserStats() {
-    const total = await getTotalUsers();
+return {
+    totalUsers: total,
+    // Add more stats as needed
+};
+}
 
-    return {
-        totalUsers: total,
-        // Add more stats as needed
-    };
+// ============================================
+// SHARE & ANTI-CHEAT SYSTEM
+// ============================================
+
+export async function validateShareUrl(url: string): Promise<boolean> {
+    // Basic validation for FB/Zalo/LinkedIn
+    const validDomains = ['facebook.com', 'zalo.me', 'linkedin.com', 'twitter.com'];
+    if (!validDomains.some(domain => url.includes(domain))) {
+        return false;
+    }
+    return true;
+}
+
+export async function canShare(userId: string): Promise<boolean> {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const shareCount = await kv.get<number>(`shares:${userId}:${today}`) || 0;
+    return shareCount < 3; // Max 3 shares/day
+}
+
+export async function submitShare(userId: string, postUrl: string): Promise<void> {
+    const today = new Date().toISOString().split('T')[0];
+
+    // Log share
+    await kv.lpush(`share_logs:${userId}`, {
+        url: postUrl,
+        timestamp: Date.now(),
+        date: today
+    });
+
+    // Increment daily counter
+    await kv.incr(`shares:${userId}:${today}`);
+
+    // Auto-award points (simplified for MVP)
+    await addPoints(userId, 30, 'Chia sẻ bài viết công khai');
 }
