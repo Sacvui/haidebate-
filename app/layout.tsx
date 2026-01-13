@@ -35,6 +35,7 @@ export const metadata: Metadata = {
 };
 
 import { AuthProvider } from "@/components/auth/AuthProvider";
+import { NextAuthProvider } from "@/components/auth/NextAuthProvider";
 
 export default function RootLayout({
   children,
@@ -46,9 +47,11 @@ export default function RootLayout({
       <body
         className={`${inter.variable} antialiased font-sans`} // Use Inter variable and safe defaults
       >
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <NextAuthProvider>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </NextAuthProvider>
       </body>
     </html>
   );

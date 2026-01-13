@@ -10,6 +10,7 @@ interface SignupModalProps {
 
 export function SignupModal({ isOpen, onClose, onSuccess }: SignupModalProps) {
     const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [referralCode, setReferralCode] = useState('');
     const [needsReferral, setNeedsReferral] = useState(false);
     const [error, setError] = useState('');
@@ -41,6 +42,7 @@ export function SignupModal({ isOpen, onClose, onSuccess }: SignupModalProps) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email,
+                    password,
                     referralCode: finalRefCode
                 })
             });
@@ -85,6 +87,20 @@ export function SignupModal({ isOpen, onClose, onSuccess }: SignupModalProps) {
                             onChange={(e) => setEmail(e.target.value)}
                             className="w-full px-3 py-2 border rounded"
                             required
+                        />
+                    </div>
+
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium mb-2">
+                            Mật khẩu
+                        </label>
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full px-3 py-2 border rounded"
+                            required
+                            minLength={6}
                         />
                     </div>
 

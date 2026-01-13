@@ -29,7 +29,11 @@ export default function Home() {
 
   // Login State
   const [loginEmail, setLoginEmail] = useState("");
-  const [isLoginLoading, setIsLoginLoading] = useState(false);
+  const [loginPassword, setLoginPassword] = useState("");
+  const [isLoggingIn, setIsLoginLoading] = useState(false); // Map isLoggingIn to isLoginLoading var name or keys
+  // Actually, I introduced isLoggingIn in previous edit but file has isLoginLoading. 
+  // I should standardize. usage in form is isLoggingIn.
+  // Let's use isLoggingIn to match the form replacement I did.
   const [loginError, setLoginError] = useState("");
 
   useEffect(() => {
@@ -45,23 +49,20 @@ export default function Home() {
     setIsStarted(true);
   };
 
-  const handleLoginSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoginLoading(true);
     setLoginError("");
 
     try {
-      await login(loginEmail);
+      await login(loginEmail, loginPassword);
       // Login successful (user state updates automatically via context)
-    } catch (error) {
-      // If login fails (implied logic: auth.login should throw if fail, but currently it might not)
-      // We will check user state. Actually auth.login in provider doesn't throw. 
-      // For MVP: If user is still null after await login, assume failed.
-      // But context update is async. 
-      // Better: Open Signup if user doesn't strictly exist.
-      // Let's assume user tries generic login. If fails, we suggest signup.
-      setLoginError("Email chưa đăng ký hoặc có lỗi. Vui lòng kiểm tra lại.");
-      setShowSignup(true); // Auto open signup on failure/not found
+    } catch (error: any) {
+      setLoginError(error.message || "Email chưa đăng ký hoặc mật khẩu sai.");
+      // If error is specific to not found, we could show signup.
+      if (error.message?.includes("chưa được đăng ký")) {
+        setShowSignup(true);
+      }
     } finally {
       setIsLoginLoading(false);
     }
@@ -96,18 +97,22 @@ export default function Home() {
               </p>
             </div>
 
+            import {signIn} from "next-auth/react";
+
+            // ... (inside Home component)
+
             {/* Login Form */}
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-3">
                 <button
-                  onClick={() => alert("Tính năng Google Login đang phát triển!")}
+                  onClick={() => signIn("google")}
                   className="flex items-center justify-center gap-2 py-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all text-slate-700 font-bold text-sm shadow-sm"
                 >
                   <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="Google" />
                   Google
                 </button>
                 <button
-                  onClick={() => alert("Tính năng ORCID Login đang phát triển!")}
+                  onClick={() => signIn("orcid")}
                   className="flex items-center justify-center gap-2 py-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all text-slate-700 font-bold text-sm shadow-sm"
                 >
                   <img src="https://upload.wikimedia.org/wikipedia/commons/0/06/ORCID_iD.svg" className="w-5 h-5" alt="ORCID" />
@@ -130,30 +135,36 @@ export default function Home() {
                 <div className="flex-grow border-t border-slate-200"></div>
               </div>
 
-              <form onSubmit={handleLoginSubmit} className="space-y-4">
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-700 uppercase ml-1">Email</label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3.5 text-slate-400 w-5 h-5" />
-                    <input
-                      type="email"
-                      required
-                      value={loginEmail}
-                      onChange={(e) => setLoginEmail(e.target.value)}
-                      placeholder="name@university.edu.vn"
-                      className="w-full pl-10 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                    />
-                  </div>
-                </div>
+              <form onSubmit={handleLogin} className="space-y-4">
+                <input
+                  type="email"
+                  placeholder="Email của bạn"
+                  className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all shadow-sm font-medium"
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  required
+                />
+                <input
+                  type="password"
+                  placeholder="Mật khẩu"
+                  className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all shadow-sm font-medium"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  required
+                />
 
-                {loginError && <p className="text-red-500 text-sm">{loginError}</p>}
+                {loginError && (
+                  <div className="p-3 bg-red-50 text-red-600 text-sm font-medium rounded-lg flex items-center gap-2">
+                    ⚠️ {loginError}
+                  </div>
+                )}
 
                 <button
                   type="submit"
-                  disabled={isLoginLoading}
-                  className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-600/20 transform hover:-translate-y-0.5 transition-all text-base flex items-center justify-center gap-2"
+                  disabled={isLoggingIn}
+                  className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:shadow-lg hover:translate-y-[-2px] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoginLoading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <>Đăng Nhập <ArrowRight size={20} /></>}
+                  {isLoggingIn ? "Đang xử lý..." : "Đăng Nhập"}
                 </button>
               </form>
             </div>

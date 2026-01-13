@@ -1,4 +1,5 @@
 import { kv } from '@vercel/kv';
+import { hash } from 'bcryptjs';
 
 // ============================================
 // USER MANAGEMENT
@@ -7,6 +8,7 @@ import { kv } from '@vercel/kv';
 export interface User {
     id: string;
     email: string;
+    password?: string; // Hashed password
     name: string;
     referralCode: string;
     referredBy?: string;
@@ -23,13 +25,19 @@ export async function getTotalUsers(): Promise<number> {
 }
 
 // Create new user
-export async function createUser(email: string, referredBy?: string): Promise<User> {
+export async function createUser(email: string, password?: string, referredBy?: string): Promise<User> {
     const userId = crypto.randomUUID();
     const referralCode = generateReferralCode();
+
+    let hashedPassword = undefined;
+    if (password) {
+        hashedPassword = await hash(password, 10);
+    }
 
     const user: User = {
         id: userId,
         email,
+        password: hashedPassword,
         name: email.split('@')[0],
         referralCode,
         referredBy,

@@ -3,7 +3,7 @@ import { createUser, getTotalUsers, validateReferralCode, processReferral } from
 
 export async function POST(request: NextRequest) {
     try {
-        const { email, referralCode } = await request.json();
+        const { email, password, referralCode } = await request.json();
 
         // Check if signup requires referral
         const total = await getTotalUsers();
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Create user
-        const user = await createUser(email, referralCode);
+        const user = await createUser(email, password, referralCode);
 
         // Process referral
         if (referralCode) {
