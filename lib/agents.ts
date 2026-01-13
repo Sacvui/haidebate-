@@ -131,11 +131,23 @@ YÊU CẦU ĐẦU RA:
 1. Giải thích lý thuyết nền ngắn gọn.
 2. Danh sách biến và giả thuyết (H1, H2...).
 3. SƠ ĐỒ MERMAID (BẮT BUỘC):
-   - Sử dụng 'graph LR' hoặc 'graph TD'.
-   - Node phải nằm trong ngoặc vuông [Tên Biến].
-   - Mũi tên --> có nhãn nếu cần.
+   
+   VÍ DỤ CHUẨN:
+   \`\`\`mermaid
+   graph LR
+     A[Nhận thức Hữu ích] --> C[Ý định Sử dụng]
+     B[Dễ Sử dụng] --> C
+     C --> D[Hành vi Thực tế]
+   \`\`\`
+   
+   QUY TẮC BẮT BUỘC:
+   - Dùng 'graph LR' hoặc 'graph TD'
+   - Node: [Tên ngắn gọn] (không dấu ngoặc kép)
+   - Mũi tên: --> (không nhãn phức tạp)
+   - Không xuống dòng trong node
+   - Không ký tự đặc biệt: (), {}, "", ''
+   
 4. Trích dẫn nguồn (Citation) dạng giả định chuẩn APA.
-FORMAT: LaTeX cho phương trình nếu có.
 `;
 
 const getModelCriticPrompt = (level: AcademicLevel) => `
