@@ -1,4 +1,4 @@
-
+// Force Vercel Rebuild: 2026-01-13 21:40
 import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
 import type { NextAuthConfig } from "next-auth"
