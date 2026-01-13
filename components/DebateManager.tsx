@@ -9,6 +9,8 @@ import { FinalReport } from './FinalReport';
 import { ThinkingAnimation } from './ThinkingAnimation';
 import { ShareableCard } from './ShareableCard';
 import { motion } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface DebateManagerProps {
     topic: string;
@@ -257,14 +259,18 @@ export default function DebateManager({ topic, goal, audience, level, language, 
                             </div>
 
                             <div className={cn(
-                                "p-5 rounded-2xl shadow-sm text-sm leading-relaxed whitespace-pre-wrap",
+                                "p-5 rounded-2xl shadow-sm text-sm leading-relaxed",
                                 msg.role === 'writer' ? "bg-white text-slate-800 rounded-tl-none border border-slate-100"
                                     : "bg-orange-50 text-slate-800 rounded-tr-none border border-orange-100"
                             )}>
                                 <div className="font-bold mb-2 uppercase text-xs tracking-wider opacity-70">
                                     {msg.role === 'writer' ? "Người Viết (Writer)" : "Hội Đồng Phản Biện (Critic)"}
                                 </div>
-                                {contentWithoutChart}
+                                <div className="prose prose-sm max-w-none prose-p:my-1 prose-headings:my-2 prose-ul:my-1 prose-li:my-0">
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                        {contentWithoutChart}
+                                    </ReactMarkdown>
+                                </div>
 
                                 {/* Render Mermaid Chart if exits in this message */}
                                 {chartCode && (

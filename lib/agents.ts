@@ -197,14 +197,14 @@ export class AgentSession {
 
       if (data.error) {
         // Handle Rate Limit (429) or Quota
-        if (data.error.code === 429 || data.error.message.includes("quota")) {
+        if (data.error.code === 429 || data.error.message.toLowerCase().includes("quota")) {
           if (retries > 0) {
-            const waitTime = 4000 * (3 - retries); // 4s, 8s
-            console.warn(`Rate limit for ${model}. Retrying in ${waitTime / 1000}s...`);
+            const waitTime = 5000 * (3 - retries); // Wait 5s, then 10s
+            console.warn(`Quota hit for ${model}. Retrying in ${waitTime / 1000}s...`);
             await new Promise(resolve => setTimeout(resolve, waitTime));
             return this.callGeminiAPI(model, prompt, key, retries - 1);
           }
-          throw new Error(`Hết lượt (Quota Exceeded) cho model ${model}. Vui lòng thử lại sau.`);
+          throw new Error(`Model ${model} đang quá tải (Quota). Vui lòng thử lại sau.`);
         }
         throw new Error(data.error.message);
       }
@@ -239,8 +239,8 @@ export class AgentSession {
         ? `${context}\n\nPHẢN HỒI CỦA CRITIC (Vòng trước): ${previousCriticFeedback}\n\n${sysPrompt}\nHãy cải thiện/viết tiếp dựa trên phản hồi này.`
         : `${context}\n\n${sysPrompt}\nHãy bắt đầu thực hiện nhiệm vụ cho giai đoạn này.`;
 
-      // Use Helper with retry & fallback
-      return await this.callGeminiAPI('gemini-3-flash-preview', prompt, finalKey);
+      // Use Helper with retry (No fallback switching)
+      return await this.callGeminiAPI('gemini-2.0-flash', prompt, finalKey);
 
     } catch (error) {
       console.error("Gemini Writer Error:", error);
@@ -262,9 +262,8 @@ export class AgentSession {
 
         const prompt = `${sysPrompt}\n\nBÀI LÀM CỦA WRITER:\n${writerDraft}\n\nHãy đóng vai trò Critic và đưa ra nhận xét chi tiết, khắt khe.`;
 
-        // Use Helper with retry & fallback
-        // Switch to Flash-Preview to avoid Pro Quota limits (User reported Pro failing)
-        return await this.callGeminiAPI('gemini-3-flash-preview', prompt, geminiKey);
+        // Use Helper with retry (No fallback switching)
+        return await this.callGeminiAPI('gemini-2.0-flash', prompt, geminiKey);
 
       } catch (error) {
         return `Lỗi Critic (Quota/Network): ${error}`;
