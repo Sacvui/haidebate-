@@ -87,8 +87,9 @@ export default function Home() {
                   <span className="text-blue-600">Research Assistant</span>
                 </h1>
               </a>
-              <p className="text-slate-500 italic">
-                "Để nghiên cứu thực sự là một cuộc rong chơi."
+              <p className="text-slate-500">
+                <Sparkles className="inline-block w-4 h-4 mr-1 text-blue-500" />
+                <i>"Điểm danh hàng ngày và kết nạp đồng môn để nhận bí kíp võ công"</i>
               </p>
             </div>
 
