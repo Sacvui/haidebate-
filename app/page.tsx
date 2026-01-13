@@ -10,7 +10,9 @@ import { ResearchForm } from "@/components/ResearchForm";
 import { SignupModal } from "@/components/auth/SignupModal";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { ShareModal } from "@/components/ShareModal";
+import { ShareModal } from "@/components/ShareModal";
 import { signIn } from "next-auth/react";
+import Cookies from "js-cookie";
 
 export default function Home() {
   // State
@@ -24,15 +26,28 @@ export default function Home() {
 
   // Auth Hook
   const { user, login, logout, isLoading } = useAuth();
-
-  // Form State
   const [formData, setFormData] = useState<any>(null);
+  const [referralCode, setReferralCode] = useState("");
 
-  // Login State
-  const [loginEmail, setLoginEmail] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
-  const [isLoginLoading, setIsLoginLoading] = useState(false);
-  const [loginError, setLoginError] = useState("");
+  useEffect(() => {
+    // Check for referral code in URL
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+    if (ref) {
+      setReferralCode(ref);
+      Cookies.set("referral_code", ref, { expires: 7 }); // Save for 7 days
+    }
+  }, []);
+
+  const handleManualReferral = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const code = e.target.value.toUpperCase();
+    setReferralCode(code);
+    if (code) {
+      Cookies.set("referral_code", code, { expires: 7 });
+    } else {
+      Cookies.remove("referral_code");
+    }
+  };
 
   useEffect(() => {
     // Load local keys
@@ -47,24 +62,7 @@ export default function Home() {
     setIsStarted(true);
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoginLoading(true);
-    setLoginError("");
 
-    try {
-      await login(loginEmail, loginPassword);
-      // Login successful (user state updates automatically via context)
-    } catch (error: any) {
-      setLoginError(error.message || "Email chưa đăng ký hoặc mật khẩu sai.");
-      // If error is specific to not found, we could show signup.
-      if (error.message?.includes("chưa được đăng ký")) {
-        setShowSignup(true);
-      }
-    } finally {
-      setIsLoginLoading(false);
-    }
-  };
 
   if (isLoading) return <div className="flex h-screen items-center justify-center bg-slate-50"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>;
 
@@ -72,8 +70,8 @@ export default function Home() {
     <main className="min-h-screen bg-slate-50 text-slate-900 font-sans overflow-x-hidden flex flex-col">
       <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
       <LevelGuidelines isOpen={showGuidelines} onClose={() => setShowGuidelines(false)} onSelectLevel={() => { }} />
-      <SignupModal isOpen={showSignup} onClose={() => setShowSignup(false)} onSuccess={() => setShowSignup(false)} />
-      {user && <ShareModal isOpen={showShare} onClose={() => setShowShare(false)} userId={user.id} onSuccess={() => { /* maybe refresh points */ }} />}
+      {/* SignupModal removed */}
+      {user && <ShareModal isOpen={showShare} onClose={() => setShowShare(false)} userId={user.id} user={user} onSuccess={() => { /* maybe refresh points */ }} />}
 
       {/* --- SPLIT SCREEN LAYOUT (GUEST) --- */}
       {!user && (
@@ -97,6 +95,19 @@ export default function Home() {
 
             {/* Login Form */}
             <div className="space-y-6">
+
+              {/* Referral Input */}
+              <div className="relative">
+                <label className="block text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">Mã giới thiệu (Nếu có)</label>
+                <input
+                  type="text"
+                  placeholder="Nhập mã referral..."
+                  value={referralCode}
+                  onChange={handleManualReferral}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all font-mono text-center tracking-widest text-slate-700 font-bold"
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => signIn("google")}
@@ -114,53 +125,9 @@ export default function Home() {
                 </button>
               </div>
 
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setShowSignup(true)}
-                  className="flex-1 py-3.5 flex items-center justify-center gap-2 bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold rounded-xl border border-blue-200 transition-all"
-                >
-                  <Mail size={20} /> Đăng Ký Bằng Email
-                </button>
-              </div>
-
-              <div className="relative flex py-1 items-center">
-                <div className="flex-grow border-t border-slate-200"></div>
-                <span className="flex-shrink mx-4 text-slate-400 text-xs uppercase font-bold tracking-wider">Hoặc Login Email</span>
-                <div className="flex-grow border-t border-slate-200"></div>
-              </div>
-
-              <form onSubmit={handleLogin} className="space-y-4">
-                <input
-                  type="email"
-                  placeholder="Email của bạn"
-                  className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all shadow-sm font-medium"
-                  value={loginEmail}
-                  onChange={(e) => setLoginEmail(e.target.value)}
-                  required
-                />
-                <input
-                  type="password"
-                  placeholder="Mật khẩu"
-                  className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all shadow-sm font-medium"
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  required
-                />
-
-                {loginError && (
-                  <div className="p-3 bg-red-50 text-red-600 text-sm font-medium rounded-lg flex items-center gap-2">
-                    ⚠️ {loginError}
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={isLoginLoading}
-                  className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:shadow-lg hover:translate-y-[-2px] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isLoginLoading ? "Đang xử lý..." : "Đăng Nhập"}
-                </button>
-              </form>
+              <p className="text-xs text-center text-slate-400">
+                Đăng nhập để lưu lịch sử & tích điểm đổi quà.
+              </p>
             </div>
           </div>
 

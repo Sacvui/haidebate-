@@ -2,7 +2,7 @@
 import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
 import type { NextAuthConfig } from "next-auth"
-import { getUserByEmail, createUser } from "@/lib/kv";
+import { cookies } from "next/headers";
 
 // Define ORCID Provider manually if not exported or standard OIDC
 const OrcidProvider = {
@@ -71,14 +71,32 @@ export const config = {
                 const existingUser = await getUserByEmail(user.email);
 
                 if (!existingUser) {
+                    // Get referral code from cookies
+                    const cookieStore = cookies();
+                    const referralCode = cookieStore.get("referral_code")?.value;
+
                     // Create new user (No password for OAuth users)
-                    await createUser(user.email, undefined, undefined);
+                    await createUser(user.email, undefined, referralCode);
                 }
                 return true;
             } catch (error) {
                 console.error("Error syncing OAuth user:", error);
                 return false;
             }
+        },
+        async session({ session, token }) {
+            if (session.user && session.user.email) {
+                const dbUser = await getUserByEmail(session.user.email);
+                if (dbUser) {
+                    // @ts-ignore
+                    session.user.id = dbUser.id;
+                    // @ts-ignore
+                    session.user.points = dbUser.points;
+                    // @ts-ignore
+                    session.user.referralCode = dbUser.referralCode;
+                }
+            }
+            return session;
         },
         authorized({ request, auth }) {
             return true
