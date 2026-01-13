@@ -1,7 +1,6 @@
 import { kv as vercelKv } from '@vercel/kv';
 import Redis from 'ioredis';
 import { hash } from 'bcryptjs';
-import { randomUUID } from 'crypto';
 
 // Adapter to handle both Vercel KV (HTTP) and Standard Redis (TCP)
 class KVAdapter {
@@ -95,7 +94,18 @@ export async function getTotalUsers(): Promise<number> {
 
 // Create new user
 export async function createUser(email: string, password?: string, referredBy?: string): Promise<User> {
-    const userId = randomUUID();
+    // Robust UUID generation
+    let userId: string;
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        userId = crypto.randomUUID();
+    } else {
+        // Fallback for older environments
+        userId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
     const referralCode = generateReferralCode();
 
     let hashedPassword = undefined;
