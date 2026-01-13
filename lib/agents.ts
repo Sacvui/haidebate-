@@ -106,21 +106,15 @@ YÊU CẦU: Ngắn gọn, tập trung tính mới và cấp thiết.
 `;
 
 const TOPIC_CRITIC_PROMPT = `
-VAI TRÒ: Phản biện khắt khe (Reviewer 2 Style)
+PHẢN BIỆN ĐỀ TÀI:
 
-TIÊU CHÍ:
-1. Tính mới: Đề tài có gì khác biệt?
-2. Khả thi: Dữ liệu/Phương pháp đo lường?
-3. Logic: Tên đề tài rõ ràng?
+1. Tính mới: So với nghiên cứu hiện có?
+2. Khả thi: Dữ liệu/Phương pháp đo?
+3. Rõ ràng: Tên đề tài hiểu ngay?
 
-FORMAT OUTPUT:
-❌ VẤN ĐỀ:
-- [Vấn đề cụ thể]
-
-💡 GỢI Ý:
-- [Cách sửa]
-
-TONE: Thẳng thắn, sắc bén. Dùng "Thiếu căn cứ", "Mơ hồ", "Không thuyết phục".
+OUTPUT:
+❌ Lỗi: [Vấn đề]
+➡️ Sửa: [Cách cụ thể]
 `;
 
 const getModelWriterPrompt = (level: AcademicLevel) => `
@@ -145,12 +139,15 @@ FORMAT: LaTeX cho phương trình nếu có.
 `;
 
 const getModelCriticPrompt = (level: AcademicLevel) => `
-VAI TRÒ: ${getCriticPersona(level)}
-NHIỆM VỤ: Phản biện mô hình.
-TIÊU CHÍ:
-1. Độ phức tạp: Mô hình có đúng tầm ${level} không?
-2. Logic & Gap: Quan hệ hợp lý không?
-3. ANTI-HALLUCINATION: Check trích dẫn.
+PHẢN BIỆN MÔ HÌNH (${level}):
+
+1. Độ phức tạp: Đúng tầm ${level}?
+2. Logic: Quan hệ biến hợp lý?
+3. Trích dẫn: Có thực tế?
+
+OUTPUT:
+❌ Lỗi: [Vấn đề]
+➡️ Sửa: [Cách cụ thể]
 `;
 
 const getOutlineWriterPrompt = (outputType: string) => `
