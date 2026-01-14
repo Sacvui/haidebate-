@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import DebateManager from "@/components/DebateManager";
+import dynamic from "next/dynamic";
 import { Sparkles, HelpCircle, LogOut, Settings, Lock, CheckCircle, ArrowRight, Mail, Globe, BookOpen } from "lucide-react";
 import { AcademicLevel } from "@/lib/agents";
 import { LevelGuidelines } from "@/components/LevelGuidelines";
@@ -14,8 +14,14 @@ import { GuideModal } from "@/components/GuideModal";
 import { HeroDemo } from "@/components/landing/HeroDemo";
 import { signIn } from "next-auth/react";
 import Cookies from "js-cookie";
-
 import { LoadingH } from "@/components/LoadingH";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+
+// Lazy load heavy components
+const DebateManager = dynamic(() => import("@/components/DebateManager"), {
+  loading: () => <div className="flex items-center justify-center min-h-screen"><LoadingH /></div>,
+  ssr: false
+});
 
 export default function Home() {
   // State
@@ -212,15 +218,17 @@ export default function Home() {
                 />
               </div>
             ) : (
-              <DebateManager
-                topic={formData.topic}
-                goal={formData.goal}
-                audience={formData.audience}
-                level={formData.level}
-                language={formData.language}
-                apiKey={apiKey}
-                apiKeyCritic={apiKeyCritic}
-              />
+              <ErrorBoundary>
+                <DebateManager
+                  topic={formData.topic}
+                  goal={formData.goal}
+                  audience={formData.audience}
+                  level={formData.level}
+                  language={formData.language}
+                  apiKey={apiKey}
+                  apiKeyCritic={apiKeyCritic}
+                />
+              </ErrorBoundary>
             )}
           </div>
           {/* Footer */}

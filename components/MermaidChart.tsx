@@ -1,50 +1,45 @@
+"use client";
 
-import React, { useEffect, useRef, useState } from 'react';
-import { RotateCw } from 'lucide-react';
+import { memo } from "react";
+import mermaid from "mermaid";
+import { useEffect, useRef } from "react";
 
 interface MermaidChartProps {
     chart: string;
 }
 
-export const MermaidChart = ({ chart }: MermaidChartProps) => {
-    const chartRef = useRef<HTMLDivElement>(null);
-    const [svgId] = useState(() => `mermaid-${Math.random().toString(36).substr(2, 9)}`);
-    const [isRendered, setIsRendered] = useState(false);
+// Memoize to prevent re-render when chart hasn't changed
+export const MermaidChart = memo(function MermaidChart({ chart }: MermaidChartProps) {
+    const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const initAndRender = async () => {
-            const mermaid = (await import('mermaid')).default;
-            mermaid.initialize({
-                startOnLoad: false,
-                theme: 'default',
-                securityLevel: 'loose',
-            });
+        if (!chart || !containerRef.current) return;
 
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: "default",
+            securityLevel: "loose",
+        });
+
+        const renderChart = async () => {
             try {
-                if (chartRef.current && chart) {
-                    const { svg } = await mermaid.render(svgId, chart);
-                    chartRef.current.innerHTML = svg;
-                    setIsRendered(true);
+                const { svg } = await mermaid.render(`mermaid-${Date.now()}`, chart);
+                if (containerRef.current) {
+                    containerRef.current.innerHTML = svg;
                 }
             } catch (error) {
-                console.error("Mermaid Render Error:", error);
-                if (chartRef.current) {
-                    chartRef.current.innerHTML = `<div class="text-red-500 text-sm p-2 bg-red-50 rounded">Lỗi hiển thị biểu đồ. (Syntax Error)</div>`;
+                console.error("Mermaid render error:", error);
+                if (containerRef.current) {
+                    containerRef.current.innerHTML = `<div class="text-red-500 text-sm">Lỗi vẽ sơ đồ: ${error}</div>`;
                 }
             }
         };
 
-        initAndRender();
-    }, [chart, svgId]);
+        renderChart();
+    }, [chart]);
 
-    return (
-        <div className="my-4 overflow-x-auto bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
-            {!isRendered && (
-                <div className="flex items-center gap-2 text-slate-400 text-sm p-4">
-                    <RotateCw className="animate-spin" size={16} /> Đang vẽ biểu đồ logic...
-                </div>
-            )}
-            <div key={chart} ref={chartRef} className="mermaid flex justify-center" />
-        </div>
-    );
-};
+    return <div ref={containerRef} className="flex justify-center items-center min-h-[200px]" />;
+}, (prevProps, nextProps) => {
+    // Custom comparison: only re-render if chart content actually changed
+    return prevProps.chart === nextProps.chart;
+});
