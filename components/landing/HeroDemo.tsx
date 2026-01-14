@@ -198,63 +198,106 @@ export const HeroDemo = () => {
                         </motion.div>
                     )}
 
-                    {/* PHASE 3: RESULT */}
+                    {/* PHASE 3: RESULT (ISI PAPER STYLE) */}
                     {phase === "RESULT" && (
                         <motion.div
                             key="result"
                             initial={{ y: 50, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
-                            className="h-full overflow-hidden"
+                            className="h-full overflow-hidden relative group"
                         >
-                            <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-5 h-full flex flex-col">
-                                <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
-                                    <div className="flex items-center gap-2">
-                                        <FileText className="text-blue-600" size={18} />
-                                        <span className="font-bold text-slate-800 text-sm">Báo cáo Nghiên cứu</span>
-                                    </div>
-                                    <div className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded-full border border-green-200">
-                                        ISI Standard
-                                    </div>
-                                </div>
-
-                                {/* Mini Research Model */}
-                                <div className="flex-1 space-y-4">
-                                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mô hình đề xuất</div>
-                                    <div className="flex items-center justify-between px-2">
-                                        <div className="bg-green-50 border border-green-200 p-2 rounded-lg text-[10px] font-bold text-green-800 text-center w-20 shadow-sm">Green<br />Marketing</div>
-                                        <ArrowRight size={14} className="text-slate-300" />
-                                        <div className="bg-blue-50 border border-blue-200 p-2 rounded-lg text-[10px] font-bold text-blue-800 text-center w-20 shadow-sm">Consumer<br />Attitude</div>
-                                        <ArrowRight size={14} className="text-slate-300" />
-                                        <div className="bg-indigo-50 border border-indigo-200 p-2 rounded-lg text-[10px] font-bold text-indigo-800 text-center w-20 shadow-sm">Purchase<br />Behavior</div>
-                                    </div>
-
-                                    <div className="space-y-2 mt-4">
-                                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Câu hỏi khảo sát (Likert 5)</div>
-                                        {[1, 2, 3].map(i => (
-                                            <motion.div
-                                                key={i}
-                                                initial={{ x: -20, opacity: 0 }}
-                                                animate={{ x: 0, opacity: 1 }}
-                                                transition={{ delay: i * 0.2 }}
-                                                className="flex items-center gap-2"
-                                            >
-                                                <CheckCircle size={12} className="text-green-500" />
-                                                <div className="h-1.5 bg-slate-100 rounded w-full relative overflow-hidden">
-                                                    <div className="absolute left-0 top-0 h-full bg-slate-200 w-3/4"></div>
-                                                </div>
-                                            </motion.div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Shine effect overlay */}
+                            {/* Paper Container */}
+                            <div className="bg-white rounded-xl shadow-2xl border border-slate-200 h-full w-full overflow-hidden relative font-serif">
+                                {/* Scrolling Content */}
                                 <motion.div
-                                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12"
-                                    initial={{ left: "-100%" }}
-                                    animate={{ left: "200%" }}
-                                    transition={{ duration: 2, repeat: Infinity, delay: 1 }}
-                                />
+                                    initial={{ y: 0 }}
+                                    animate={{ y: -200 }}
+                                    transition={{ delay: 2, duration: 4, ease: "easeInOut" }} // Auto scroll down
+                                    className="p-8"
+                                >
+                                    {/* Header */}
+                                    <div className="text-center mb-6">
+                                        <div className="text-[10px] font-sans font-bold text-slate-400 uppercase tracking-widest mb-2">ISI/Scopus Standard Output</div>
+                                        <h1 className="text-lg font-bold text-slate-900 leading-tight mb-2">
+                                            Tác động của Marketing Xanh đến Hành vi người tiêu dùng tại Việt Nam
+                                        </h1>
+                                        <div className="text-xs text-slate-600 italic">
+                                            Tác giả: Dr. User & AI Research Assistant
+                                        </div>
+                                    </div>
 
+                                    {/* Abstract */}
+                                    <div className="text-xs text-justify text-slate-700 leading-relaxed mb-6 space-y-2 opacity-80">
+                                        <p><strong>Tóm tắt:</strong> Nghiên cứu này khám phá mối quan hệ giữa các chiến lược marketing xanh và quyết định mua hàng...</p>
+                                        <div className="h-2 bg-slate-100 rounded w-full"></div>
+                                        <div className="h-2 bg-slate-100 rounded w-5/6"></div>
+                                        <div className="h-2 bg-slate-100 rounded w-full"></div>
+                                    </div>
+
+                                    {/* THE "SHINY" SEM MODEL */}
+                                    <div className="my-8 p-4 border border-indigo-100 rounded-xl bg-gradient-to-br from-slate-50 to-white shadow-inner relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 p-1 bg-indigo-600 text-white text-[8px] font-bold font-sans rounded-bl-lg">Figure 1. SEM Model</div>
+
+                                        <div className="flex items-center justify-between relative z-10">
+                                            {/* Node 1 */}
+                                            <div className="bg-white border-2 border-green-500 p-2 rounded shadow-lg w-20 text-center relative group-hover:scale-105 transition-transform">
+                                                <div className="text-[8px] font-bold text-green-700">Green<br />Marketing</div>
+                                                <div className="absolute inset-0 bg-green-400/20 blur-xl -z-10 rounded-full"></div>
+                                            </div>
+
+                                            {/* Arrows */}
+                                            <div className="flex-1 h-0.5 bg-slate-300 relative mx-2">
+                                                <div className="absolute right-0 -top-1 w-2 h-2 border-t-2 border-r-2 border-slate-300 rotate-45"></div>
+                                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-[8px] text-slate-400 font-sans">0.45**</div>
+                                            </div>
+
+                                            {/* Node 2 */}
+                                            <div className="bg-white border-2 border-blue-500 p-2 rounded shadow-lg w-20 text-center relative group-hover:scale-105 transition-transform delay-100">
+                                                <div className="text-[8px] font-bold text-blue-700">Consumer<br />Attitude</div>
+                                                <div className="absolute inset-0 bg-blue-400/20 blur-xl -z-10 rounded-full"></div>
+                                            </div>
+
+                                            {/* Arrows */}
+                                            <div className="flex-1 h-0.5 bg-slate-300 relative mx-2">
+                                                <div className="absolute right-0 -top-1 w-2 h-2 border-t-2 border-r-2 border-slate-300 rotate-45"></div>
+                                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-[8px] text-slate-400 font-sans">0.62***</div>
+                                            </div>
+
+                                            {/* Node 3 */}
+                                            <div className="bg-white border-2 border-purple-500 p-2 rounded shadow-lg w-20 text-center relative group-hover:scale-105 transition-transform delay-200">
+                                                <div className="text-[8px] font-bold text-purple-700">Purchase<br />Behavior</div>
+                                                <div className="absolute inset-0 bg-purple-400/20 blur-xl -z-10 rounded-full"></div>
+                                            </div>
+                                        </div>
+
+                                        {/* Glow Effect */}
+                                        <motion.div
+                                            animate={{ opacity: [0.3, 0.6, 0.3] }}
+                                            transition={{ duration: 2, repeat: Infinity }}
+                                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent skew-x-12"
+                                        />
+                                    </div>
+
+                                    {/* Survey Table */}
+                                    <div className="mt-6 border-t border-slate-200 pt-4">
+                                        <h3 className="text-sm font-bold uppercase mb-3">Appendix: Measures</h3>
+                                        <div className="space-y-2">
+                                            {[1, 2, 3].map(i => (
+                                                <div key={i} className="flex items-center gap-2 text-[10px] text-slate-600 border-b border-slate-100 pb-1">
+                                                    <span className="font-bold text-slate-400">GM{i}</span>
+                                                    <span>Sản phẩm này thân thiện với môi trường...</span>
+                                                    <div className="ml-auto flex gap-0.5">
+                                                        {[1, 2, 3, 4, 5].map(n => <div key={n} className="w-2 h-2 rounded-full border border-slate-300"></div>)}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                </motion.div>
+
+                                {/* Overlay Gradient to hide scroll cutoff */}
+                                <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-white to-transparent z-10"></div>
                             </div>
                         </motion.div>
                     )}
