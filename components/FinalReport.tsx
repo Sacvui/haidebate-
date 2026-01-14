@@ -22,84 +22,64 @@ export const FinalReport = ({ topic, goal, audience, finalContent, variableChart
     };
 
     return (
-        <div className="min-h-screen bg-slate-100 py-8 animate-in fade-in slide-in-from-bottom-4 duration-500 font-sans print:bg-white print:py-0">
-            <div className="max-w-4xl mx-auto bg-white shadow-2xl rounded-none sm:rounded-xl overflow-hidden print:shadow-none print:rounded-none">
+        <div className="min-h-screen bg-slate-50 py-8 animate-in fade-in slide-in-from-bottom-4 duration-500 font-serif print:bg-white print:py-0">
+            <div className="max-w-[210mm] mx-auto bg-white shadow-2xl min-h-[297mm] flex flex-col relative print:shadow-none">
 
-                {/* Toolbar - Hidden when printing */}
-                <div className="bg-slate-900 text-white p-4 flex justify-between items-center print:hidden">
-                    <button onClick={onBack} className="flex items-center gap-2 text-slate-300 hover:text-white transition-colors">
-                        <ArrowLeft size={18} /> Quay lại thảo luận
+                {/* Toolbar - Sticky Top (Screen only) */}
+                <div className="sticky top-0 z-50 bg-slate-900/90 backdrop-blur text-white p-3 flex justify-between items-center print:hidden rounded-t-xl mx-4 mt-4 mb-0 shadow-lg">
+                    <button onClick={onBack} className="flex items-center gap-2 text-slate-300 hover:text-white transition-colors text-sm font-medium">
+                        <ArrowLeft size={16} /> Quay lại
                     </button>
-
-                    <div className="flex items-center gap-4">
-                        {variableChart && (
-                            <button
-                                onClick={() => setIncludeChart(!includeChart)}
-                                className="flex items-center gap-2 text-sm text-slate-300 hover:text-white transition-colors"
-                            >
-                                {includeChart ? <Eye size={16} /> : <EyeOff size={16} />}
-                                {includeChart ? 'Kèm Sơ đồ' : 'Ẩn Sơ đồ'}
-                            </button>
-                        )}
-
-                        <div className="w-px h-6 bg-slate-700"></div>
-
-                        <button onClick={handlePrint} className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium transition-colors shadow-lg shadow-blue-900/50">
-                            <Printer size={16} /> In / Lưu PDF
+                    <div className="flex items-center gap-3">
+                        <button onClick={handlePrint} className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-lg text-xs font-bold transition-colors shadow">
+                            <Printer size={14} /> Xuất PDF (A4)
                         </button>
                     </div>
                 </div>
 
-                {/* Report Content */}
-                <div className="p-8 sm:p-12 md:p-16 max-w-[210mm] mx-auto bg-white min-h-[297mm] print:p-0 print:max-w-none">
-                    {/* Header Area */}
-                    <div className="border-b-2 border-black pb-6 mb-8 print:mb-6">
-                        <div className="uppercase tracking-widest text-xs font-bold text-slate-500 mb-2 print:text-black">Báo Cáo Nghiên Cứu Khoa Học (Draft)</div>
-                        <h1 className="text-3xl sm:text-4xl font-serif font-bold text-slate-900 leading-tight mb-4 print:text-black">
+                {/* PAPER A4 CONTAINER */}
+                <div className="p-[25mm] text-justify leading-relaxed text-black">
+
+                    {/* 1. TITLE PAGE HEADER */}
+                    <div className="text-center mb-12">
+                        <h1 className="text-2xl font-bold uppercase mb-4 font-serif leading-tight">
                             {topic}
                         </h1>
-                        <div className="flex flex-wrap gap-6 text-sm text-slate-600 font-serif italic print:text-black">
-                            <div><strong>Mục tiêu:</strong> {goal}</div>
-                            <div><strong>Độc giả:</strong> {audience}</div>
-                            <div><strong>Ngày tạo:</strong> {new Date().toLocaleDateString('vi-VN')}</div>
+                        <div className="text-lg font-serif mb-6 italic">
+                            {goal}
+                        </div>
+                        <div className="text-base font-serif">
+                            <strong>Tác giả:</strong> Nhà Nghiên Cứu AI & Cộng Sự<br />
+                            <strong>Ngày:</strong> {new Date().toLocaleDateString('vi-VN')}
                         </div>
                     </div>
 
-                    {/* Model Visualization */}
-                    {variableChart && includeChart && (
-                        <div className="mb-10 page-break-inside-avoid print:mb-6">
-                            <h3 className="text-lg font-bold text-slate-900 mb-4 border-l-4 border-blue-600 pl-3 uppercase print:text-black print:border-black">
-                                Mô Hình Nghiên Cứu Đề Xuất
-                            </h3>
-                            <MermaidChart chart={variableChart} />
-                            <p className="text-center text-xs text-slate-500 italic mt-2 print:text-black">Hình 1. Sơ đồ mô hình nghiên cứu (Generated by AI)</p>
-                        </div>
-                    )}
-
-                    {/* Main Content */}
-                    <div className="prose prose-slate max-w-none font-serif prose-headings:font-sans prose-headings:font-bold prose-p:text-justify prose-a:text-blue-600 prose-ul:list-disc prose-ol:list-decimal print:prose-black print:text-justify">
-                        <style>
-                            {`
-                                @media print {
-                                    body { -webkit-print-color-adjust: exact; }
-                                    .prose { font-family: "Times New Roman", Times, serif !important; font-size: 12pt !important; line-height: 1.5 !important; }
-                                    h1, h2, h3, h4, h5, h6 { font-family: "Times New Roman", Times, serif !important; color: #000 !important; }
-                                    a { text-decoration: none !important; color: #000 !important; }
-                                }
-                            `}
-                        </style>
+                    {/* 2. MAIN CONTENT (Introduction, Lit Review, etc.) */}
+                    <div className="prose prose-slate max-w-none font-serif prose-headings:font-bold prose-headings:font-serif prose-headings:uppercase prose-headings:text-base prose-p:indent-8 prose-p:text-justify prose-p:leading-7 text-black">
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                             {finalContent}
                         </ReactMarkdown>
                     </div>
 
-                    {/* Survey Section - New Step 4 Content */}
+                    {/* 3. FIGURES (SEM Model) - "Kéo xuống mô hình xịn" */}
+                    {variableChart && includeChart && (
+                        <div className="mt-12 break-inside-avoid">
+                            <h3 className="text-center font-bold uppercase mb-6 text-sm">Mô Hình Nghiên Cứu Đề Xuất (SEM)</h3>
+
+                            <div className="border border-slate-300 p-6 rounded-lg bg-white shadow-sm flex justify-center">
+                                <MermaidChart chart={variableChart} />
+                            </div>
+                            <p className="text-center text-sm italic mt-3">
+                                <strong>Hình 1.</strong> Mô hình cấu trúc tuyến tính (SEM) đề xuất cho nghiên cứu.
+                            </p>
+                        </div>
+                    )}
+
+                    {/* 4. APPENDIX (Survey) */}
                     {surveyContent && (
-                        <div className="mt-12 pt-8 border-t-4 border-slate-200 page-break-before-always">
-                            <h3 className="text-2xl font-bold text-slate-900 mb-6 uppercase print:text-black font-serif">
-                                Phụ Lục: Thang Đo & Bảng Câu Hỏi
-                            </h3>
-                            <div className="prose prose-slate max-w-none font-serif prose-headings:font-sans prose-headings:font-bold prose-p:text-justify prose-a:text-blue-600 prose-ul:list-disc prose-ol:list-decimal print:prose-black print:text-justify">
+                        <div className="mt-12 pt-8 border-t border-black/20 break-before-page">
+                            <h3 className="text-center font-bold uppercase mb-6 text-lg">Phụ Lục: Thang Đo & Câu Hỏi Khảo Sát</h3>
+                            <div className="prose prose-slate max-w-none font-serif prose-table:border-collapse prose-table:border prose-table:border-black prose-th:border prose-th:border-black prose-th:p-2 prose-td:border prose-td:border-black prose-td:p-2 text-sm">
                                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                     {surveyContent}
                                 </ReactMarkdown>
@@ -107,10 +87,9 @@ export const FinalReport = ({ topic, goal, audience, finalContent, variableChart
                         </div>
                     )}
 
-                    {/* Footer */}
-                    <div className="mt-20 pt-8 border-t border-slate-200 text-center text-xs text-slate-400 print:hidden">
-                        <p>Tài liệu được tạo tự động bởi hệ thống <strong>Hải Debate AI</strong>.</p>
-                        <p>Vui lòng kiểm tra lại tính chính xác trước khi sử dụng chính thức.</p>
+                    {/* Footer Paging (Print) */}
+                    <div className="fixed bottom-4 left-0 w-full text-center text-[10px] text-slate-400 print:block hidden">
+                        Generated by Hai Debate AI System
                     </div>
                 </div>
             </div>
