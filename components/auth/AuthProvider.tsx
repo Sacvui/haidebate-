@@ -83,8 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const logout = async () => {
         setUser(null);
         localStorage.removeItem('userId');
-        await signOut({ redirect: false });
-        window.location.href = "/"; // Manual redirect to ensure state clear
+        await signOut({ callbackUrl: '/' });
     };
 
     return (
