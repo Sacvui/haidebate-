@@ -65,6 +65,10 @@ export const config = {
     ],
     callbacks: {
         async signIn({ user, account, profile }) {
+            // DEBUG: Force allow to test Provider/Env config
+            return true;
+
+            /*
             if (!user.email) return false;
 
             try {
@@ -72,17 +76,18 @@ export const config = {
                 const existingUser = await getUserByEmail(user.email);
 
                 if (!existingUser) {
-                    // Create new user (No password for OAuth users)
-                    // Note: We disabled cookie-based referral for stability. 
-                    // Users can add referral code manually later if needed.
+                     // Create new user (No password for OAuth users)
+                     // Note: We disabled cookie-based referral for stability. 
+                     // Users can add referral code manually later if needed.
                     await createUser(user.email, undefined, undefined);
                 }
                 return true;
             } catch (error) {
                 console.error("Error syncing OAuth user:", error);
                 // FAILSAFE: Allow login even if KV sync fails to prevent AccessDenied
-                return true;
+                return true; 
             }
+            */
         },
         async session({ session, token }) {
             if (session.user && session.user.email) {
