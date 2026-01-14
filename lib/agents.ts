@@ -6,12 +6,13 @@ export interface AgentMessage {
   round?: number;
 }
 
-export type WorkflowStep = '1_TOPIC' | '2_MODEL' | '3_OUTLINE';
+export type WorkflowStep = '1_TOPIC' | '2_MODEL' | '3_OUTLINE' | '4_SURVEY';
 export type AcademicLevel = 'UNDERGRAD' | 'MASTER' | 'PHD';
 
 // --- PROMPTS HELPERS ---
 
 const getModelRequirements = (level: AcademicLevel) => {
+  // ... (omitted) match existing
   switch (level) {
     case 'UNDERGRAD':
       return `
@@ -39,6 +40,7 @@ const getModelRequirements = (level: AcademicLevel) => {
 };
 
 const getOutlineStructure = (outputType: string) => {
+  // ... (omitted) match existing
   if (outputType.includes("Tiểu luận") || outputType.includes("Khóa luận")) {
     return `
         CẤU TRÚC TIỂU LUẬN / KHÓA LUẬN:
@@ -82,6 +84,7 @@ const getOutlineStructure = (outputType: string) => {
 };
 
 const getCriticPersona = (level: AcademicLevel) => {
+  // ... (omitted) match existing
   switch (level) {
     case 'UNDERGRAD': return "Giảng viên khó tính (Strict Instructor). Đòi hỏi tính Logic và Tuân thủ quy tắc.";
     case 'MASTER': return "Hội đồng phản biện sắc sảo (Critical Council). Tấn công vào phương pháp luận và cơ sở lý thuyết.";
@@ -212,7 +215,51 @@ OUTPUT FORM:
 ...
 `;
 
+const getSurveyWriterPrompt = (level: AcademicLevel) => `
+NHIỆM VỤ: Xây dựng Thang đo (Scale) và Bảng hỏi Khảo sát (Survey Questionnaire).
+TRÌNH ĐỘ: ${level}
+
+QUY TRÌNH:
+1. Dựa trên Mô hình nghiên cứu đã chốt (Biến độc lập, phụ thuộc, trung gian...).
+2. Tìm thang đo chuẩn (từ Paper gốc tiếng Anh).
+3. Dịch và điều chỉnh (Scale Adaptation) cho phù hợp bối cảnh nghiên cứu.
+4. Xây dựng Biến Kiểm soát (Demographics).
+
+YÊU CẦU OUTPUT (MARKDOWN TABLE):
+- Biến | Mã hóa | Câu hỏi (Tiếng Việt) | Nguồn tham khảo (Author, Year)
+- Ví dụ:
+| Biến (Variable) | Item Code | Câu hỏi khảo sát (Items) | Nguồn gốc (Source) |
+|---|---|---|---|
+| Nhận thức (PE) | PE1 | Tôi thấy AI giúp tôi viết nhanh hơn. | Davis (1989) |
+
+SAU BẢNG LÀ PHẦN "GHI CHÚ THU THẬP DỮ LIỆU":
+- Phương pháp lấy mẫu?
+- Kích thước mẫu dự kiến (N)?
+`;
+
+const SURVEY_CRITIC_PROMPT = `
+PHẢN BIỆN BẢNG HỎI (SURVEY CHECKLIST):
+
+1. **Validity:** Thang đo có đo đúng khái niệm không?
+2. **Reliability:** Câu hỏi có dễ hiểu không? Có bị Bias không?
+3. **Format:** Bảng có rõ ràng không?
+4. **Nguồn gốc:** Có trích dẫn Author gốc không?
+
+OUTPUT:
+📊 ĐÁNH GIÁ: [Pass/Minor Revise/Major Revise]
+❌ LỖI CỤ THỂ:
+1. ...
+2. ...
+`;
+
 export class AgentSession {
+  // ... (class implementation remains same but methods use new prompts)
+  // NOTE: I am not replacing the CLASS implementation in this tool call significantly, just the strings.
+  // Wait, replace_file_content matches TargetContent. I need to be careful.
+  // I'll replace the ENTIRE file content from "export type WorkflowStep..." down to the start of Class?
+  // No, the file is large.
+  // I will just replace the "WorkflowStep" line and inject the prompts before "export class AgentSession".
+
   private messages: AgentMessage[] = [];
 
   constructor(

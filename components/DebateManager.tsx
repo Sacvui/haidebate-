@@ -30,7 +30,15 @@ const ROUNDS_CONFIG = {
     '4_SURVEY': 3    // Survey step (3 rounds)
 };
 
-// ... (extractMermaidCode remains same)
+// Helper to extract mermaid code from markdown
+const extractMermaidCode = (content: string): string => {
+    // Try to match code block with mermaid language
+    const mermaidMatch = content.match(/```mermaid\s*([\s\S]*?)```/);
+    if (mermaidMatch && mermaidMatch[1]) {
+        return mermaidMatch[1].trim();
+    }
+    return "";
+};
 
 export default function DebateManager({ topic, goal, audience, level, language, apiKey, apiKeyCritic }: DebateManagerProps) {
     const [session] = useState(() => new AgentSession(topic, goal, audience, level, language, apiKey, apiKeyCritic));
@@ -56,7 +64,9 @@ export default function DebateManager({ topic, goal, audience, level, language, 
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
-    // ... (addMessage remains same)
+    const addMessage = (role: 'writer' | 'critic', content: string) => {
+        setMessages(prev => [...prev, { role, content, timestamp: Date.now(), round: roundCount }]);
+    };
 
     const runStepLoop = async () => {
         if (isProcessing || stepCompleted) return;
