@@ -328,7 +328,7 @@ export class AgentSession {
             await new Promise(resolve => setTimeout(resolve, waitTime));
             return this.callGeminiAPI(model, prompt, key, retries - 1);
           }
-          throw new Error(`Model ${model} đang quá tải. Vui lòng chờ vài phút hoặc dùng Key khác.`);
+          throw new Error(`Hết Quota (Hạn mức) miễn phí trong ngày hoặc Model đang quá tải. Vui lòng sử dụng API Key riêng trong phần Cài đặt.`);
         }
 
         // Model not found (404)
@@ -381,9 +381,9 @@ export class AgentSession {
       // Use Gemini 3 Flash Preview (Latest)
       return await this.callGeminiAPI('gemini-3-flash-preview', prompt, finalKey);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Gemini Writer Error:", error);
-      return `Hệ thống đang quá tải (Rate Limit). Vui lòng thử lại sau 30s. (${error})`;
+      return `Lỗi AI: ${error.message || error}`;
     }
   }
 

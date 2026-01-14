@@ -24,10 +24,10 @@ interface DebateManagerProps {
 
 // Config rounds per step - Increased for more thorough refinement
 const ROUNDS_CONFIG = {
-    '1_TOPIC': 5,    // Increased from 2 to 5
-    '2_MODEL': 5,    // Increased from 3 to 5
-    '3_OUTLINE': 5,  // Increased from 3 to 5
-    '4_SURVEY': 3    // Survey step (3 rounds)
+    '1_TOPIC': 3,    // Optimized for Quota
+    '2_MODEL': 3,
+    '3_OUTLINE': 3,
+    '4_SURVEY': 2
 };
 
 // Helper to extract mermaid code from markdown
