@@ -273,6 +273,8 @@ export class AgentSession {
   // I will just replace the "WorkflowStep" line and inject the prompts before "export class AgentSession".
 
   private messages: AgentMessage[] = [];
+  private finalizedTopic?: string;
+  private finalizedModel?: string;
 
   constructor(
     public topic: string,
@@ -286,7 +288,13 @@ export class AgentSession {
 
   public updateTopic(newTopic: string) {
     this.topic = newTopic;
+    this.finalizedTopic = newTopic;
     console.log("Topic updated to:", newTopic);
+  }
+
+  public setFinalizedModel(model: string) {
+    this.finalizedModel = model;
+    console.log("Model finalized");
   }
 
   public isUsingSameKey(): boolean {

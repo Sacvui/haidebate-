@@ -53,6 +53,7 @@ export default function DebateManager({ topic, goal, audience, level, language, 
     const [showReport, setShowReport] = useState(false);
     const [variableChart, setVariableChart] = useState<string | undefined>(undefined);
     const [finalContent, setFinalContent] = useState("");
+    const [outlineContent, setOutlineContent] = useState(""); // Step 3 detailed outline
     const [surveyContent, setSurveyContent] = useState(""); // New state for Survey
 
     const bottomRef = useRef<HTMLDivElement>(null);
@@ -90,6 +91,7 @@ export default function DebateManager({ topic, goal, audience, level, language, 
                 if (extractedChart) setVariableChart(extractedChart);
             }
             if (currentStep === '3_OUTLINE') {
+                setOutlineContent(writerContent); // Save detailed outline
                 setFinalContent(prev => prev + "\n" + writerContent);
             }
             if (currentStep === '4_SURVEY') {

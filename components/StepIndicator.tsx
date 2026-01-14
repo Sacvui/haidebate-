@@ -11,7 +11,8 @@ interface StepIndicatorProps {
 const STEPS = [
     { id: 1, label: "Tên Đề Tài (Topic)" },
     { id: 2, label: "Mô Hình (Research Model)" },
-    { id: 3, label: "Đề Cương (Outline)" }
+    { id: 3, label: "Đề Cương (Outline)" },
+    { id: 4, label: "Khảo Sát (Survey)" }
 ];
 
 export function StepIndicator({ currentStep }: StepIndicatorProps) {

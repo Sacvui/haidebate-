@@ -10,12 +10,14 @@ interface FinalReportProps {
     audience: string;
     finalContent: string;
     variableChart?: string;
-    surveyContent?: string; // New Prop
+    surveyContent?: string;
+    outlineContent?: string; // Step 3 detailed outline
     onBack: () => void;
 }
 
-export const FinalReport = ({ topic, goal, audience, finalContent, variableChart, surveyContent, onBack }: FinalReportProps) => {
+export const FinalReport = ({ topic, goal, audience, finalContent, variableChart, surveyContent, outlineContent, onBack }: FinalReportProps) => {
     const [includeChart, setIncludeChart] = useState(true);
+    const [showOutlineModal, setShowOutlineModal] = useState(false);
 
     const handlePrint = () => {
         window.print();
@@ -31,6 +33,12 @@ export const FinalReport = ({ topic, goal, audience, finalContent, variableChart
                         <ArrowLeft size={16} /> Quay lại
                     </button>
                     <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setShowOutlineModal(true)}
+                            className="flex items-center gap-2 px-3 py-1.5 bg-green-600 hover:bg-green-700 rounded-lg text-xs font-bold transition-colors shadow"
+                        >
+                            <FileText size={14} /> Xem Đề Cương Chi Tiết
+                        </button>
                         <button onClick={handlePrint} className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-lg text-xs font-bold transition-colors shadow">
                             <Printer size={14} /> Xuất PDF (A4)
                         </button>
@@ -93,6 +101,58 @@ export const FinalReport = ({ topic, goal, audience, finalContent, variableChart
                     </div>
                 </div>
             </div>
+
+            {/* Outline Modal */}
+            {showOutlineModal && outlineContent && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+                        {/* Modal Header */}
+                        <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white p-6 flex justify-between items-center">
+                            <div>
+                                <h2 className="text-2xl font-bold flex items-center gap-3">
+                                    <FileText size={28} />
+                                    Đề Cương Chi Tiết
+                                </h2>
+                                <p className="text-green-100 text-sm mt-1">Kết quả giai đoạn 3 - Outline</p>
+                            </div>
+                            <button
+                                onClick={() => setShowOutlineModal(false)}
+                                className="text-white/80 hover:text-white transition-colors"
+                            >
+                                <Eye size={24} />
+                            </button>
+                        </div>
+
+                        {/* Modal Content */}
+                        <div className="p-8 overflow-y-auto flex-1 bg-slate-50">
+                            <div className="prose prose-slate max-w-none prose-headings:text-green-700 prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg">
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                    {outlineContent}
+                                </ReactMarkdown>
+                            </div>
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="bg-slate-100 p-4 flex justify-end gap-3">
+                            <button
+                                onClick={() => {
+                                    navigator.clipboard.writeText(outlineContent);
+                                    alert('Đã copy đề cương vào clipboard!');
+                                }}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+                            >
+                                📋 Copy Nội Dung
+                            </button>
+                            <button
+                                onClick={() => setShowOutlineModal(false)}
+                                className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors font-medium text-sm"
+                            >
+                                Đóng
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
