@@ -51,6 +51,7 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
                     <span className="px-3 py-1 bg-white border rounded-full flex items-center gap-1"><BookOpen size={14} /> Topic Check</span>
                     <span className="px-3 py-1 bg-white border rounded-full flex items-center gap-1"><BookOpen size={14} /> Model Builder</span>
                     <span className="px-3 py-1 bg-white border rounded-full flex items-center gap-1"><BookOpen size={14} /> Outline</span>
+                    <span className="px-3 py-1 bg-white border rounded-full flex items-center gap-1"><BookOpen size={14} /> Survey Builder</span>
                 </div>
             </div>
 
