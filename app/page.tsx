@@ -89,7 +89,7 @@ export default function Home() {
               </a>
               <p className="text-slate-500">
                 <Sparkles className="inline-block w-4 h-4 mr-1 text-blue-500" />
-                <i>"Điểm danh hàng ngày và kết nạp đồng môn để nhận bí kíp võ công"</i>
+                <i>"Để nghiên cứu thực sự là một cuộc rong chơi nhiều hoa thơm cỏ lạ."</i>
               </p>
             </div>
 
@@ -126,7 +126,7 @@ export default function Home() {
               </div>
 
               <p className="text-xs text-center text-slate-400">
-                Đăng nhập để lưu lịch sử & tích điểm đổi quà.
+                Điểm danh hàng ngày và kết nạp đồng môn để nhận bí kíp võ công
               </p>
             </div>
           </div>
