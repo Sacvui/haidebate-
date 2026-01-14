@@ -31,7 +31,7 @@ export default function Home() {
   const [showSignup, setShowSignup] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
-  const [apiKey, setApiKey] = useState(process.env.NEXT_PUBLIC_GEMINI_API_KEY || "");
+  const [apiKey, setApiKey] = useState("");
   const [apiKeyCritic, setApiKeyCritic] = useState<string | undefined>(undefined);
 
   // Auth Hook
@@ -42,6 +42,12 @@ export default function Home() {
 
   useEffect(() => {
     setIsMounted(true);
+    // Load API keys from localStorage
+    const savedKey = localStorage.getItem("gemini_api_key");
+    if (savedKey) setApiKey(savedKey);
+    const savedCriticKey = localStorage.getItem("gemini_api_key_critic");
+    if (savedCriticKey) setApiKeyCritic(savedCriticKey);
+
     // Check for referral code in URL
     const params = new URLSearchParams(window.location.search);
     const ref = params.get("ref");
@@ -60,14 +66,6 @@ export default function Home() {
       Cookies.remove("referral_code");
     }
   };
-
-  useEffect(() => {
-    // Load local keys
-    const savedKey = localStorage.getItem("gemini_api_key");
-    if (savedKey) setApiKey(savedKey);
-    const savedCriticKey = localStorage.getItem("gemini_api_key_critic");
-    if (savedCriticKey) setApiKeyCritic(savedCriticKey);
-  }, []);
 
   const handleStart = (data: any) => {
     setFormData(data);
