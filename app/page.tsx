@@ -190,9 +190,9 @@ export default function Home() {
                 <div className="h-6 w-px bg-slate-200 mx-1"></div>
 
                 <div className="text-xs text-slate-500 hidden md:flex items-center gap-1">
-                  <span className="font-bold text-slate-700">{user.points} pts</span>
+                  <span className="font-bold text-slate-700">{user.points || 0} pts</span>
                   <span className="mx-1">•</span>
-                  {user.email.split('@')[0]}
+                  {user.name || (user.email ? user.email.split('@')[0] : 'Người dùng')}
                 </div>
 
                 <button onClick={() => setShowSettings(true)} className="p-2 text-slate-400 hover:text-slate-700 transition-colors" title="Cài đặt API Key">
