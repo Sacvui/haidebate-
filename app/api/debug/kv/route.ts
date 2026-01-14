@@ -8,6 +8,7 @@ export async function GET() {
         REDIS_URL: process.env.REDIS_URL ? "Set (Custom)" : "Missing",
         AUTH_SECRET: process.env.AUTH_SECRET ? "Set" : "Missing",
         AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID ? "Set" : "Missing",
+        AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET ? "Set" : "Missing",
         ORCID_CLIENT_ID: process.env.ORCID_CLIENT_ID ? "Set" : "Missing",
         ORCID_CLIENT_SECRET: process.env.ORCID_CLIENT_SECRET ? "Set" : "Missing",
     };
