@@ -114,14 +114,14 @@ export default function Home() {
 
               <div className="grid grid-cols-2 gap-3">
                 <button
-                  onClick={() => signIn("google", { callbackUrl: "/" })}
+                  onClick={(e) => { e.preventDefault(); void signIn("google", { callbackUrl: "/" }); }}
                   className="flex items-center justify-center gap-2 py-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 active:scale-95 transition-all text-slate-700 font-bold text-sm shadow-sm"
                 >
                   <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="Google" />
                   Google
                 </button>
                 <button
-                  onClick={() => signIn("orcid", { callbackUrl: "/" })}
+                  onClick={(e) => { e.preventDefault(); void signIn("orcid", { callbackUrl: "/" }); }}
                   className="flex items-center justify-center gap-2 py-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 active:scale-95 transition-all text-slate-700 font-bold text-sm shadow-sm"
                 >
                   <img src="https://upload.wikimedia.org/wikipedia/commons/0/06/ORCID_iD.svg" className="w-5 h-5" alt="ORCID" />
