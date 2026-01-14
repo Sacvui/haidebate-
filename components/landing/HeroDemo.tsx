@@ -198,7 +198,7 @@ export const HeroDemo = () => {
                         </motion.div>
                     )}
 
-                    {/* PHASE 3: RESULT (ISI PAPER STYLE) */}
+                    {/* PHASE 3: RESULT (PREMIUM JOURNAL LAYOUT) */}
                     {phase === "RESULT" && (
                         <motion.div
                             key="result"
@@ -207,97 +207,109 @@ export const HeroDemo = () => {
                             className="h-full overflow-hidden relative group"
                         >
                             {/* Paper Container */}
-                            <div className="bg-white rounded-xl shadow-2xl border border-slate-200 h-full w-full overflow-hidden relative font-serif">
+                            <div className="bg-white rounded-xl shadow-2xl border border-slate-200 h-full w-full overflow-hidden relative font-serif text-slate-900">
+
+                                {/* Journal Header (Sticky) */}
+                                <div className="absolute top-0 left-0 w-full h-8 bg-slate-900 flex items-center justify-between px-4 z-20">
+                                    <div className="text-[8px] text-white uppercase tracking-widest font-sans font-bold">International Journal of Green Growth</div>
+                                    <div className="text-[8px] text-slate-400 font-sans">Vol. 12, No. 4, 2025</div>
+                                </div>
+
                                 {/* Scrolling Content */}
                                 <motion.div
                                     initial={{ y: 0 }}
-                                    animate={{ y: -200 }}
-                                    transition={{ delay: 2, duration: 4, ease: "easeInOut" }} // Auto scroll down
-                                    className="p-8"
+                                    animate={{ y: -220 }}
+                                    transition={{ delay: 2, duration: 5, ease: "easeInOut" }}
+                                    className="p-8 pt-12"
                                 >
-                                    {/* Header */}
-                                    <div className="text-center mb-6">
-                                        <div className="text-[10px] font-sans font-bold text-slate-400 uppercase tracking-widest mb-2">ISI/Scopus Standard Output</div>
-                                        <h1 className="text-lg font-bold text-slate-900 leading-tight mb-2">
-                                            Tác động của Marketing Xanh đến Hành vi người tiêu dùng tại Việt Nam
+                                    {/* Paper Title Area */}
+                                    <div className="text-center mb-6 border-b border-slate-200 pb-4">
+                                        <h1 className="text-xl font-bold leading-tight mb-2">
+                                            The Impact of Green Marketing on Consumer Purchase Behavior in Vietnam
                                         </h1>
-                                        <div className="text-xs text-slate-600 italic">
-                                            Tác giả: Dr. User & AI Research Assistant
+                                        <div className="text-xs italic text-slate-600 mb-2">
+                                            <span className="font-bold text-slate-900">Nguyen Van A.</span><sup>1</sup>,
+                                            <span className="ml-2">Tran Thi B.</span><sup>2</sup> &
+                                            <span className="ml-2 text-blue-600">AI Assistant</span><sup>3</sup>
+                                        </div>
+                                        <div className="text-[8px] text-slate-500">
+                                            <sup>1,2</sup>University of Economics, <sup>3</sup>Hai Debate AI System
                                         </div>
                                     </div>
 
                                     {/* Abstract */}
-                                    <div className="text-xs text-justify text-slate-700 leading-relaxed mb-6 space-y-2 opacity-80">
-                                        <p><strong>Tóm tắt:</strong> Nghiên cứu này khám phá mối quan hệ giữa các chiến lược marketing xanh và quyết định mua hàng...</p>
-                                        <div className="h-2 bg-slate-100 rounded w-full"></div>
-                                        <div className="h-2 bg-slate-100 rounded w-5/6"></div>
-                                        <div className="h-2 bg-slate-100 rounded w-full"></div>
+                                    <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 mb-6 text-justify">
+                                        <p className="text-[9px] leading-relaxed text-slate-700">
+                                            <strong className="uppercase text-slate-900">Abstract:</strong> This research investigates the structural relationship between green marketing awareness and consumer purchase intentions. Utilizing a Structural Equation Modeling (SEM) approach, we analyze data from 400 respondents...
+                                        </p>
                                     </div>
 
-                                    {/* THE "SHINY" SEM MODEL */}
-                                    <div className="my-8 p-4 border border-indigo-100 rounded-xl bg-gradient-to-br from-slate-50 to-white shadow-inner relative overflow-hidden">
-                                        <div className="absolute top-0 right-0 p-1 bg-indigo-600 text-white text-[8px] font-bold font-sans rounded-bl-lg">Figure 1. SEM Model</div>
+                                    {/* 2-Column Body */}
+                                    <div className="grid grid-cols-2 gap-4 text-[9px] leading-relaxed text-justify relative">
+                                        <div>
+                                            <h3 className="font-bold uppercase mb-1 text-[10px]">1. Introduction</h3>
+                                            <p className="mb-2">Environmental concerns have shifted consumer paradigms globally. In Vietnam, rapid urbanization has led to increased demand for sustainable products.</p>
+                                            <p>This study bridges the gap by applying the Theory of Planned Behavior (TPB) to the context of eco-labels.</p>
 
-                                        <div className="flex items-center justify-between relative z-10">
-                                            {/* Node 1 */}
-                                            <div className="bg-white border-2 border-green-500 p-2 rounded shadow-lg w-20 text-center relative group-hover:scale-105 transition-transform">
-                                                <div className="text-[8px] font-bold text-green-700">Green<br />Marketing</div>
-                                                <div className="absolute inset-0 bg-green-400/20 blur-xl -z-10 rounded-full"></div>
-                                            </div>
-
-                                            {/* Arrows */}
-                                            <div className="flex-1 h-0.5 bg-slate-300 relative mx-2">
-                                                <div className="absolute right-0 -top-1 w-2 h-2 border-t-2 border-r-2 border-slate-300 rotate-45"></div>
-                                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-[8px] text-slate-400 font-sans">0.45**</div>
-                                            </div>
-
-                                            {/* Node 2 */}
-                                            <div className="bg-white border-2 border-blue-500 p-2 rounded shadow-lg w-20 text-center relative group-hover:scale-105 transition-transform delay-100">
-                                                <div className="text-[8px] font-bold text-blue-700">Consumer<br />Attitude</div>
-                                                <div className="absolute inset-0 bg-blue-400/20 blur-xl -z-10 rounded-full"></div>
-                                            </div>
-
-                                            {/* Arrows */}
-                                            <div className="flex-1 h-0.5 bg-slate-300 relative mx-2">
-                                                <div className="absolute right-0 -top-1 w-2 h-2 border-t-2 border-r-2 border-slate-300 rotate-45"></div>
-                                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-[8px] text-slate-400 font-sans">0.62***</div>
-                                            </div>
-
-                                            {/* Node 3 */}
-                                            <div className="bg-white border-2 border-purple-500 p-2 rounded shadow-lg w-20 text-center relative group-hover:scale-105 transition-transform delay-200">
-                                                <div className="text-[8px] font-bold text-purple-700">Purchase<br />Behavior</div>
-                                                <div className="absolute inset-0 bg-purple-400/20 blur-xl -z-10 rounded-full"></div>
-                                            </div>
+                                            <h3 className="font-bold uppercase mb-1 mt-3 text-[10px]">2. Methodology</h3>
+                                            <p>We employed a quantitative approach with surveys distributed in Hanoi and HCMC.</p>
                                         </div>
-
-                                        {/* Glow Effect */}
-                                        <motion.div
-                                            animate={{ opacity: [0.3, 0.6, 0.3] }}
-                                            transition={{ duration: 2, repeat: Infinity }}
-                                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent skew-x-12"
-                                        />
+                                        <div>
+                                            <h3 className="font-bold uppercase mb-1 text-[10px]">3. Results</h3>
+                                            <p className="mb-2">The measurement model exhibited satisfactory reliability (Cronbach&apos;s Alpha &gt; 0.7).</p>
+                                            <p className="text-blue-700 font-bold italic">See Figure 1 for the structural path analysis.</p>
+                                        </div>
                                     </div>
 
-                                    {/* Survey Table */}
-                                    <div className="mt-6 border-t border-slate-200 pt-4">
-                                        <h3 className="text-sm font-bold uppercase mb-3">Appendix: Measures</h3>
-                                        <div className="space-y-2">
-                                            {[1, 2, 3].map(i => (
-                                                <div key={i} className="flex items-center gap-2 text-[10px] text-slate-600 border-b border-slate-100 pb-1">
-                                                    <span className="font-bold text-slate-400">GM{i}</span>
-                                                    <span>Sản phẩm này thân thiện với môi trường...</span>
-                                                    <div className="ml-auto flex gap-0.5">
-                                                        {[1, 2, 3, 4, 5].map(n => <div key={n} className="w-2 h-2 rounded-full border border-slate-300"></div>)}
-                                                    </div>
+                                    {/* FIGURE 1: SHINY SEM MODEL (Spanning Cols) */}
+                                    <div className="mt-6 mb-6">
+                                        <div className="relative border border-slate-200 rounded-lg overflow-hidden bg-gradient-to-b from-slate-50 to-white p-4 shadow-sm group-hover:shadow-md transition-shadow">
+                                            <div className="absolute top-0 left-0 bg-slate-900 text-white text-[8px] px-2 py-0.5 font-sans font-bold">Fig 1. SEM Analysis</div>
+
+                                            <div className="flex items-center justify-between relative mt-2 px-2">
+                                                {/* Node 1 */}
+                                                <div className="bg-white border border-green-600 shadow-lg p-2 w-20 text-center rounded relative z-10">
+                                                    <div className="text-[8px] font-bold text-green-800 uppercase">Green<br />Marketing</div>
                                                 </div>
-                                            ))}
+                                                {/* Node 2 */}
+                                                <div className="bg-white border border-blue-600 shadow-lg p-2 w-20 text-center rounded relative z-10">
+                                                    <div className="text-[8px] font-bold text-blue-800 uppercase">Attitude</div>
+                                                </div>
+                                                {/* Node 3 */}
+                                                <div className="bg-white border border-purple-600 shadow-lg p-2 w-20 text-center rounded relative z-10">
+                                                    <div className="text-[8px] font-bold text-purple-800 uppercase">Behavior</div>
+                                                </div>
+
+                                                {/* Connecting Lines (Absolute for demo) */}
+                                                <div className="absolute top-1/2 left-20 right-20 h-0.5 bg-slate-300 -translate-y-1/2 -z-0"></div>
+
+                                                {/* Floating Badges */}
+                                                <div className="absolute top-0 left-1/3 -translate-y-2 bg-white px-1 border border-slate-200 text-[8px] font-bold text-slate-500 rounded">0.45**</div>
+                                                <div className="absolute top-0 right-1/3 -translate-y-2 bg-white px-1 border border-slate-200 text-[8px] font-bold text-slate-500 rounded">0.72***</div>
+                                            </div>
+
+                                            {/* Shine effect */}
+                                            <motion.div
+                                                animate={{ x: ["-100%", "200%"] }}
+                                                transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
+                                                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-transparent skew-x-12 pointer-events-none"
+                                            />
                                         </div>
+                                        <div className="text-center text-[8px] italic text-slate-500 mt-1">
+                                            Note: *** p &lt; 0.001. Model Fit: CFI=0.98, RMSEA=0.04.
+                                        </div>
+                                    </div>
+
+                                    {/* Conclusion / Survey Short */}
+                                    <div className="text-[9px] leading-relaxed text-justify border-t border-slate-200 pt-3">
+                                        <h3 className="font-bold uppercase mb-1 text-[10px]">4. Conclusion</h3>
+                                        <p>The findings confirm that perceived green value significantly mediates the relationship between packaging and behavioral intention.</p>
                                     </div>
 
                                 </motion.div>
 
-                                {/* Overlay Gradient to hide scroll cutoff */}
-                                <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-white to-transparent z-10"></div>
+                                {/* Bottom Fog */}
+                                <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-white via-white/80 to-transparent z-10"></div>
                             </div>
                         </motion.div>
                     )}
