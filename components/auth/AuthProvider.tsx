@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 
 interface User {
     id: string;
@@ -57,18 +57,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const syncOAuthUser = async (email: string) => {
         try {
-            // First try to login/get user by email (passwordless for OAuth)
-            // We can reuse login endpoint if we handle passwordless safely? 
-            // Better: use a dedicated "get user by email" public endpoint or modify login to accept OAuth flag?
-            // Actually, simply calling login with just email might fail if password required.
-            // Let's call /api/login with a special flag or create a new endpoint?
-            // Let's assume for now /api/login checks password ONLY if user has one. 
-            // If user was created via OAuth (in lib/auth.ts), they have NO password.
-            // So calling login(email) works!
-
-            // Wait, previously I enforced: "if (user.password) ... if (!password) error"
-            // So if OAuth user has no password, it returns user. Correct.
-
             await login(email);
         } catch (e) {
             console.error("OAuth Sync Error", e);
@@ -92,9 +80,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    const logout = () => {
+    const logout = async () => {
         setUser(null);
         localStorage.removeItem('userId');
+        await signOut({ redirect: false });
+        window.location.href = "/"; // Manual redirect to ensure state clear
     };
 
     return (
