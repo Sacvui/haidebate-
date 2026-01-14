@@ -30,8 +30,10 @@ export default function Home() {
   const { user, login, logout, isLoading } = useAuth();
   const [formData, setFormData] = useState<any>(null);
   const [referralCode, setReferralCode] = useState("");
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     // Check for referral code in URL
     const params = new URLSearchParams(window.location.search);
     const ref = params.get("ref");
@@ -63,8 +65,6 @@ export default function Home() {
     setFormData(data);
     setIsStarted(true);
   };
-
-
 
   if (isLoading) return <div className="flex h-screen items-center justify-center bg-slate-50"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>;
 
@@ -114,6 +114,7 @@ export default function Home() {
 
               <div className="grid grid-cols-2 gap-3">
                 <button
+                  type="button"
                   onClick={(e) => { e.preventDefault(); void signIn("google", { callbackUrl: "/" }); }}
                   className="flex items-center justify-center gap-2 py-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 active:scale-95 transition-all text-slate-700 font-bold text-sm shadow-sm"
                 >
@@ -121,6 +122,7 @@ export default function Home() {
                   Google
                 </button>
                 <button
+                  type="button"
                   onClick={(e) => { e.preventDefault(); void signIn("orcid", { callbackUrl: "/" }); }}
                   className="flex items-center justify-center gap-2 py-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 active:scale-95 transition-all text-slate-700 font-bold text-sm shadow-sm"
                 >
@@ -144,9 +146,11 @@ export default function Home() {
             <div className="absolute bottom-0 left-0 w-80 h-80 bg-indigo-400/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
 
             {/* Animation Component */}
-            <div className="w-full relative z-10 scale-110 origin-center">
-              <HeroDemo />
-            </div>
+            {isMounted && (
+              <div className="w-full relative z-10 scale-110 origin-center">
+                <HeroDemo />
+              </div>
+            )}
           </div>
         </div>
       )}
