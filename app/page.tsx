@@ -11,6 +11,7 @@ import { SignupModal } from "@/components/auth/SignupModal";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { ShareModal } from "@/components/ShareModal";
 import { GuideModal } from "@/components/GuideModal";
+import { HeroDemo } from "@/components/landing/HeroDemo";
 import { signIn } from "next-auth/react";
 import Cookies from "js-cookie";
 
@@ -146,21 +147,17 @@ export default function Home() {
             </div>
           </div>
 
+
           {/* RIGHT COLUMN: PREVIEW */}
           <div className="hidden md:flex flex-1 bg-slate-50 items-center justify-center p-12 relative overflow-hidden">
-            {/* ... same preview content ... */}
-            <div className="absolute inset-0 z-10 bg-white/10 backdrop-blur-[2px]"></div>
-            <div className="w-full max-w-2xl opacity-60 scale-95 origin-center select-none pointer-events-none grayscale-[0.2]">
-              <ResearchForm onStart={() => { }} onOpenGuidelines={() => { }} isPreview={true} />
-            </div>
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-md px-6 py-4 rounded-2xl shadow-2xl flex flex-col items-center gap-3 border border-white/50">
-              <div className="w-12 h-12 bg-slate-900 rounded-full flex items-center justify-center text-white">
-                <Lock size={20} />
-              </div>
-              <div className="text-center">
-                <h3 className="font-bold text-slate-900">Nội dung bị khóa</h3>
-                <p className="text-xs text-slate-500">Đăng nhập để xem đầy đủ</p>
-              </div>
+            {/* Background elements */}
+            <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none"></div>
+            <div className="absolute -top-20 -right-20 w-96 h-96 bg-blue-400/20 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute bottom-0 left-0 w-80 h-80 bg-indigo-400/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+
+            {/* Animation Component */}
+            <div className="w-full relative z-10 scale-110 origin-center">
+              <HeroDemo />
             </div>
           </div>
         </div>
