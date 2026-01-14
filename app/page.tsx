@@ -15,6 +15,8 @@ import { HeroDemo } from "@/components/landing/HeroDemo";
 import { signIn } from "next-auth/react";
 import Cookies from "js-cookie";
 
+import { LoadingH } from "@/components/LoadingH";
+
 export default function Home() {
   // State
   const [isStarted, setIsStarted] = useState(false);
@@ -66,7 +68,7 @@ export default function Home() {
     setIsStarted(true);
   };
 
-  if (isLoading) return <div className="flex h-screen items-center justify-center bg-slate-50"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>;
+  if (isLoading) return <div className="flex h-screen items-center justify-center bg-slate-50"><LoadingH /></div>;
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900 font-sans overflow-x-hidden flex flex-col">

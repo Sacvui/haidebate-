@@ -291,9 +291,7 @@ export class AgentSession {
 
   public isUsingSameKey(): boolean {
     // Check if Writer and Critic are using the same API key
-    const writerKey = this.writerKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    const criticKey = this.criticKey || this.writerKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    return writerKey === criticKey;
+    return this.writerKey === this.criticKey || (!this.criticKey && !!this.writerKey);
   }
 
   private async callGeminiAPI(model: string, prompt: string, key: string, retries = 3): Promise<string> {
@@ -359,10 +357,12 @@ export class AgentSession {
 
   async generateWriterTurn(step: WorkflowStep, previousCriticFeedback?: string): Promise<string> {
     try {
-      const finalKey = this.writerKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-      if (!finalKey) return "E: Vui lòng cấu hình API Key Writer";
+      const finalKey = this.writerKey;
+      if (!finalKey) {
+        return "⚠️ CHƯA CẤU HÌNH API KEY: Vui lòng vào Cài đặt (⚙️) để nhập API Key của bạn. Hệ thống không còn dùng key mặc định.";
+      }
 
-      console.log(`🔑 Writer using key: ${finalKey.substring(0, 10)}... (Source: ${this.writerKey ? 'Custom Writer Key' : 'Env/Default'})`);
+      console.log(`🔑 Writer using key: ${finalKey.substring(0, 10)}...`);
 
       let sysPrompt = "";
       switch (step) {
@@ -389,29 +389,29 @@ export class AgentSession {
 
   async generateCriticTurn(step: WorkflowStep, writerDraft: string): Promise<string> {
     // Use Critic Key if available, else fallback to Writer Key
-    const geminiKey = this.criticKey || this.writerKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    const geminiKey = this.criticKey || this.writerKey;
 
-    if (geminiKey) {
-      console.log(`🔑 Critic using key: ${geminiKey.substring(0, 10)}... (Source: ${this.criticKey ? 'Custom Critic Key' : this.writerKey ? 'Writer Key (Fallback)' : 'Env/Default'})`);
-      try {
-        let sysPrompt = "";
-        switch (step) {
-          case '1_TOPIC': sysPrompt = TOPIC_CRITIC_PROMPT; break;
-          case '2_MODEL': sysPrompt = getModelCriticPrompt(this.level); break;
-          case '3_OUTLINE': sysPrompt = OUTLINE_CRITIC_PROMPT; break;
-          case '4_SURVEY': sysPrompt = SURVEY_CRITIC_PROMPT; break;
-        }
-
-        const prompt = `${sysPrompt}\n\nBÀI LÀM CỦA WRITER:\n${writerDraft}\n\nHãy đóng vai trò Critic và đưa ra nhận xét chi tiết, khắt khe.`;
-
-        // Use Gemini 2.0 Flash Exp (Latest Stable)
-        return await this.callGeminiAPI('gemini-2.0-flash-exp', prompt, geminiKey);
-
-      } catch (error) {
-        return `Lỗi Critic (Quota/Network): ${error}`;
-      }
+    if (!geminiKey) {
+      return "⚠️ CHƯA CẤU HÌNH API KEY: Vui lòng vào Cài đặt (⚙️) để nhập API Key.";
     }
 
-    return "Lỗi: Không thể khởi tạo Critic (Thiếu API Key).";
+    console.log(`🔑 Critic using key: ${geminiKey.substring(0, 10)}...`);
+    try {
+      let sysPrompt = "";
+      switch (step) {
+        case '1_TOPIC': sysPrompt = TOPIC_CRITIC_PROMPT; break;
+        case '2_MODEL': sysPrompt = getModelCriticPrompt(this.level); break;
+        case '3_OUTLINE': sysPrompt = OUTLINE_CRITIC_PROMPT; break;
+        case '4_SURVEY': sysPrompt = SURVEY_CRITIC_PROMPT; break;
+      }
+
+      const prompt = `${sysPrompt}\n\nBÀI LÀM CỦA WRITER:\n${writerDraft}\n\nHãy đóng vai trò Critic và đưa ra nhận xét chi tiết, khắt khe.`;
+
+      // Use Gemini 2.0 Flash Exp (Latest Stable)
+      return await this.callGeminiAPI('gemini-2.0-flash-exp', prompt, geminiKey);
+
+    } catch (error) {
+      return `Lỗi Critic (Quota/Network): ${error}`;
+    }
   }
 }
