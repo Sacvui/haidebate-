@@ -15,51 +15,20 @@ export const ThinkingAnimation = () => {
 
     return (
         <div className="flex flex-col items-center justify-center space-y-4 py-6">
-            {/* Brain/Processing Icon with Particles */}
+            {/* Simple H with rotation - NO BACKGROUND */}
             <div className="relative">
-                {/* Orbiting Particles */}
-                {[...Array(8)].map((_, i) => (
-                    <motion.div
-                        key={i}
-                        className="absolute w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
-                        style={{
-                            top: "50%",
-                            left: "50%",
-                        }}
-                        animate={{
-                            x: [
-                                Math.cos((i * Math.PI * 2) / 8) * 40,
-                                Math.cos((i * Math.PI * 2) / 8 + Math.PI) * 40,
-                            ],
-                            y: [
-                                Math.sin((i * Math.PI * 2) / 8) * 40,
-                                Math.sin((i * Math.PI * 2) / 8 + Math.PI) * 40,
-                            ],
-                            opacity: [0.3, 1, 0.3],
-                        }}
-                        transition={{
-                            duration: 2,
-                            repeat: Infinity,
-                            delay: i * 0.2,
-                            ease: "easeInOut",
-                        }}
-                    />
-                ))}
-
-                {/* Center Icon */}
+                {/* Center Icon - Transparent */}
                 <motion.div
-                    className="relative z-10 w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-2xl"
+                    className="relative z-10 w-16 h-16 flex items-center justify-center"
                     animate={{
                         rotate: [0, 360],
-                        scale: [1, 1.05, 1],
                     }}
                     transition={{
                         rotate: { duration: 3, repeat: Infinity, ease: "linear" },
-                        scale: { duration: 2, repeat: Infinity, ease: "easeInOut" },
                     }}
                 >
                     <motion.div
-                        className="text-3xl font-black text-white"
+                        className="text-5xl font-black bg-gradient-to-br from-blue-500 to-purple-600 bg-clip-text text-transparent"
                         animate={{
                             opacity: [0.7, 1, 0.7],
                         }}
@@ -71,19 +40,6 @@ export const ThinkingAnimation = () => {
                         H
                     </motion.div>
                 </motion.div>
-
-                {/* Glow Effect */}
-                <motion.div
-                    className="absolute inset-0 bg-blue-500/30 rounded-full blur-2xl -z-10"
-                    animate={{
-                        scale: [1, 1.3, 1],
-                        opacity: [0.3, 0.6, 0.3],
-                    }}
-                    transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                    }}
-                />
             </div>
 
             {/* Typing Text Effect */}
@@ -113,21 +69,6 @@ export const ThinkingAnimation = () => {
                 <span className="text-sm font-medium text-slate-700">
                     AI đang phân tích{dots}
                 </span>
-            </div>
-
-            {/* Progress Bar */}
-            <div className="w-48 h-1 bg-slate-200 rounded-full overflow-hidden">
-                <motion.div
-                    className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
-                    animate={{
-                        x: ["-100%", "100%"],
-                    }}
-                    transition={{
-                        duration: 1.5,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                    }}
-                />
             </div>
         </div>
     );
