@@ -10,6 +10,7 @@ import { ResearchForm } from "@/components/ResearchForm";
 import { SignupModal } from "@/components/auth/SignupModal";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { ShareModal } from "@/components/ShareModal";
+import { GuideModal } from "@/components/GuideModal";
 import { signIn } from "next-auth/react";
 import Cookies from "js-cookie";
 
@@ -20,6 +21,7 @@ export default function Home() {
   const [showSettings, setShowSettings] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
   const [showShare, setShowShare] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
   const [apiKey, setApiKey] = useState(process.env.NEXT_PUBLIC_GEMINI_API_KEY || "");
   const [apiKeyCritic, setApiKeyCritic] = useState<string | undefined>(undefined);
 
@@ -68,6 +70,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900 font-sans overflow-x-hidden flex flex-col">
       <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
+      <GuideModal isOpen={showGuide} onClose={() => setShowGuide(false)} />
       <LevelGuidelines isOpen={showGuidelines} onClose={() => setShowGuidelines(false)} onSelectLevel={() => { }} />
       {/* SignupModal removed */}
       {user && <ShareModal isOpen={showShare} onClose={() => setShowShare(false)} userId={user.id} user={user} onSuccess={() => { /* maybe refresh points */ }} />}
@@ -197,6 +200,9 @@ export default function Home() {
 
                 <button onClick={() => setShowSettings(true)} className="p-2 text-slate-400 hover:text-slate-700 transition-colors" title="Cài đặt API Key">
                   <Settings size={18} />
+                </button>
+                <button onClick={() => setShowGuide(true)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Hướng dẫn lấy Key">
+                  <HelpCircle size={18} />
                 </button>
 
                 <button onClick={logout} className="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Đăng xuất">

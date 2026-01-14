@@ -1,12 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllUsers } from '@/lib/kv';
+import { auth } from "@/lib/auth";
+import { getAllUsers } from "@/lib/kv";
 
-export async function GET(request: NextRequest) {
+const ALLOWED_ADMIN_EMAIL = "foreverlove3004@gmail.com";
+
+export async function GET(req: NextRequest) {
     try {
-        // TODO: Add admin authentication check here
+        const session = await auth();
+
+        // Strict Authorization
+        if (!session || !session.user || session.user.email !== ALLOWED_ADMIN_EMAIL) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const users = await getAllUsers(100);
-        return NextResponse.json(users);
+        return NextResponse.json({ users });
     } catch (error) {
+        console.error("Admin Users Error:", error);
         return NextResponse.json({ error: 'Failed to get users' }, { status: 500 });
     }
 }
