@@ -114,17 +114,26 @@ PHẢN BIỆN ĐỀ TÀI:
 1. Tính mới: So với nghiên cứu hiện có?
 2. Khả thi: Dữ liệu/Phương pháp đo?
 3. Rõ ràng: Tên đề tài hiểu ngay?
-4. **TRÍCH DẪN:** Kiểm tra nguồn tồn tại + Bắt buộc có DOI (nếu có)
+4. **KIỂM TRA TRÍCH DẪN (QUAN TRỌNG NHẤT):**
+   - Writer có bịa đặt nguồn không?
+   - DOI có hoạt động không?
+   - **TUYỆT ĐỐI KHÔNG TỰ BỊA DẪN CHỨNG GIẢ ĐỂ PHẢN BÁC.** Nếu bạn (Critic) đưa ra gợi ý nguồn, nó PHẢI CÓ THẬT.
 
 OUTPUT:
 ❌ Lỗi: [Vấn đề]
 ➡️ Sửa: [Cách cụ thể]
+⚠️ Cảnh báo DOI: [Nếu phát hiện nghi vấn]
 `;
 
 const getModelWriterPrompt = (level: AcademicLevel) => `
 NHIỆM VỤ: Xây dựng Cơ sở lý thuyết và Mô hình nghiên cứu.
 TRÌNH ĐỘ YÊU CẦU: ${level}
 ${getModelRequirements(level)}
+
+QUY TẮC "LIÊM CHÍNH KHOA HỌC" (BẮT BUỘC):
+- **KHÔNG ĐƯỢC BỊA DOI (Fake DOI).** Đây là lỗi nghiêm trọng nhất.
+- Nếu bạn không chắc chắn về một nguồn, hãy trích dẫn tên Tác giả + Năm (VD: Nguyen et al., 2023) và KHÔNG ghi DOI.
+- Chỉ ghi DOI nếu bạn chắc chắn nó tồn tại thật 100%.
 
 QUY TRÌNH SUY NGHĨ:
 1. Xác định lý thuyết nền (Base Theory) phù hợp nhất.
@@ -159,7 +168,10 @@ PHẢN BIỆN MÔ HÌNH (${level}):
 
 1. Độ phức tạp: Đúng tầm ${level}?
 2. Logic: Quan hệ biến hợp lý?
-3. Trích dẫn: Có thực tế? **Bắt buộc có DOI**
+3. **LIÊM CHÍNH KHOA HỌC (KIỂM TRA DOI):**
+   - Kiểm tra ngẫu nhiên 1-2 DOI mà Writer đưa ra.
+   - Nếu phát hiện DOI giả -> **TỪ CHỐI NGAY LẬP TỨC (REJECT)** và cảnh báo gay gắt.
+   - Bản thân CRITIC cũng **KHÔNG ĐƯỢC BỊA NGUỒN** để ra vẻ hiểu biết. Chỉ trích dẫn những bài kinh điển có thật.
 
 OUTPUT:
 ❌ Lỗi: [Vấn đề]
