@@ -64,6 +64,7 @@ export default function DebateManager({ topic, goal, audience, level, language, 
     const [finalContent, setFinalContent] = useState("");
     const [outlineContent, setOutlineContent] = useState(""); // Step 3 detailed outline
     const [surveyContent, setSurveyContent] = useState(""); // New state for Survey
+    const [isLoadingConfig, setIsLoadingConfig] = useState(true);
 
     const bottomRef = useRef<HTMLDivElement>(null);
     const exportRef = useRef<HTMLDivElement>(null);
@@ -73,6 +74,7 @@ export default function DebateManager({ topic, goal, audience, level, language, 
     // Fetch rounds config from admin API
     useEffect(() => {
         const fetchConfig = async () => {
+            setIsLoadingConfig(true);
             try {
                 const res = await fetch('/api/admin/config');
                 const data = await res.json();
@@ -81,6 +83,9 @@ export default function DebateManager({ topic, goal, audience, level, language, 
                 }
             } catch (error) {
                 console.error('Failed to fetch rounds config:', error);
+                // Keep default config
+            } finally {
+                setIsLoadingConfig(false);
             }
         };
         fetchConfig();
