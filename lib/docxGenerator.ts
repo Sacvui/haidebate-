@@ -49,7 +49,7 @@ export const generateDocx = async (data: DocxData) => {
     };
 
     // Helper for Headings
-    const createHeading = (text: string, level: HeadingLevel) => {
+    const createHeading = (text: string, level: typeof HeadingLevel[keyof typeof HeadingLevel]) => {
         return new Paragraph({
             text: text,
             heading: level,

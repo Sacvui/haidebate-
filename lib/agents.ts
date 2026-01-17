@@ -431,62 +431,69 @@ export class AgentSession {
     return this.writerKey === this.criticKey || (!this.criticKey && !!this.writerKey);
   }
 
-  private async callGeminiAPI(model: string, prompt: string, key: string, retries = 3): Promise<string> {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
-
+  private async callGeminiAPI(model: string, prompt: string, customKey?: string, retries = 3): Promise<string> {
     try {
-      const response = await fetch(url, {
+      // Call server-side proxy instead of direct API
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+
+      // If custom key provided, add it to headers
+      if (customKey) {
+        headers['x-gemini-api-key'] = customKey;
+      }
+
+      const response = await fetch('/api/gemini', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        headers,
+        body: JSON.stringify({
+          model,
+          prompt,
+          useCustomKey: !!customKey
+        })
       });
 
       const data = await response.json();
 
-      if (data.error) {
-        const errorCode = data.error.code;
-        const errorMsg = data.error.message;
+      // Handle errors from proxy
+      if (!response.ok) {
+        const errorMsg = data.error || 'Unknown error';
 
-        // Log full error for debugging
-        console.error(`🚨 Gemini API Error:`, {
+        console.error(`🚨 Gemini Proxy Error:`, {
           model,
-          code: errorCode,
+          status: response.status,
           message: errorMsg,
           retriesLeft: retries
         });
 
-        // Handle Rate Limit (429) or Quota
-        if (errorCode === 429 || errorMsg.toLowerCase().includes("quota") || errorMsg.toLowerCase().includes("overloaded")) {
+        // Handle Rate Limit (429)
+        if (response.status === 429) {
           if (retries > 0) {
             const waitTime = 10000 * (4 - retries); // 10s, 20s, 30s
-            console.warn(`⚠️ Quota/Rate Limit for ${model}. Retrying in ${waitTime / 1000}s... (${retries} retries left)`);
+            console.warn(`⚠️ Rate Limit. Retrying in ${waitTime / 1000}s... (${retries} retries left)`);
             await new Promise(resolve => setTimeout(resolve, waitTime));
-            return this.callGeminiAPI(model, prompt, key, retries - 1);
+            return this.callGeminiAPI(model, prompt, customKey, retries - 1);
           }
-          throw new Error(`Hết Quota (Hạn mức) miễn phí trong ngày hoặc Model đang quá tải. Vui lòng sử dụng API Key riêng trong phần Cài đặt.`);
+          throw new Error(`Hết quota hoặc vượt giới hạn. Vui lòng thử lại sau hoặc sử dụng API Key riêng trong Cài đặt.`);
         }
 
-        // Model not found (404)
-        if (errorCode === 404) {
-          throw new Error(`Model "${model}" không tồn tại. Vui lòng kiểm tra tên model.`);
-        }
-
-        // Invalid API Key (401, 403)
-        if (errorCode === 401 || errorCode === 403) {
-          throw new Error(`API Key không hợp lệ hoặc hết hạn. Vui lòng kiểm tra lại.`);
+        // Unauthorized (need login)
+        if (response.status === 401) {
+          throw new Error(`Vui lòng đăng nhập để sử dụng tính năng AI.`);
         }
 
         // Other errors
-        throw new Error(`Lỗi API (${errorCode}): ${errorMsg}`);
+        throw new Error(errorMsg);
       }
 
-      return data?.candidates?.[0]?.content?.parts?.[0]?.text || "Lỗi: Không có phản hồi từ AI.";
+      return data.text || "Lỗi: Không có phản hồi từ AI.";
 
     } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-      // Network errors -> Retry Same Model
-      if (retries > 0) {
+      // Network errors -> Retry
+      if (retries > 0 && (error.message?.includes('fetch') || error.message?.includes('network'))) {
+        console.warn(`Network error, retrying... (${retries} left)`);
         await new Promise(resolve => setTimeout(resolve, 3000));
-        return this.callGeminiAPI(model, prompt, key, retries - 1);
+        return this.callGeminiAPI(model, prompt, customKey, retries - 1);
       }
       throw error;
     }
@@ -547,7 +554,7 @@ export class AgentSession {
         ? `${context}\n\nPHẢN HỒI CỦA CRITIC (Vòng trước): ${previousCriticFeedback}\n\n${sysPrompt}\nHãy cải thiện/viết tiếp dựa trên phản hồi này.`
         : `${context}\n\n${sysPrompt}\nHãy bắt đầu thực hiện nhiệm vụ cho giai đoạn này.`;
 
-      // Use Gemini 3 Flash Preview
+      // Use Gemini 3 Flash Preview (pass custom key if available)
       return await this.callGeminiAPI('gemini-3-flash-preview', prompt, finalKey);
 
     } catch (error: any) {
@@ -574,7 +581,7 @@ export class AgentSession {
 
       const prompt = `${sysPrompt}\n\nBÀI LÀM CỦA WRITER:\n${writerDraft}\n\nHãy đóng vai trò Critic và đưa ra nhận xét chi tiết, khắt khe.`;
 
-      // Use Gemini 3 Flash Preview
+      // Use Gemini 3 Flash Preview (pass custom key if available)
       return await this.callGeminiAPI('gemini-3-flash-preview', prompt, geminiKey);
 
     } catch (error) {

@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getUser } from '@/lib/kv';
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const userId = params.id;
-        const user = await getUser(userId);
+        const { id } = await params;
+        const user = await getUser(id);
 
         if (!user) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -16,3 +16,4 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
         return NextResponse.json({ error: 'Lỗi tải thông tin' }, { status: 500 });
     }
 }
+
