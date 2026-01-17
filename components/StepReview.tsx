@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { WorkflowStep } from '@/lib/agents';
-import { CheckCircle, Copy, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { WorkflowStep, AcademicLevel } from '@/lib/agents';
+import { CheckCircle, Copy, X, AlertTriangle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { MermaidChart } from './MermaidChart';
 import { CitationChecker } from './CitationChecker';
 import { extractDOIs } from '@/lib/citationUtils';
+import { validateOutline, getValidationMessage } from '@/lib/outlineValidator';
 import type { DOIVerificationResult } from '@/lib/doiVerifier';
 
 interface StepReviewProps {
@@ -14,6 +15,7 @@ interface StepReviewProps {
     mermaidCode?: string;
     onFinalize: (userFinal: string, note?: string) => void;
     onCancel: () => void;
+    level?: AcademicLevel;
 }
 
 const getStepName = (step: WorkflowStep): string => {
