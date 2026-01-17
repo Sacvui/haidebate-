@@ -40,37 +40,47 @@ export async function POST(req: NextRequest) {
 
         const model = "gemini-3-flash-preview";
 
-        let history = [];
-        let currentDraft = "";
 
-        // --- ROUND 1: WRITER DRAFT ---
-        const r1Prompt = `${WRITER_PROMPT}\n\nINPUT: "${topic}"\n\nVIẾT BÀI NHÁP ĐẦU TIÊN (DRAFT 1):`;
-        currentDraft = await callGemini(model, r1Prompt, safeWriterKey);
-        history.push({ role: 'Writer', content: currentDraft, round: 1 });
+        const { action, currentDraft, critique } = body;
 
-        // --- ROUND 2: CRITIC REVIEW & WRITER REVISE ---
-        // Critic
-        const r2CriticPrompt = `${CRITIC_PROMPT}\n\nBÀI NHÁP: "${currentDraft}"\n\nNHẬN XÉT (ROUND 1):`;
-        const critique1 = await callGemini(model, r2CriticPrompt, safeCriticKey);
-        history.push({ role: 'Critic', content: critique1, round: 2 });
+        let prompt = "";
+        let apiKey = safeWriterKey;
+        let role = "Writer";
 
-        // Writer Revise
-        const r2WriterPrompt = `${WRITER_PROMPT}\n\nINPUT: "${topic}"\n\nBÀI NHÁP CŨ:\n${currentDraft}\n\nLỜI CHÊ CỦA SẾP:\n"${critique1}"\n\nNHIỆM VỤ: VIẾT LẠI (DRAFT 2) KHẮC PHỤC CÁC LỖI TRÊN.`;
-        currentDraft = await callGemini(model, r2WriterPrompt, safeWriterKey);
-        history.push({ role: 'Writer', content: currentDraft, round: 2 });
+        switch (action) {
+            case 'draft':
+                prompt = `${WRITER_PROMPT}\n\nINPUT: "${topic}"\n\nVIẾT BÀI NHÁP ĐẦU TIÊN (DRAFT 1):`;
+                role = "Writer";
+                apiKey = safeWriterKey;
+                break;
+            case 'critique':
+                prompt = `${CRITIC_PROMPT}\n\nBÀI NHÁP: "${currentDraft}"\n\nNHẬN XÉT (ROUND 1):`;
+                role = "Critic";
+                apiKey = safeCriticKey;
+                break;
+            case 'revise':
+                prompt = `${WRITER_PROMPT}\n\nINPUT: "${topic}"\n\nBÀI NHÁP CŨ:\n${currentDraft}\n\nLỜI CHÊ CỦA SẾP:\n"${critique}"\n\nNHIỆM VỤ: VIẾT LẠI (DRAFT 2) KHẮC PHỤC CÁC LỖI TRÊN.`;
+                role = "Writer";
+                apiKey = safeWriterKey;
+                break;
+            case 'final_critique':
+                prompt = `${CRITIC_PROMPT}\n\nBÀI NHÁP 2: "${currentDraft}"\n\nNHẬN XÉT (ROUND 2 - FINAL):`;
+                role = "Critic";
+                apiKey = safeCriticKey;
+                break;
+            case 'final':
+                prompt = `${WRITER_PROMPT}\n\nINPUT: "${topic}"\n\nBÀI NHÁP 2:\n${currentDraft}\n\nLỜI CHÊ CỦA SẾP:\n"${critique}"\n\nNHIỆM VỤ: VIẾT BẢN HOÀN THIỆN CUỐI CÙNG (FINAL). ĐỪNG ĐỂ TAO THẤT VỌNG.`;
+                role = "Writer";
+                apiKey = safeWriterKey;
+                break;
+            default:
+                return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+        }
 
-        // --- ROUND 3: FINAL POLISH ---
-        // Critic
-        const r3CriticPrompt = `${CRITIC_PROMPT}\n\nBÀI NHÁP 2: "${currentDraft}"\n\nNHẬN XÉT (ROUND 2 - FINAL):`;
-        const critique2 = await callGemini(model, r3CriticPrompt, safeCriticKey);
-        history.push({ role: 'Critic', content: critique2, round: 3 });
+        const content = await callGemini(model, prompt, apiKey);
+        return NextResponse.json({ content, role, action });
 
-        // Writer Final
-        const r3WriterPrompt = `${WRITER_PROMPT}\n\nINPUT: "${topic}"\n\nBÀI NHÁP 2:\n${currentDraft}\n\nLỜI CHÊ CỦA SẾP:\n"${critique2}"\n\nNHIỆM VỤ: VIẾT BẢN HOÀN THIỆN CUỐI CÙNG (FINAL). ĐỪNG ĐỂ TAO THẤT VỌNG.`;
-        currentDraft = await callGemini(model, r3WriterPrompt, safeWriterKey);
-        history.push({ role: 'Writer', content: currentDraft, round: 3 });
 
-        return NextResponse.json({ content: currentDraft, history });
 
     } catch (error: any) {
         console.error('Debate Error:', error);

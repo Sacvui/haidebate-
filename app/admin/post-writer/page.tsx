@@ -77,42 +77,64 @@ export default function PostWriterPage() {
         setIsLoading(true);
         setResult('');
         setHistory([]);
-        setStatusText('Khởi động Debate System...');
 
-        try {
-            const progressInterval = setInterval(() => {
-                setStatusText(prev => {
-                    if (prev.includes('Khởi động')) return 'Round 1: Writer đang viết nháp...';
-                    if (prev.includes('Writer đang viết nháp')) return 'Round 2: Critic đang "sấy" (Roasting)...';
-                    if (prev.includes('Critic')) return 'Round 2: Writer đang sửa bài...';
-                    if (prev.includes('sửa bài')) return 'Round 3: Critic đang chốt hạ...';
-                    if (prev.includes('chốt hạ')) return 'Final: Writer đang hoàn thiện...';
-                    return prev;
-                });
-            }, 4000);
+        const safeWriterKey = writerKey || '';
+        const safeCriticKey = criticKey || '';
 
-            const response = await fetch('/api/admin/generate-post', {
+        // Helper to call generic step
+        const callStep = async (action: string, currentDraft = "", critique = ""): Promise<string> => {
+            const res = await fetch('/api/admin/generate-post', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ topic, writerKey, criticKey })
+                body: JSON.stringify({
+                    topic,
+                    writerKey: safeWriterKey,
+                    criticKey: safeCriticKey,
+                    action,
+                    currentDraft,
+                    critique
+                })
             });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || `Lỗi bước ${action}`);
+            return data.content;
+        };
 
-            clearInterval(progressInterval);
-            const data = await response.json();
+        try {
+            // STEP 1: DRAFT
+            setStatusText('Round 1: Writer đang viết nháp...');
+            const draft1 = await callStep('draft');
+            setHistory(prev => [...prev, { role: 'Writer', content: draft1, round: 1 }]);
 
-            if (!response.ok) {
-                throw new Error(data.error || 'Có lỗi xảy ra');
-            }
+            // STEP 2: CRITIQUE 1
+            setStatusText('Round 2: Critic đang "sấy" (Roasting)...');
+            const critique1 = await callStep('critique', draft1);
+            setHistory(prev => [...prev, { role: 'Critic', content: critique1, round: 2 }]);
 
-            setResult(data.content);
-            if (data.history) setHistory(data.history);
+            // STEP 3: REVISE 1
+            setStatusText('Round 2: Writer đang sửa bài theo chỉ đạo...');
+            const draft2 = await callStep('revise', draft1, critique1);
+            setHistory(prev => [...prev, { role: 'Writer', content: draft2, round: 2 }]);
 
+            // STEP 4: CRITIQUE 2 (FINAL CHECK)
+            setStatusText('Round 3: Critic đang kiểm tra lần cuối...');
+            const critique2 = await callStep('final_critique', draft2);
+            setHistory(prev => [...prev, { role: 'Critic', content: critique2, round: 3 }]);
+
+            // STEP 5: FINAL
+            setStatusText('Final: Writer đang hoàn thiện cực phẩm...');
+            const finalPost = await callStep('final', draft2, critique2);
+            setHistory(prev => [...prev, { role: 'Writer', content: finalPost, round: 3 }]);
+
+            setResult(finalPost);
             toast.success('Đã hoàn thành 3 vòng tranh biện!');
+
         } catch (error: any) {
             toast.error(`Lỗi: ${error.message}`);
             setStatusText('Lỗi rồi đại vương ơi!');
         } finally {
             setIsLoading(false);
+            setStatusText('');
         }
     };
 
