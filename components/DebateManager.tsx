@@ -274,13 +274,11 @@ export default function DebateManager({ topic, goal, audience, level, language, 
                 topic={topic}
                 goal={goal}
                 audience={audience}
+                level={level}
                 finalContent={finalContent}
                 variableChart={variableChart}
-                // We need to update FinalReport to accept surveyContent. 
-                // For now, let's append it or pass as new prop. 
-                // Decision: Pass as new prop 'surveyContent' in next step.
-                // Assuming FinalReport prop update.
                 surveyContent={surveyContent}
+                outlineContent={outlineContent}
                 onBack={() => setShowReport(false)}
             />
         );

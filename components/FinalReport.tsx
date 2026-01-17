@@ -3,19 +3,21 @@ import { Download, CheckCircle, FileText, ArrowLeft, Printer, Eye, EyeOff } from
 import { MermaidChart } from './MermaidChart';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { generateDocx } from '../lib/docxGenerator';
 
 interface FinalReportProps {
     topic: string;
     goal: string;
     audience: string;
+    level: string; // Added level
     finalContent: string;
     variableChart?: string;
     surveyContent?: string;
-    outlineContent?: string; // Step 3 detailed outline
+    outlineContent?: string;
     onBack: () => void;
 }
 
-export const FinalReport = ({ topic, goal, audience, finalContent, variableChart, surveyContent, outlineContent, onBack }: FinalReportProps) => {
+export const FinalReport = ({ topic, goal, audience, level, finalContent, variableChart, surveyContent, outlineContent, onBack }: FinalReportProps) => {
     const [includeChart, setIncludeChart] = useState(true);
     const [showOutlineModal, setShowOutlineModal] = useState(false);
 
@@ -38,6 +40,18 @@ export const FinalReport = ({ topic, goal, audience, finalContent, variableChart
                             className="flex items-center gap-2 px-3 py-1.5 bg-green-600 hover:bg-green-700 rounded-lg text-xs font-bold transition-colors shadow"
                         >
                             <FileText size={14} /> Xem Đề Cương Chi Tiết
+                        </button>
+                        <button
+                            onClick={() => generateDocx({
+                                topic,
+                                level,
+                                modelContent: finalContent,
+                                outlineContent: outlineContent,
+                                surveyContent: surveyContent
+                            })}
+                            className="flex items-center gap-2 px-3 py-1.5 bg-blue-700 hover:bg-blue-800 rounded-lg text-xs font-bold transition-colors shadow"
+                        >
+                            <FileText size={14} /> Tải DOCX (APA)
                         </button>
                         <button onClick={handlePrint} className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-lg text-xs font-bold transition-colors shadow">
                             <Printer size={14} /> Xuất PDF (A4)
