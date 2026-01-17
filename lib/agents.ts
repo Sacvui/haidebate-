@@ -275,6 +275,10 @@ export class AgentSession {
   private messages: AgentMessage[] = [];
   private finalizedTopic?: string;
   private finalizedModel?: string;
+  private finalizedModelChart?: string;
+  private finalizedOutline?: string;
+  private sessionId: string;
+  private userId?: string;
 
   constructor(
     public topic: string,
@@ -283,8 +287,13 @@ export class AgentSession {
     public level: AcademicLevel = "MASTER",
     public language: 'vi' | 'en' = 'vi',
     private writerKey?: string,
-    private criticKey?: string
-  ) { }
+    private criticKey?: string,
+    sessionId?: string,
+    userId?: string
+  ) {
+    this.sessionId = sessionId || `session_${Date.now()}`;
+    this.userId = userId;
+  }
 
   public updateTopic(newTopic: string) {
     this.topic = newTopic;
@@ -292,9 +301,24 @@ export class AgentSession {
     console.log("Topic updated to:", newTopic);
   }
 
-  public setFinalizedModel(model: string) {
+  public setFinalizedTopic(topic: string) {
+    this.finalizedTopic = topic;
+    console.log("Topic finalized:", topic.substring(0, 50) + "...");
+  }
+
+  public setFinalizedModel(model: string, chart?: string) {
     this.finalizedModel = model;
+    this.finalizedModelChart = chart;
     console.log("Model finalized");
+  }
+
+  public setFinalizedOutline(outline: string) {
+    this.finalizedOutline = outline;
+    console.log("Outline finalized");
+  }
+
+  public getSessionId(): string {
+    return this.sessionId;
   }
 
   public isUsingSameKey(): boolean {
@@ -373,14 +397,48 @@ export class AgentSession {
       console.log(`🔑 Writer using key: ${finalKey.substring(0, 10)}...`);
 
       let sysPrompt = "";
+      let contextAddition = "";
+
       switch (step) {
-        case '1_TOPIC': sysPrompt = TOPIC_WRITER_PROMPT; break;
-        case '2_MODEL': sysPrompt = getModelWriterPrompt(this.level); break;
-        case '3_OUTLINE': sysPrompt = getOutlineWriterPrompt(this.goal); break;
-        case '4_SURVEY': sysPrompt = getSurveyWriterPrompt(this.level); break;
+        case '1_TOPIC':
+          sysPrompt = TOPIC_WRITER_PROMPT;
+          break;
+        case '2_MODEL':
+          sysPrompt = getModelWriterPrompt(this.level);
+          // Add finalized topic as context
+          if (this.finalizedTopic) {
+            contextAddition = `\n\nĐỀ TÀI ĐÃ ĐƯỢC PHÊ DUYỆT (sử dụng làm nền tảng):\n"${this.finalizedTopic}"`;
+          }
+          break;
+        case '3_OUTLINE':
+          sysPrompt = getOutlineWriterPrompt(this.goal);
+          // Add finalized topic and model as context
+          if (this.finalizedTopic) {
+            contextAddition += `\n\nĐỀ TÀI ĐÃ PHÊ DUYỆT:\n"${this.finalizedTopic}"`;
+          }
+          if (this.finalizedModel) {
+            contextAddition += `\n\nMÔ HÌNH LÝ THUYẾT ĐÃ PHÊ DUYỆT:\n${this.finalizedModel.substring(0, 1000)}...`;
+          }
+          if (this.finalizedModelChart) {
+            contextAddition += `\n\nSƠ ĐỒ MÔ HÌNH:\n\`\`\`mermaid\n${this.finalizedModelChart}\n\`\`\``;
+          }
+          break;
+        case '4_SURVEY':
+          sysPrompt = getSurveyWriterPrompt(this.level);
+          // Add all finalized results as context
+          if (this.finalizedTopic) {
+            contextAddition += `\n\nĐỀ TÀI: "${this.finalizedTopic}"`;
+          }
+          if (this.finalizedModel) {
+            contextAddition += `\n\nMÔ HÌNH: ${this.finalizedModel.substring(0, 500)}...`;
+          }
+          if (this.finalizedOutline) {
+            contextAddition += `\n\nĐỀ CƯƠNG (trích đoạn): ${this.finalizedOutline.substring(0, 500)}...`;
+          }
+          break;
       }
 
-      const context = `CHỦ ĐỀ GỐC: ${this.topic}\nLOẠI HÌNH (OUTPUT): ${this.goal}\nĐỐI TƯỢNG: ${this.audience}\nTRÌNH ĐỘ: ${this.level}\nNGÔN NGỮ ĐẦU RA (OUTPUT LANGUAGE): ${this.language === 'en' ? 'ENGLISH (100%)' : 'VIETNAMESE (100%)'}`;
+      const context = `CHỦ ĐỀ GỐC: ${this.topic}\nLOẠI HÌNH (OUTPUT): ${this.goal}\nĐỐI TƯỢNG: ${this.audience}\nTRÌNH ĐỘ: ${this.level}\nNGÔN NGỮ ĐẦU RA (OUTPUT LANGUAGE): ${this.language === 'en' ? 'ENGLISH (100%)' : 'VIETNAMESE (100%)'}${contextAddition}`;;
 
       const prompt = previousCriticFeedback
         ? `${context}\n\nPHẢN HỒI CỦA CRITIC (Vòng trước): ${previousCriticFeedback}\n\n${sysPrompt}\nHãy cải thiện/viết tiếp dựa trên phản hồi này.`

@@ -225,6 +225,7 @@ export default function Home() {
                   language={formData.language}
                   apiKey={apiKey}
                   apiKeyCritic={apiKeyCritic}
+                  userId={user.id}
                 />
               </ErrorBoundary>
             )}

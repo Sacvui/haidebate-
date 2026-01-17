@@ -8,9 +8,11 @@ import { MermaidChart } from './MermaidChart';
 import { FinalReport } from './FinalReport';
 import { ThinkingAnimation } from './ThinkingAnimation';
 import { ShareableCard } from './ShareableCard';
+import { StepReview } from './StepReview';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { saveStepResult, type RoundsConfig } from '@/lib/kv';
 
 interface DebateManagerProps {
     topic: string;
@@ -20,6 +22,7 @@ interface DebateManagerProps {
     language: 'vi' | 'en';
     apiKey?: string;
     apiKeyCritic?: string;
+    userId?: string;
 }
 
 // Config rounds per step - Increased for more thorough refinement
@@ -40,14 +43,22 @@ const extractMermaidCode = (content: string): string => {
     return "";
 };
 
-export default function DebateManager({ topic, goal, audience, level, language, apiKey, apiKeyCritic }: DebateManagerProps) {
-    const [session] = useState(() => new AgentSession(topic, goal, audience, level, language, apiKey, apiKeyCritic));
+export default function DebateManager({ topic, goal, audience, level, language, apiKey, apiKeyCritic, userId }: DebateManagerProps) {
+    const [sessionId] = useState(() => `session_${Date.now()}`);
+    const [session] = useState(() => new AgentSession(topic, goal, audience, level, language, apiKey, apiKeyCritic, sessionId, userId));
+    const [roundsConfig, setRoundsConfig] = useState<RoundsConfig>({
+        '1_TOPIC': 3,
+        '2_MODEL': 3,
+        '3_OUTLINE': 3,
+        '4_SURVEY': 2
+    });
 
     const [currentStep, setCurrentStep] = useState<WorkflowStep>('1_TOPIC');
     const [messages, setMessages] = useState<AgentMessage[]>([]);
     const [isProcessing, setIsProcessing] = useState(false);
     const [roundCount, setRoundCount] = useState(0);
     const [stepCompleted, setStepCompleted] = useState(false);
+    const [showReview, setShowReview] = useState(false);
 
     // Phase 3 & 4 State
     const [showReport, setShowReport] = useState(false);
@@ -59,7 +70,23 @@ export default function DebateManager({ topic, goal, audience, level, language, 
     const bottomRef = useRef<HTMLDivElement>(null);
     const exportRef = useRef<HTMLDivElement>(null);
 
-    const maxRounds = ROUNDS_CONFIG[currentStep];
+    const maxRounds = roundsConfig[currentStep];
+
+    // Fetch rounds config from admin API
+    useEffect(() => {
+        const fetchConfig = async () => {
+            try {
+                const res = await fetch('/api/admin/config');
+                const data = await res.json();
+                if (data.config) {
+                    setRoundsConfig(data.config);
+                }
+            } catch (error) {
+                console.error('Failed to fetch rounds config:', error);
+            }
+        };
+        fetchConfig();
+    }, []);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -137,6 +164,7 @@ export default function DebateManager({ topic, goal, audience, level, language, 
             }
 
             setStepCompleted(true);
+            setShowReview(true); // ⭐ Trigger review mode
 
         } catch (error) {
             console.error("Error running debate:", error);
@@ -146,9 +174,43 @@ export default function DebateManager({ topic, goal, audience, level, language, 
         }
     };
 
+    const handleFinalize = async (userFinal: string, note?: string) => {
+        if (!userId) {
+            alert('Lỗi: Không tìm thấy userId');
+            return;
+        }
+
+        try {
+            // Save to database
+            await saveStepResult(userId, sessionId, currentStep, {
+                aiOutput: messages.filter(m => m.role === 'writer').pop()?.content || '',
+                userFinal,
+                mermaidCode: currentStep === '2_MODEL' ? variableChart : undefined,
+                status: 'finalized',
+                editedAt: new Date().toISOString(),
+                note
+            });
+
+            // Update session with finalized results
+            if (currentStep === '1_TOPIC') {
+                session.setFinalizedTopic(userFinal);
+            } else if (currentStep === '2_MODEL') {
+                session.setFinalizedModel(userFinal, variableChart);
+            } else if (currentStep === '3_OUTLINE') {
+                session.setFinalizedOutline(userFinal);
+            }
+
+            // Move to next step
+            handleNextStep();
+        } catch (error) {
+            console.error('Error saving step result:', error);
+            alert('Lỗi khi lưu kết quả. Vui lòng thử lại.');
+        }
+    };
+
     const handleNextStep = () => {
-        // Step 1 -> 2: Finalize Topic
-        if (currentStep === '1_TOPIC') {
+        // Step 1 -> 2: Finalize Topic (only if not from review)
+        if (currentStep === '1_TOPIC' && !showReview) {
             const lastWriterMsg = messages.filter(m => m.role === 'writer').pop();
             if (lastWriterMsg) {
                 const match = lastWriterMsg.content.match(/CHỐT ĐỀ TÀI:\s*(.*)/i) || lastWriterMsg.content.match(/\*\*CHỐT ĐỀ TÀI:\*\*\s*(.*)/i);
@@ -157,14 +219,17 @@ export default function DebateManager({ topic, goal, audience, level, language, 
                     session.updateTopic(newTopic);
                 }
             }
-            setCurrentStep('2_MODEL');
         }
+
+        // Transition to next step
+        if (currentStep === '1_TOPIC') setCurrentStep('2_MODEL');
         else if (currentStep === '2_MODEL') setCurrentStep('3_OUTLINE');
-        else if (currentStep === '3_OUTLINE') setCurrentStep('4_SURVEY'); // New Transition
+        else if (currentStep === '3_OUTLINE') setCurrentStep('4_SURVEY');
 
         setMessages([]);
         setRoundCount(0);
         setStepCompleted(false);
+        setShowReview(false);
     };
 
     const getStepNumber = (step: WorkflowStep) => {
@@ -256,96 +321,109 @@ export default function DebateManager({ topic, goal, audience, level, language, 
                 </div>
             </div>
 
-            {/* Chat Area */}
-            <div className="flex-1 bg-slate-50 rounded-xl border border-slate-200 p-6 overflow-y-auto min-h-[500px] mb-8 space-y-6">
-                {messages.length === 0 && (
-                    <div className="text-center text-slate-400 mt-20">
-                        <Bot size={48} className="mx-auto mb-4 opacity-50" />
-                        <p className="text-lg">Nhấn "Bắt Đầu" để AI tiến hành công việc.</p>
-                    </div>
-                )}
+            {/* Review Mode */}
+            {showReview ? (
+                <StepReview
+                    step={currentStep}
+                    aiOutput={messages.filter(m => m.role === 'writer').pop()?.content || ''}
+                    mermaidCode={currentStep === '2_MODEL' ? variableChart : undefined}
+                    onFinalize={handleFinalize}
+                    onCancel={() => setShowReview(false)}
+                />
+            ) : (
+                <>
+                    {/* Chat Area */}
+                    <div className="flex-1 bg-slate-50 rounded-xl border border-slate-200 p-6 overflow-y-auto min-h-[500px] mb-8 space-y-6">
+                        {messages.length === 0 && (
+                            <div className="text-center text-slate-400 mt-20">
+                                <Bot size={48} className="mx-auto mb-4 opacity-50" />
+                                <p className="text-lg">Nhấn "Bắt Đầu" để AI tiến hành công việc.</p>
+                            </div>
+                        )}
 
-                {messages.map((msg, idx) => {
-                    const chartCode = extractMermaidCode(msg.content);
-                    const contentWithoutChart = msg.content.replace(/```mermaid[\s\S]*?```/, '');
+                        {messages.map((msg, idx) => {
+                            const chartCode = extractMermaidCode(msg.content);
+                            const contentWithoutChart = msg.content.replace(/```mermaid[\\s\\S]*?```/, '');
 
-                    // Logic to determine if we should show a Divider
-                    const showDivider = idx === 0 || (msg.round && messages[idx - 1]?.round !== msg.round);
-                    const roundLabel = msg.round ? `Vòng ${msg.round}` : '';
+                            // Logic to determine if we should show a Divider
+                            const showDivider = idx === 0 || (msg.round && messages[idx - 1]?.round !== msg.round);
+                            const roundLabel = msg.round ? `Vòng ${msg.round}` : '';
 
-                    return (
-                        <React.Fragment key={idx}>
-                            {showDivider && msg.round && (
-                                <div className="flex items-center gap-4 my-6 opacity-30">
-                                    <div className="h-px bg-slate-400 flex-1"></div>
-                                    <span className="text-xs font-bold uppercase tracking-widest text-slate-500">{roundLabel}</span>
-                                    <div className="h-px bg-slate-400 flex-1"></div>
-                                </div>
-                            )}
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.4 }}
-                                className={cn(
-                                    "flex gap-4 max-w-4xl",
-                                    msg.role === 'writer' ? "mr-auto" : "ml-auto flex-row-reverse"
-                                )}
-                            >
-                                <div className={cn(
-                                    "w-10 h-10 rounded-full flex items-center justify-center shrink-0 shadow-sm",
-                                    msg.role === 'writer' ? "bg-blue-100 text-blue-600" : "bg-orange-100 text-orange-600"
-                                )}>
-                                    {msg.role === 'writer' ? <User size={20} /> : <Bot size={20} />}
-                                </div>
-
-                                <div className={cn(
-                                    "p-5 rounded-2xl shadow-sm text-sm leading-relaxed",
-                                    msg.role === 'writer' ? "bg-white text-slate-800 rounded-tl-none border border-slate-100"
-                                        : "bg-orange-50 text-slate-800 rounded-tr-none border border-orange-100"
-                                )}>
-                                    <div className="font-bold mb-2 uppercase text-xs tracking-wider opacity-70">
-                                        {msg.role === 'writer' ? "Người Viết (Writer)" : "Hội Đồng Phản Biện (Critic)"}
-                                    </div>
-                                    <div className="prose prose-sm max-w-none prose-p:my-1 prose-headings:my-2 prose-ul:my-1 prose-li:my-0">
-                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                            {contentWithoutChart}
-                                        </ReactMarkdown>
-                                    </div>
-
-                                    {/* Render Mermaid Chart if exits in this message */}
-                                    {chartCode && (
-                                        <div className="mt-4">
-                                            <div className="text-xs font-bold text-slate-400 mb-1 uppercase tracking-wide">Sơ đồ minh họa:</div>
-                                            <MermaidChart chart={chartCode} />
+                            return (
+                                <React.Fragment key={idx}>
+                                    {showDivider && msg.round && (
+                                        <div className="flex items-center gap-4 my-6 opacity-30">
+                                            <div className="h-px bg-slate-400 flex-1"></div>
+                                            <span className="text-xs font-bold uppercase tracking-widest text-slate-500">{roundLabel}</span>
+                                            <div className="h-px bg-slate-400 flex-1"></div>
                                         </div>
                                     )}
-                                </div>
-                            </motion.div>
-                        </React.Fragment>
-                    );
-                })}
-                <div ref={bottomRef} />
-            </div>
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.4 }}
+                                        className={cn(
+                                            "flex gap-4 max-w-4xl",
+                                            msg.role === 'writer' ? "mr-auto" : "ml-auto flex-row-reverse"
+                                        )}
+                                    >
+                                        <div className={cn(
+                                            "w-10 h-10 rounded-full flex items-center justify-center shrink-0 shadow-sm",
+                                            msg.role === 'writer' ? "bg-blue-100 text-blue-600" : "bg-orange-100 text-orange-600"
+                                        )}>
+                                            {msg.role === 'writer' ? <User size={20} /> : <Bot size={20} />}
+                                        </div>
 
-            {/* Thinking Animation Overlay - Sticky Top */}
-            {
-                isProcessing && (
-                    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3">
-                        <ThinkingAnimation />
+                                        <div className={cn(
+                                            "p-5 rounded-2xl shadow-sm text-sm leading-relaxed",
+                                            msg.role === 'writer' ? "bg-white text-slate-800 rounded-tl-none border border-slate-100"
+                                                : "bg-orange-50 text-slate-800 rounded-tr-none border border-orange-100"
+                                        )}>
+                                            <div className="font-bold mb-2 uppercase text-xs tracking-wider opacity-70">
+                                                {msg.role === 'writer' ? "Người Viết (Writer)" : "Hội Đồng Phản Biện (Critic)"}
+                                            </div>
+                                            <div className="prose prose-sm max-w-none prose-p:my-1 prose-headings:my-2 prose-ul:my-1 prose-li:my-0">
+                                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                    {contentWithoutChart}
+                                                </ReactMarkdown>
+                                            </div>
+
+                                            {/* Render Mermaid Chart if exits in this message */}
+                                            {chartCode && (
+                                                <div className="mt-4">
+                                                    <div className="text-xs font-bold text-slate-400 mb-1 uppercase tracking-wide">Sơ đồ minh họa:</div>
+                                                    <MermaidChart chart={chartCode} />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                </React.Fragment>
+                            );
+                        })}
+                        <div ref={bottomRef} />
                     </div>
-                )
-            }
 
-            {/* Hidden Export Card */}
-            <div className="fixed top-0 left-0 -z-50 opacity-0 pointer-events-none">
-                <ShareableCard
-                    ref={exportRef}
-                    topic={topic}
-                    level={level}
-                    goal={goal}
-                    content={messages.filter(m => m.role === 'writer').slice(-1)[0]?.content.slice(0, 300) + "..." || "..."}
-                />
-            </div>
+                    {/* Thinking Animation Overlay - Sticky Top */}
+                    {
+                        isProcessing && (
+                            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3">
+                                <ThinkingAnimation />
+                            </div>
+                        )
+                    }
+
+                    {/* Hidden Export Card */}
+                    <div className="fixed top-0 left-0 -z-50 opacity-0 pointer-events-none">
+                        <ShareableCard
+                            ref={exportRef}
+                            topic={topic}
+                            level={level}
+                            goal={goal}
+                            content={messages.filter(m => m.role === 'writer').slice(-1)[0]?.content.slice(0, 300) + "..." || "..."}
+                        />
+                    </div>
+                </>
+            )}
         </div >
     );
 }

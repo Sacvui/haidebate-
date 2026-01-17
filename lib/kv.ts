@@ -296,3 +296,103 @@ export async function tryClaimShareReward(userId: string, postUrl: string): Prom
 
     return { success: true };
 }
+
+// ============================================
+// SYSTEM CONFIG
+// ============================================
+
+export interface RoundsConfig {
+    '1_TOPIC': number;
+    '2_MODEL': number;
+    '3_OUTLINE': number;
+    '4_SURVEY': number;
+}
+
+const DEFAULT_ROUNDS_CONFIG: RoundsConfig = {
+    '1_TOPIC': 3,
+    '2_MODEL': 3,
+    '3_OUTLINE': 3,
+    '4_SURVEY': 2
+};
+
+export async function getRoundsConfig(): Promise<RoundsConfig> {
+    const config = await kv.get<RoundsConfig>('system:rounds_config');
+    return config || DEFAULT_ROUNDS_CONFIG;
+}
+
+export async function setRoundsConfig(config: RoundsConfig): Promise<void> {
+    await kv.set('system:rounds_config', config);
+}
+
+// ============================================
+// SESSION MANAGEMENT
+// ============================================
+
+export interface StepResult {
+    aiOutput: string;
+    userFinal?: string;
+    mermaidCode?: string;
+    status: 'draft' | 'finalized';
+    editedAt?: string;
+    note?: string;
+}
+
+export interface SessionData {
+    metadata: {
+        userId: string;
+        sessionId: string;
+        createdAt: string;
+        level: string;
+        language: 'vi' | 'en';
+    };
+    step1_topic?: StepResult;
+    step2_model?: StepResult;
+    step3_outline?: StepResult;
+    step4_survey?: StepResult;
+}
+
+export async function saveStepResult(
+    userId: string,
+    sessionId: string,
+    step: '1_TOPIC' | '2_MODEL' | '3_OUTLINE' | '4_SURVEY',
+    data: StepResult
+): Promise<void> {
+    const sessionKey = `session:${userId}:${sessionId}`;
+    const session = await kv.get<SessionData>(sessionKey) || {
+        metadata: {
+            userId,
+            sessionId,
+            createdAt: new Date().toISOString(),
+            level: 'MASTER',
+            language: 'vi'
+        }
+    };
+
+    const stepKey = `step${step.charAt(0)}_${step.split('_')[1].toLowerCase()}` as keyof Omit<SessionData, 'metadata'>;
+    session[stepKey] = data;
+
+    await kv.set(sessionKey, session);
+}
+
+export async function getFinalizedStepResult(
+    userId: string,
+    sessionId: string,
+    step: '1_TOPIC' | '2_MODEL' | '3_OUTLINE' | '4_SURVEY'
+): Promise<string | null> {
+    const sessionKey = `session:${userId}:${sessionId}`;
+    const session = await kv.get<SessionData>(sessionKey);
+    if (!session) return null;
+
+    const stepKey = `step${step.charAt(0)}_${step.split('_')[1].toLowerCase()}` as keyof Omit<SessionData, 'metadata'>;
+    const stepData = session[stepKey];
+
+    return stepData?.userFinal || stepData?.aiOutput || null;
+}
+
+export async function getSessionData(
+    userId: string,
+    sessionId: string
+): Promise<SessionData | null> {
+    const sessionKey = `session:${userId}:${sessionId}`;
+    return await kv.get<SessionData>(sessionKey);
+}
