@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Shield, Users, Search, Award, AlertTriangle, Save, Settings } from "lucide-react";
+import { Shield, Users, Search, Award, AlertTriangle, Save, Settings, PenTool, ExternalLink } from "lucide-react";
 import type { RoundsConfig } from "@/lib/kv";
 
 export default function AdminPage() {
@@ -12,7 +12,7 @@ export default function AdminPage() {
     const [users, setUsers] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
-    const [activeTab, setActiveTab] = useState<'users' | 'config'>('users');
+    const [activeTab, setActiveTab] = useState<'users' | 'config' | 'tools'>('users');
 
     // Edit state
     const [editingUser, setEditingUser] = useState<string | null>(null);
@@ -165,6 +165,16 @@ export default function AdminPage() {
                     >
                         <Settings className="inline mr-2" size={18} />
                         Cấu hình hệ thống
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('tools')}
+                        className={`px-6 py-2 rounded-lg font-medium transition-all ${activeTab === 'tools'
+                            ? 'bg-blue-600 text-white shadow-md'
+                            : 'bg-white text-slate-600 hover:bg-slate-50'
+                            }`}
+                    >
+                        <PenTool className="inline mr-2" size={18} />
+                        Công cụ AI
                     </button>
                 </div>
 
@@ -362,6 +372,38 @@ export default function AdminPage() {
                                     <li>Thay đổi sẽ áp dụng cho tất cả sessions mới</li>
                                     <li>Sessions đang chạy không bị ảnh hưởng</li>
                                 </ul>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Tools Tab */}
+                {activeTab === 'tools' && (
+                    <div className="bg-white rounded-xl shadow-lg p-8">
+                        <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                            <PenTool className="text-blue-600" />
+                            Kho Công Cụ AI
+                        </h2>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {/* Card: Post Writer */}
+                            <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl p-6 text-white shadow-lg relative overflow-hidden group hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer" onClick={() => router.push('/admin/post-writer')}>
+                                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                    <PenTool size={100} />
+                                </div>
+                                <h3 className="text-xl font-bold mb-2 relative z-10">Hải Rong Chơi Writer</h3>
+                                <p className="text-indigo-100 text-sm mb-4 relative z-10">
+                                    Viết content Facebook phong cách "Bụi bặm - Học thuật".
+                                </p>
+                                <button className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors relative z-10">
+                                    Truy cập ngay <ExternalLink size={14} />
+                                </button>
+                            </div>
+
+                            {/* Placeholder for future tools */}
+                            <div className="border border-dashed border-slate-300 rounded-xl p-6 flex flex-col items-center justify-center text-slate-400">
+                                <Shield size={40} className="mb-2 opacity-50" />
+                                <p className="text-sm font-medium">Sắp có công cụ mới...</p>
                             </div>
                         </div>
                     </div>
