@@ -402,23 +402,19 @@ export class AgentSession {
   public updateTopic(newTopic: string) {
     this.topic = newTopic;
     this.finalizedTopic = newTopic;
-    console.log("Topic updated to:", newTopic);
   }
 
   public setFinalizedTopic(topic: string) {
     this.finalizedTopic = topic;
-    console.log("Topic finalized:", topic.substring(0, 50) + "...");
   }
 
   public setFinalizedModel(model: string, chart?: string) {
     this.finalizedModel = model;
     this.finalizedModelChart = chart;
-    console.log("Model finalized");
   }
 
   public setFinalizedOutline(outline: string) {
     this.finalizedOutline = outline;
-    console.log("Outline finalized");
   }
 
   public getSessionId(): string {
@@ -498,8 +494,6 @@ export class AgentSession {
         return "⚠️ CHƯA CẤU HÌNH API KEY: Vui lòng vào Cài đặt (⚙️) để nhập API Key của bạn. Hệ thống không còn dùng key mặc định.";
       }
 
-      console.log(`🔑 Writer using key: ${finalKey.substring(0, 10)}...`);
-
       let sysPrompt = "";
       let contextAddition = "";
 
@@ -564,8 +558,6 @@ export class AgentSession {
     if (!geminiKey) {
       return "⚠️ CHƯA CẤU HÌNH API KEY: Vui lòng vào Cài đặt (⚙️) để nhập API Key.";
     }
-
-    console.log(`🔑 Critic using key: ${geminiKey.substring(0, 10)}...`);
     try {
       let sysPrompt = "";
       switch (step) {

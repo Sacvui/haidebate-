@@ -258,6 +258,16 @@ export default function DebateManager({ topic, goal, audience, level, language, 
         return 4;
     };
 
+    // Initial loading state
+    if (isLoadingConfig) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+                <p className="text-slate-600 font-medium">Đang tải cấu hình hệ thống...</p>
+            </div>
+        );
+    }
+
     if (showReport) {
         return (
             <FinalReport
@@ -348,6 +358,7 @@ export default function DebateManager({ topic, goal, audience, level, language, 
                     mermaidCode={currentStep === '2_MODEL' ? variableChart : undefined}
                     onFinalize={handleFinalize}
                     onCancel={() => setShowReview(false)}
+                    level={level}
                 />
             ) : (
                 <>
