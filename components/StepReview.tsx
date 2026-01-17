@@ -4,6 +4,8 @@ import { CheckCircle, Copy, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { MermaidChart } from './MermaidChart';
+import { CitationChecker } from './CitationChecker';
+import type { DOIVerificationResult } from '@/lib/doiVerifier';
 
 interface StepReviewProps {
     step: WorkflowStep;
@@ -32,6 +34,7 @@ export function StepReview({
     const [userFinal, setUserFinal] = useState(aiOutput);
     const [note, setNote] = useState("");
     const [copied, setCopied] = useState(false);
+    const [verificationResults, setVerificationResults] = useState<DOIVerificationResult[]>([]);
 
     const handleCopy = () => {
         navigator.clipboard.writeText(aiOutput);
@@ -57,6 +60,19 @@ export function StepReview({
 
         if (sanitized.length < 10) {
             alert('Nội dung quá ngắn. Vui lòng nhập ít nhất 10 ký tự.');
+            return;
+        }
+
+        // Check for fake DOIs
+        const hasFakeDOIs = verificationResults.some(r => !r.valid);
+        if (hasFakeDOIs) {
+            const fakeDOIs = verificationResults.filter(r => !r.valid);
+            alert(
+                `⚠️ CẢNH BÁO: Phát hiện ${fakeDOIs.length} DOI giả!\n\n` +
+                `Các DOI sau không hợp lệ:\n${fakeDOIs.map(r => `- ${r.doi}`).join('\n')}\n\n` +
+                `Vui lòng xóa hoặc sửa lại các DOI này trước khi tiếp tục.\n` +
+                `DOI giả vi phạm đạo đức nghiên cứu!`
+            );
             return;
         }
 
@@ -137,6 +153,12 @@ export function StepReview({
                     )}
                 </div>
             </div>
+
+            {/* Citation Checker */}
+            <CitationChecker
+                content={aiOutput}
+                onVerificationComplete={setVerificationResults}
+            />
 
             {/* Divider */}
             <div className="flex items-center gap-4 my-8">
