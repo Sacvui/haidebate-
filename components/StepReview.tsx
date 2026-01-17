@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { MermaidChart } from './MermaidChart';
 import { CitationChecker } from './CitationChecker';
+import { extractDOIs } from '@/lib/citationUtils';
 import type { DOIVerificationResult } from '@/lib/doiVerifier';
 
 interface StepReviewProps {
@@ -60,6 +61,20 @@ export function StepReview({
 
         if (sanitized.length < 10) {
             alert('Nội dung quá ngắn. Vui lòng nhập ít nhất 10 ký tự.');
+            return;
+        }
+
+        // Extract DOIs from content
+        const extractedDOIs = extractDOIs(aiOutput);
+
+        // Check if verification is required but not done
+        if (extractedDOIs.length > 0 && verificationResults.length === 0) {
+            alert(
+                '⚠️ CẢNH BÁO: Phát hiện DOI trong nội dung!\n\n' +
+                `Tìm thấy ${extractedDOIs.length} DOI chưa được verify.\n\n` +
+                'Vui lòng click "Verify Citations" để kiểm tra trước khi xác nhận.\n' +
+                'Điều này đảm bảo không có DOI giả trong nội dung.'
+            );
             return;
         }
 
