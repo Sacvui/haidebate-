@@ -9,6 +9,7 @@ import { FinalReport } from './FinalReport';
 import { ThinkingAnimation } from './ThinkingAnimation';
 import { ShareableCard } from './ShareableCard';
 import { StepReview } from './StepReview';
+import { ExportManager } from './ExportManager';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -60,6 +61,7 @@ export default function DebateManager({ topic, goal, audience, level, language, 
 
     // Phase 3 & 4 State
     const [showReport, setShowReport] = useState(false);
+    const [showExport, setShowExport] = useState(false);
     const [variableChart, setVariableChart] = useState<string | undefined>(undefined);
     const [finalContent, setFinalContent] = useState("");
     const [outlineContent, setOutlineContent] = useState(""); // Step 3 detailed outline
@@ -257,7 +259,8 @@ export default function DebateManager({ topic, goal, audience, level, language, 
         if (step === '1_TOPIC') return 1;
         if (step === '2_MODEL') return 2;
         if (step === '3_OUTLINE') return 3;
-        return 4;
+        if (step === '4_SURVEY') return 4;
+        return 5; // For future export step
     };
 
     // Initial loading state
@@ -267,6 +270,21 @@ export default function DebateManager({ topic, goal, audience, level, language, 
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
                 <p className="text-slate-600 font-medium">Đang tải cấu hình hệ thống...</p>
             </div>
+        );
+    }
+
+    if (showExport) {
+        return (
+            <ExportManager
+                topic={session.finalizedTopic || topic}
+                level={level}
+                goal={goal}
+                modelContent={session.finalizedModel}
+                outlineContent={session.finalizedOutline}
+                surveyContent={session.finalizedSurvey || surveyContent}
+                onBack={() => setShowExport(false)}
+                onViewReport={() => setShowReport(true)}
+            />
         );
     }
 
@@ -311,7 +329,7 @@ export default function DebateManager({ topic, goal, audience, level, language, 
                     </div>
                 </div>
 
-                <StepIndicator currentStep={getStepNumber(currentStep)} totalSteps={4} />
+                <StepIndicator currentStep={getStepNumber(currentStep)} totalSteps={5} />
 
                 <div className="flex items-center justify-between mt-2">
                     <div className="text-sm font-medium text-slate-500">
@@ -341,10 +359,10 @@ export default function DebateManager({ topic, goal, audience, level, language, 
 
                     {stepCompleted && currentStep === '4_SURVEY' && (
                         <button
-                            onClick={() => setShowReport(true)}
+                            onClick={() => setShowExport(true)}
                             className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-bold shadow-lg shadow-indigo-200"
                         >
-                            <FileText size={18} /> Xem Báo Cáo Tổng Hợp
+                            <FileText size={18} /> Chuyển sang Bước 5: Export
                         </button>
                     )}
                 </div>

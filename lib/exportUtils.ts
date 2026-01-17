@@ -1,0 +1,339 @@
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+import { AcademicLevel } from './agents';
+
+// Helper: Parse markdown table to array of objects
+interface SurveyRow {
+    variable: string;
+    code: string;
+    items: string;
+    source: string;
+}
+
+function parseSurveyTable(surveyContent: string): SurveyRow[] {
+    const rows: SurveyRow[] = [];
+    const lines = surveyContent.split('\n');
+
+    let inTable = false;
+    let headerPassed = false;
+
+    for (const line of lines) {
+        const trimmed = line.trim();
+
+        // Detect table start
+        if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
+            inTable = true;
+
+            // Skip header separator line (|---|---|---|---|)
+            if (trimmed.includes('---')) {
+                headerPassed = true;
+                continue;
+            }
+
+            // Skip header row
+            if (!headerPassed) {
+                continue;
+            }
+
+            // Parse data rows
+            const cells = trimmed
+                .split('|')
+                .map(cell => cell.trim())
+                .filter(cell => cell.length > 0);
+
+            if (cells.length >= 4) {
+                rows.push({
+                    variable: cells[0],
+                    code: cells[1],
+                    items: cells[2],
+                    source: cells[3]
+                });
+            }
+        } else if (inTable) {
+            // End of table
+            break;
+        }
+    }
+
+    return rows;
+}
+
+// Helper: Parse markdown outline to structured sections
+interface OutlineSection {
+    level: number;
+    title: string;
+    content: string[];
+}
+
+function parseOutline(outlineContent: string): OutlineSection[] {
+    const sections: OutlineSection[] = [];
+    const lines = outlineContent.split('\n');
+
+    let currentSection: OutlineSection | null = null;
+
+    for (const line of lines) {
+        const trimmed = line.trim();
+
+        // Detect headings (# or numbered like 1., 1.1, etc.)
+        const headingMatch = trimmed.match(/^(#{1,6})\s+(.+)$/);
+        const numberedMatch = trimmed.match(/^(\d+\.(?:\d+\.)*)\s+(.+)$/);
+
+        if (headingMatch) {
+            // Save previous section
+            if (currentSection) {
+                sections.push(currentSection);
+            }
+
+            currentSection = {
+                level: headingMatch[1].length,
+                title: headingMatch[2],
+                content: []
+            };
+        } else if (numberedMatch) {
+            // Save previous section
+            if (currentSection) {
+                sections.push(currentSection);
+            }
+
+            const level = numberedMatch[1].split('.').length - 1;
+            currentSection = {
+                level: level + 1,
+                title: numberedMatch[2],
+                content: []
+            };
+        } else if (trimmed.length > 0 && currentSection) {
+            // Add content to current section
+            currentSection.content.push(trimmed);
+        }
+    }
+
+    // Save last section
+    if (currentSection) {
+        sections.push(currentSection);
+    }
+
+    return sections;
+}
+
+// Export đề cương ra Word
+export async function exportOutlineToWord(
+    topic: string,
+    outline: string,
+    model: string,
+    level: AcademicLevel
+): Promise<Blob> {
+    const sections = parseOutline(outline);
+
+    const children: Paragraph[] = [
+        // Title page
+        new Paragraph({
+            text: 'ĐỀ CƯƠNG NGHIÊN CỨU CHI TIẾT',
+            heading: HeadingLevel.TITLE,
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 400 }
+        }),
+        new Paragraph({
+            text: topic,
+            heading: HeadingLevel.HEADING_1,
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 400 }
+        }),
+        new Paragraph({
+            children: [
+                new TextRun({
+                    text: `Trình độ: ${level}`,
+                    bold: true
+                })
+            ],
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 800 }
+        }),
+
+        // Model section
+        new Paragraph({
+            text: 'MÔ HÌNH NGHIÊN CỨU',
+            heading: HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 200 }
+        }),
+        new Paragraph({
+            text: model.substring(0, 500) + '...',
+            spacing: { after: 400 }
+        }),
+
+        // Outline sections
+        new Paragraph({
+            text: 'ĐỀ CƯƠNG CHI TIẾT',
+            heading: HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 200 }
+        })
+    ];
+
+    // Add parsed sections
+    for (const section of sections) {
+        const headingLevel = section.level === 1 ? HeadingLevel.HEADING_1 :
+            section.level === 2 ? HeadingLevel.HEADING_2 :
+                section.level === 3 ? HeadingLevel.HEADING_3 : HeadingLevel.HEADING_4;
+
+        children.push(new Paragraph({
+            text: section.title,
+            heading: headingLevel,
+            spacing: { before: 200, after: 100 }
+        }));
+
+        for (const content of section.content) {
+            children.push(new Paragraph({
+                text: content,
+                spacing: { after: 100 }
+            }));
+        }
+    }
+
+    const doc = new Document({
+        sections: [{
+            properties: {},
+            children
+        }]
+    });
+
+    return await Packer.toBlob(doc);
+}
+
+// Export đề cương ra PDF
+export async function exportOutlineToPDF(
+    topic: string,
+    outline: string,
+    model: string,
+    level: AcademicLevel
+): Promise<Blob> {
+    const doc = new jsPDF();
+
+    // Note: jsPDF has limited Vietnamese font support
+    // For production, you'd need to embed a Vietnamese font
+
+    let yPos = 20;
+
+    // Title
+    doc.setFontSize(16);
+    doc.text('DE CUONG NGHIEN CUU CHI TIET', 105, yPos, { align: 'center' });
+    yPos += 10;
+
+    doc.setFontSize(14);
+    doc.text(topic, 105, yPos, { align: 'center', maxWidth: 180 });
+    yPos += 15;
+
+    doc.setFontSize(10);
+    doc.text(`Trinh do: ${level}`, 105, yPos, { align: 'center' });
+    yPos += 20;
+
+    // Model section
+    doc.setFontSize(12);
+    doc.text('MO HINH NGHIEN CUU', 20, yPos);
+    yPos += 7;
+
+    doc.setFontSize(10);
+    const modelText = model.substring(0, 500).replace(/[^\x00-\x7F]/g, '?'); // Remove Vietnamese chars for now
+    const modelLines = doc.splitTextToSize(modelText, 170);
+    doc.text(modelLines, 20, yPos);
+    yPos += modelLines.length * 5 + 10;
+
+    // Outline
+    doc.setFontSize(12);
+    doc.text('DE CUONG CHI TIET', 20, yPos);
+    yPos += 7;
+
+    doc.setFontSize(10);
+    const outlineText = outline.substring(0, 1000).replace(/[^\x00-\x7F]/g, '?');
+    const outlineLines = doc.splitTextToSize(outlineText, 170);
+    doc.text(outlineLines, 20, yPos);
+
+    return doc.output('blob');
+}
+
+// Export survey ra Excel
+export async function exportSurveyToExcel(
+    surveyContent: string,
+    topic: string
+): Promise<Blob> {
+    const rows = parseSurveyTable(surveyContent);
+
+    // Create worksheet data
+    const wsData = [
+        ['ĐỀ TÀI:', topic],
+        [],
+        ['BẢNG THANG ĐO KHẢO SÁT'],
+        [],
+        ['Biến (Variable)', 'Mã (Code)', 'Câu hỏi (Items)', 'Nguồn gốc (Source)'],
+        ...rows.map(row => [row.variable, row.code, row.items, row.source])
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+    // Set column widths
+    ws['!cols'] = [
+        { wch: 20 },
+        { wch: 10 },
+        { wch: 50 },
+        { wch: 20 }
+    ];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Survey');
+
+    // Generate Excel file
+    const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    return new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+}
+
+// Export survey ra CSV (Microsoft Forms compatible)
+export async function exportSurveyToCSV(
+    surveyContent: string,
+    topic: string
+): Promise<Blob> {
+    const rows = parseSurveyTable(surveyContent);
+
+    // Microsoft Forms CSV format:
+    // Question,Option1,Option2,Option3,Option4,Option5
+
+    const csvRows: string[] = [
+        // Header
+        'Question,Option1,Option2,Option3,Option4,Option5'
+    ];
+
+    // Add each survey item as a question with Likert scale options
+    for (const row of rows) {
+        const question = `${row.code}: ${row.items}`;
+        const options = [
+            '1 - Hoàn toàn không đồng ý',
+            '2 - Không đồng ý',
+            '3 - Trung lập',
+            '4 - Đồng ý',
+            '5 - Hoàn toàn đồng ý'
+        ];
+
+        // Escape commas and quotes in question
+        const escapedQuestion = `"${question.replace(/"/g, '""')}"`;
+        const escapedOptions = options.map(opt => `"${opt}"`);
+
+        csvRows.push([escapedQuestion, ...escapedOptions].join(','));
+    }
+
+    const csvContent = csvRows.join('\n');
+
+    // Use UTF-8 BOM for Excel compatibility
+    const BOM = '\uFEFF';
+    return new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+}
+
+// Helper: Trigger download
+export function downloadBlob(blob: Blob, filename: string) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}

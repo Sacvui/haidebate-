@@ -12,7 +12,8 @@ const STEPS = [
     { id: 1, label: "Tên Đề Tài (Topic)" },
     { id: 2, label: "Mô Hình (Research Model)" },
     { id: 3, label: "Đề Cương (Outline)" },
-    { id: 4, label: "Khảo Sát (Survey)" }
+    { id: 4, label: "Khảo Sát (Survey)" },
+    { id: 5, label: "Export Files" }
 ];
 
 export function StepIndicator({ currentStep }: StepIndicatorProps) {
