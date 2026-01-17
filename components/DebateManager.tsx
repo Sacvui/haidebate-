@@ -25,14 +25,6 @@ interface DebateManagerProps {
     userId?: string;
 }
 
-// Config rounds per step - Increased for more thorough refinement
-const ROUNDS_CONFIG = {
-    '1_TOPIC': 3,    // Optimized for Quota
-    '2_MODEL': 3,
-    '3_OUTLINE': 3,
-    '4_SURVEY': 2
-};
-
 // Helper to extract mermaid code from markdown
 const extractMermaidCode = (content: string): string => {
     // Try to match code block with mermaid language

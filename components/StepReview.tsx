@@ -39,12 +39,38 @@ export function StepReview({
         setTimeout(() => setCopied(false), 2000);
     };
 
+    // Sanitize input to prevent XSS
+    const sanitizeInput = (input: string): string => {
+        return input
+            .replace(/<script[^>]*>.*?<\/script>/gi, '')
+            .replace(/<iframe[^>]*>.*?<\/iframe>/gi, '')
+            .trim();
+    };
+
     const handleFinalize = () => {
-        if (!userFinal.trim()) {
+        const sanitized = sanitizeInput(userFinal);
+
+        if (!sanitized) {
             alert('Vui lòng nhập nội dung trước khi xác nhận!');
             return;
         }
-        onFinalize(userFinal, note || undefined);
+
+        if (sanitized.length < 10) {
+            alert('Nội dung quá ngắn. Vui lòng nhập ít nhất 10 ký tự.');
+            return;
+        }
+
+        // Confirmation dialog
+        const confirmed = window.confirm(
+            'Bạn có chắc chắn muốn xác nhận?\n\n' +
+            'Sau khi xác nhận, bạn không thể quay lại sửa bước này.\n\n' +
+            'Hãy đảm bảo nội dung đã được GVHD phê duyệt.'
+        );
+
+        if (!confirmed) return;
+
+        const sanitizedNote = note ? sanitizeInput(note) : undefined;
+        onFinalize(sanitized, sanitizedNote);
     };
 
     return (
@@ -85,8 +111,8 @@ export function StepReview({
                     <button
                         onClick={handleCopy}
                         className={`text-xs px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5 transition-all ${copied
-                                ? 'bg-green-100 text-green-700 border border-green-300'
-                                : 'bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200'
+                            ? 'bg-green-100 text-green-700 border border-green-300'
+                            : 'bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200'
                             }`}
                     >
                         <Copy size={14} />
