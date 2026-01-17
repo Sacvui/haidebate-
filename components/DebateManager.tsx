@@ -12,7 +12,13 @@ import { StepReview } from './StepReview';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { saveStepResult, type RoundsConfig } from '@/lib/kv';
+
+interface RoundsConfig {
+    '1_TOPIC': number;
+    '2_MODEL': number;
+    '3_OUTLINE': number;
+    '4_SURVEY': number;
+}
 
 interface DebateManagerProps {
     topic: string;
@@ -173,15 +179,28 @@ export default function DebateManager({ topic, goal, audience, level, language, 
         }
 
         try {
-            // Save to database
-            await saveStepResult(userId, sessionId, currentStep, {
-                aiOutput: messages.filter(m => m.role === 'writer').pop()?.content || '',
-                userFinal,
-                mermaidCode: currentStep === '2_MODEL' ? variableChart : undefined,
-                status: 'finalized',
-                editedAt: new Date().toISOString(),
-                note
+            // Save to database via API
+            const response = await fetch('/api/session/save-step', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId,
+                    sessionId,
+                    step: currentStep,
+                    data: {
+                        aiOutput: messages.filter(m => m.role === 'writer').pop()?.content || '',
+                        userFinal,
+                        mermaidCode: currentStep === '2_MODEL' ? variableChart : undefined,
+                        status: 'finalized',
+                        editedAt: new Date().toISOString(),
+                        note
+                    }
+                })
             });
+
+            if (!response.ok) {
+                throw new Error('Failed to save step result');
+            }
 
             // Update session with finalized results
             if (currentStep === '1_TOPIC') {
@@ -196,7 +215,10 @@ export default function DebateManager({ topic, goal, audience, level, language, 
             handleNextStep();
         } catch (error) {
             console.error('Error saving step result:', error);
-            alert('Lỗi khi lưu kết quả. Vui lòng thử lại.');
+            const errorMessage = error instanceof Error
+                ? error.message
+                : 'Lỗi không xác định';
+            alert(`Lỗi khi lưu kết quả: ${errorMessage}\n\nVui lòng thử lại hoặc liên hệ admin.`);
         }
     };
 
