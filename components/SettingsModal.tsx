@@ -30,9 +30,16 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
         if (apiKey.trim()) {
             localStorage.setItem("gemini_api_key", apiKey.trim());
             if (apiKeyCritic.trim()) localStorage.setItem("gemini_api_key_critic", apiKeyCritic.trim());
-            alert("Đã lưu API Keys thành công!");
+            alert("✅ Đã lưu API Key riêng của bạn!\n\nHệ thống sẽ dùng quota của bạn thay vì key chung.");
             onClose();
             window.location.reload(); // Reload to apply key
+        } else {
+            // Clear if empty
+            localStorage.removeItem("gemini_api_key");
+            localStorage.removeItem("gemini_api_key_critic");
+            alert("ℹ️ Đã xóa API Key riêng.\n\nHệ thống sẽ dùng key chung (có giới hạn quota).");
+            onClose();
+            window.location.reload();
         }
     };
 
@@ -41,7 +48,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
         localStorage.removeItem("gemini_api_key_critic");
         setApiKey("");
         setApiKeyCritic("");
-        alert("Đã xóa API Key cá nhân. Hệ thống sẽ dùng Key mặc định.");
+        alert("🔄 Đã chuyển về dùng API Key chung của hệ thống.\n\nLưu ý: Key chung có giới hạn quota.");
         onClose();
         window.location.reload();
     };
@@ -77,24 +84,39 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                         </div>
 
                         <div className="space-y-4">
+                            {/* Info Banner */}
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
+                                <p className="text-blue-900 font-medium mb-1">ℹ️ Tùy chọn API Key</p>
+                                <p className="text-blue-700 text-xs">
+                                    • <b>Để trống:</b> Dùng API key chung của hệ thống (có giới hạn quota)<br />
+                                    • <b>Nhập key riêng:</b> Dùng quota của bạn, không giới hạn
+                                </p>
+                            </div>
+
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">API Key 1: Writer AI (Người Viết)</label>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">
+                                    API Key 1: Writer AI (Người Viết)
+                                    <span className="text-slate-400 font-normal ml-1">(Tùy chọn)</span>
+                                </label>
                                 <input
                                     type="password"
                                     value={apiKey}
                                     onChange={(e) => setApiKey(e.target.value)}
-                                    placeholder="sk-..."
+                                    placeholder="AIzaSy... (để trống nếu dùng key chung)"
                                     className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none font-mono text-sm"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">API Key 2: Critic AI (Người Phản Biện)</label>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">
+                                    API Key 2: Critic AI (Người Phản Biện)
+                                    <span className="text-slate-400 font-normal ml-1">(Tùy chọn)</span>
+                                </label>
                                 <input
                                     type="password"
                                     value={apiKeyCritic}
                                     onChange={(e) => setApiKeyCritic(e.target.value)}
-                                    placeholder="sk-..."
+                                    placeholder="AIzaSy... (để trống nếu dùng key chung)"
                                     className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-orange-500 outline-none font-mono text-sm"
                                 />
                                 <p className="text-xs text-slate-500 mt-2">
