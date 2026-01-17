@@ -9,15 +9,16 @@ interface FinalReportProps {
     topic: string;
     goal: string;
     audience: string;
-    level: string; // Added level
-    finalContent: string;
-    variableChart?: string;
-    surveyContent?: string;
+    level: string;
+    finalContent?: string; // Optional legacy prop
+    modelContent?: string;
     outlineContent?: string;
+    surveyContent?: string;
+    variableChart?: string;
     onBack: () => void;
 }
 
-export const FinalReport = ({ topic, goal, audience, level, finalContent, variableChart, surveyContent, outlineContent, onBack }: FinalReportProps) => {
+export const FinalReport = ({ topic, goal, audience, level, finalContent, modelContent, variableChart, surveyContent, outlineContent, onBack }: FinalReportProps) => {
     const [includeChart, setIncludeChart] = useState(true);
     const [showOutlineModal, setShowOutlineModal] = useState(false);
 
@@ -78,9 +79,32 @@ export const FinalReport = ({ topic, goal, audience, level, finalContent, variab
 
                     {/* 2. MAIN CONTENT (Introduction, Lit Review, etc.) */}
                     <div className="prose prose-slate max-w-none font-serif prose-headings:font-bold prose-headings:font-serif prose-headings:uppercase prose-headings:text-base prose-p:indent-8 prose-p:text-justify prose-p:leading-7 text-black">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                            {finalContent}
-                        </ReactMarkdown>
+                        {/* Section 1: Model & Theory */}
+                        {modelContent && (
+                            <div className="mb-12">
+                                <h2 className="text-xl font-bold uppercase mb-4">I. Cơ Sở Lý Thuyết & Mô Hình</h2>
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                    {modelContent}
+                                </ReactMarkdown>
+                            </div>
+                        )}
+
+                        {/* Section 2: Outline */}
+                        {outlineContent && (
+                            <div className="mb-12">
+                                <h2 className="text-xl font-bold uppercase mb-4">II. Đề Cương Chi Tiết</h2>
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                    {outlineContent}
+                                </ReactMarkdown>
+                            </div>
+                        )}
+
+                        {/* Fallback for legacy Final Content if strictly needed */}
+                        {finalContent && !modelContent && !outlineContent && (
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                {finalContent}
+                            </ReactMarkdown>
+                        )}
                     </div>
 
                     {/* 3. FIGURES (SEM Model) - "Kéo xuống mô hình xịn" */}

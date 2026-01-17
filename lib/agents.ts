@@ -377,10 +377,11 @@ export class AgentSession {
   // I will just replace the "WorkflowStep" line and inject the prompts before "export class AgentSession".
 
   private messages: AgentMessage[] = [];
-  private finalizedTopic?: string;
-  private finalizedModel?: string;
-  private finalizedModelChart?: string;
-  private finalizedOutline?: string;
+  public finalizedTopic?: string;
+  public finalizedModel?: string;
+  public finalizedModelChart?: string;
+  public finalizedOutline?: string;
+  public finalizedSurvey?: string;
   private sessionId: string;
   private userId?: string;
 
@@ -415,6 +416,10 @@ export class AgentSession {
 
   public setFinalizedOutline(outline: string) {
     this.finalizedOutline = outline;
+  }
+
+  public setFinalizedSurvey(survey: string) {
+    this.finalizedSurvey = survey;
   }
 
   public getSessionId(): string {

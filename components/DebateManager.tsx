@@ -214,6 +214,8 @@ export default function DebateManager({ topic, goal, audience, level, language, 
                 session.setFinalizedModel(userFinal, variableChart);
             } else if (currentStep === '3_OUTLINE') {
                 session.setFinalizedOutline(userFinal);
+            } else if (currentStep === '4_SURVEY') {
+                session.setFinalizedSurvey(userFinal);
             }
 
             // Move to next step
@@ -271,14 +273,14 @@ export default function DebateManager({ topic, goal, audience, level, language, 
     if (showReport) {
         return (
             <FinalReport
-                topic={topic}
+                topic={session.finalizedTopic || ""}
                 goal={goal}
                 audience={audience}
                 level={level}
-                finalContent={finalContent}
-                variableChart={variableChart}
-                surveyContent={surveyContent}
-                outlineContent={outlineContent}
+                modelContent={session.finalizedModel}
+                outlineContent={session.finalizedOutline}
+                surveyContent={session.finalizedSurvey || surveyContent} // Fallback to state if not yet in session
+                variableChart={session.finalizedModelChart || variableChart}
                 onBack={() => setShowReport(false)}
             />
         );
