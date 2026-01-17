@@ -98,6 +98,18 @@ const getCriticPersona = (level: AcademicLevel) => {
 const TOPIC_WRITER_PROMPT = `
 NHIỆM VỤ: Đề xuất/tinh chỉnh Tên Đề Tài nghiên cứu.
 
+VÍ DỤ MẪU (FEW-SHOT EXAMPLES):
+
+VÍ DỤ 1: ĐỀ TÀI TỐT (9/10)
+Input: "Nghiên cứu ảnh hưởng của AI đến nhân viên"
+Output: "Tác động của trí tuệ nhân tạo (AI) đến hiệu suất làm việc và sự hài lòng công việc của nhân viên văn phòng tại Việt Nam: Vai trò điều tiết của nỗi lo mất việc làm"
+✅ Lý do tốt: Cụ thể (đối tượng, phạm vi), có biến cụ thể (hiệu suất, hài lòng), có tính mới (nỗi lo mất việc).
+
+VÍ DỤ 2: ĐỀ TÀI YẾU (4/10)
+Input: "Nghiên cứu về chuyển đổi số"
+Output: "Nghiên cứu về chuyển đổi số trong doanh nghiệp"
+❌ Lý do yếu: Quá chung chung, không rõ biến nghiên cứu, không có bối cảnh cụ thể.
+
 QUY TRÌNH:
 1. Phân tích input/phản biện
 2. Đề xuất:
@@ -109,19 +121,38 @@ YÊU CẦU: Ngắn gọn, tập trung tính mới và cấp thiết.
 `;
 
 const TOPIC_CRITIC_PROMPT = `
-PHẢN BIỆN ĐỀ TÀI:
+PHẢN BIỆN ĐỀ TÀI - RUBRIC CHI TIẾT (BẮT BUỘC CHẤM ĐIỂM):
 
-1. Tính mới: So với nghiên cứu hiện có?
-2. Khả thi: Dữ liệu/Phương pháp đo?
-3. Rõ ràng: Tên đề tài hiểu ngay?
-4. **KIỂM TRA TRÍCH DẪN (QUAN TRỌNG NHẤT):**
-   - Writer có bịa đặt nguồn không?
-   - DOI có hoạt động không?
-   - **TUYỆT ĐỐI KHÔNG TỰ BỊA DẪN CHỨNG GIẢ ĐỂ PHẢN BÁC.** Nếu bạn (Critic) đưa ra gợi ý nguồn, nó PHẢI CÓ THẬT.
+1. TÍNH MỚI (NOVELTY) - 3 điểm:
+   - So với nghiên cứu trước đây?
+   - Có gap nghiên cứu rõ ràng không?
 
-OUTPUT:
-❌ Lỗi: [Vấn đề]
-➡️ Sửa: [Cách cụ thể]
+2. TÍNH KHẢ THI (FEASIBILITY) - 3 điểm:
+   - Dữ liệu có thể thu thập không?
+   - Phương pháp đo lường có sẵn không?
+
+3. TÍNH RÕ RÀNG (CLARITY) - 2 điểm:
+   - Tên đề tài có dễ hiểu?
+   - Các biến có được xác định rõ?
+
+4. PHẠM VI (SCOPE) - 2 điểm:
+   - Không quá rộng cũng không quá hẹp?
+   - Phù hợp với trình độ (Undergrad/Master/PhD)?
+
+TỔNG ĐIỂM: .../10
+
+NẾU < 9 ĐIỂM:
+❌ KẾT LUẬN: KHÔNG DUYỆT (REJECT) - Yêu cầu sửa cụ thể.
+
+KIỂM TRA TRÍCH DẪN (QUAN TRỌNG NHẤT):
+- Writer có bịa đặt nguồn không?
+- DOI có hoạt động không?
+- **TUYỆT ĐỐI KHÔNG TỰ BỊA DẪN CHỨNG GIẢ ĐỂ PHẢN BÁC.** Nếu bạn (Critic) đưa ra gợi ý nguồn, nó PHẢI CÓ THẬT.
+
+OUTPUT FORM:
+📊 ĐIỂM SỐ: .../10
+❌ Lỗi chính: [Vấn đề]
+➡️ Đề xuất sửa: [Cách cụ thể]
 ⚠️ Cảnh báo DOI: [Nếu phát hiện nghi vấn]
 `;
 
