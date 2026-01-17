@@ -32,14 +32,55 @@ export default function AdminPage() {
     useEffect(() => {
         if (status === "loading") return;
 
-        if (!session || session.user?.email !== "foreverlove3004@gmail.com") {
-            router.push("/"); // Kick unauthorized users
+        console.log("Admin Page Auth Check:", {
+            status,
+            email: session?.user?.email,
+            isAdmin: session?.user?.email?.toLowerCase() === "foreverlove3004@gmail.com"
+        });
+
+        const adminEmail = "foreverlove3004@gmail.com";
+        const currentUserEmail = session?.user?.email?.toLowerCase();
+
+        if (!session || currentUserEmail !== adminEmail) {
+            // Instead of auto-redirect which causes confusion/loops, show denied state or redirect after delay
+            // router.push("/"); 
+            setIsLoading(false); // Stop loading to show denied UI
             return;
         }
 
         fetchUsers();
         fetchConfig();
     }, [session, status, router]);
+
+    // UI Handling for Unauthorized
+    if (status === "loading") return <div className="p-10 text-center">Đang kiểm tra quyền Admin...</div>;
+
+    if (!session || session.user?.email?.toLowerCase() !== "foreverlove3004@gmail.com") {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center p-4">
+                <AlertTriangle size={48} className="text-red-500 mb-4" />
+                <h1 className="text-2xl font-bold text-red-600 mb-2">Truy cập bị từ chối</h1>
+                <p className="text-slate-600 mb-6 text-center max-w-md">
+                    Bạn đang đăng nhập với email: <strong>{session?.user?.email || "Chưa đăng nhập"}</strong>.<br />
+                    Email này không có quyền truy cập trang Admin.
+                </p>
+                <div className="flex gap-4">
+                    <button
+                        onClick={() => router.push("/")}
+                        className="px-6 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-slate-800 font-medium"
+                    >
+                        Về Trang Chủ
+                    </button>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium"
+                    >
+                        Thử lại
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     const fetchUsers = async () => {
         try {
@@ -120,11 +161,9 @@ export default function AdminPage() {
         }
     };
 
-    if (status === "loading" || isLoading) {
-        return <div className="min-h-screen flex items-center justify-center bg-slate-100">Loading Admin...</div>;
+    if (isLoading) {
+        return <div className="min-h-screen flex items-center justify-center bg-slate-100">Loading Admin Dashboard...</div>;
     }
-
-    if (!session || session.user?.email !== "foreverlove3004@gmail.com") return null;
 
     const filteredUsers = users.filter(u =>
         u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
