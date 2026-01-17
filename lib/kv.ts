@@ -302,10 +302,7 @@ export async function tryClaimShareReward(userId: string, postUrl: string): Prom
 // ============================================
 
 export interface RoundsConfig {
-    '1_TOPIC': number;
-    '2_MODEL': number;
-    '3_OUTLINE': number;
-    '4_SURVEY': number;
+    [step: string]: number;
 }
 
 const DEFAULT_ROUNDS_CONFIG: RoundsConfig = {
@@ -395,4 +392,23 @@ export async function getSessionData(
 ): Promise<SessionData | null> {
     const sessionKey = `session:${userId}:${sessionId}`;
     return await kv.get<SessionData>(sessionKey);
+}
+
+
+
+// ============================================
+// PROMPT CONFIG (Hải Rong Chơi)
+// ============================================
+
+export interface PostWriterPrompts {
+    writer: string;
+    critic: string;
+}
+
+export async function savePostPrompts(prompts: PostWriterPrompts) {
+    await kv.set('config:prompt:post_writer', prompts);
+}
+
+export async function getPostPrompts(): Promise<PostWriterPrompts | null> {
+    return await kv.get<PostWriterPrompts>('config:prompt:post_writer');
 }

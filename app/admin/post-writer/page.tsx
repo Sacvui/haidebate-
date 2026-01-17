@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Bot, Copy, RefreshCw, Send, Lock, FileText, Check, MessageSquare } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Bot, Copy, RefreshCw, Send, Lock, FileText, Check, MessageSquare, Settings, X, Save } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
 
@@ -21,6 +21,53 @@ export default function PostWriterPage() {
     const [isCopied, setIsCopied] = useState(false);
     const [statusText, setStatusText] = useState('');
 
+    // Settings State
+    const [showSettings, setShowSettings] = useState(false);
+    const [writerPrompt, setWriterPrompt] = useState('');
+    const [criticPrompt, setCriticPrompt] = useState('');
+    const [loadingPrompts, setLoadingPrompts] = useState(false);
+
+    // Initial load prompts when opening settings
+    useEffect(() => {
+        if (showSettings) {
+            fetchPrompts();
+        }
+    }, [showSettings]);
+
+    const fetchPrompts = async () => {
+        setLoadingPrompts(true);
+        try {
+            const res = await fetch('/api/admin/prompts');
+            const data = await res.json();
+            if (data.prompts) {
+                setWriterPrompt(data.prompts.writer);
+                setCriticPrompt(data.prompts.critic);
+            }
+        } catch (error) {
+            toast.error('Không tải được cấu hình Prompts');
+        } finally {
+            setLoadingPrompts(false);
+        }
+    };
+
+    const handleSavePrompts = async () => {
+        try {
+            const res = await fetch('/api/admin/prompts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ writer: writerPrompt, critic: criticPrompt })
+            });
+            if (res.ok) {
+                toast.success('Đã lưu cấu hình Prompt mới!');
+                setShowSettings(false);
+            } else {
+                toast.error('Lỗi khi lưu cấu hình');
+            }
+        } catch (error) {
+            toast.error('Lỗi kết nối');
+        }
+    };
+
     const handleGenerate = async () => {
         if (!topic.trim()) {
             toast.error('Vui lòng nhập chủ đề hoặc ý tưởng!');
@@ -33,7 +80,6 @@ export default function PostWriterPage() {
         setStatusText('Khởi động Debate System...');
 
         try {
-            // Simulation of progress text since fetch is one-shot (unless we stream, but for now simple)
             const progressInterval = setInterval(() => {
                 setStatusText(prev => {
                     if (prev.includes('Khởi động')) return 'Round 1: Writer đang viết nháp...';
@@ -79,19 +125,28 @@ export default function PostWriterPage() {
     };
 
     return (
-        <div className="p-6 max-w-7xl mx-auto h-screen flex flex-col">
-            <header className="mb-6 flex-none">
-                <h1 className="text-3xl font-bold flex items-center gap-3 text-slate-800">
-                    <Bot className="w-10 h-10 text-blue-600" />
-                    Hải Rong Chơi Writer <span className="text-sm font-normal bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Pro Debate Mode</span>
-                </h1>
-                <p className="text-slate-500 mt-2">
-                    Hệ thống tranh luận 3 vòng: Writer (Viết/Sửa) vs Critic (Sấy/Duyệt) để tạo content "Bụi & Đỉnh".
-                </p>
+        <div className="p-6 max-w-7xl mx-auto h-screen flex flex-col relative">
+            <header className="mb-6 flex-none flex justify-between items-center">
+                <div>
+                    <h1 className="text-3xl font-bold flex items-center gap-3 text-slate-800">
+                        <Bot className="w-10 h-10 text-blue-600" />
+                        Hải Rong Chơi Writer <span className="text-sm font-normal bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Pro Debate Mode</span>
+                    </h1>
+                    <p className="text-slate-500 mt-2">
+                        Hệ thống tranh luận 3 vòng: Writer (Viết/Sửa) vs Critic (Sấy/Duyệt) để tạo content "Bụi & Đỉnh".
+                    </p>
+                </div>
+                <button
+                    onClick={() => setShowSettings(true)}
+                    className="p-2 rounded-full hover:bg-slate-200 text-slate-600 transition-colors"
+                    title="Cấu hình Prompt"
+                >
+                    <Settings size={24} />
+                </button>
             </header>
 
             <div className="grid grid-cols-12 gap-6 flex-1 min-h-0">
-                {/* LEFT: INPUT (3 cols) */}
+                {/* LEFT: INPUT */}
                 <div className="col-span-3 bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-col h-full overflow-y-auto">
                     <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                         <FileText size={20} /> Input
@@ -160,7 +215,7 @@ export default function PostWriterPage() {
                     </div>
                 </div>
 
-                {/* MIDDLE: DEBATE PROCESS (4 cols) */}
+                {/* MIDDLE: DEBATE LOG */}
                 <div className="col-span-4 bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col h-full overflow-hidden">
                     <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-700">
                         <MessageSquare size={20} /> Diễn biến (Debate Log)
@@ -189,7 +244,7 @@ export default function PostWriterPage() {
                     </div>
                 </div>
 
-                {/* RIGHT: FINAL RESULT (5 cols) */}
+                {/* RIGHT: RESULT */}
                 <div className="col-span-5 bg-white p-6 rounded-xl border border-slate-200 flex flex-col h-full shadow-lg">
                     <div className="flex justify-between items-center mb-4 flex-none">
                         <h2 className="text-lg font-semibold flex items-center gap-2 text-green-700">
@@ -224,6 +279,70 @@ export default function PostWriterPage() {
                     </div>
                 </div>
             </div>
+
+            {/* SETTINGS MODAL */}
+            {showSettings && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+                        <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                            <h2 className="text-xl font-bold flex items-center gap-2">
+                                <Settings className="text-slate-600" /> Cấu hình Persona (Hải Rong Chơi)
+                            </h2>
+                            <button onClick={() => setShowSettings(false)} className="text-slate-400 hover:text-slate-600">
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-6 grid grid-cols-2 gap-6 bg-slate-50">
+                            {loadingPrompts ? (
+                                <div className="col-span-2 text-center py-20">Loading configuration...</div>
+                            ) : (
+                                <>
+                                    <div className="flex flex-col h-[500px]">
+                                        <label className="font-bold mb-2 flex items-center gap-2 text-blue-700">
+                                            ✍️ Writer Prompt
+                                            <span className="text-xs font-normal text-slate-500 bg-slate-200 px-2 rounded">Người viết</span>
+                                        </label>
+                                        <textarea
+                                            value={writerPrompt}
+                                            onChange={(e) => setWriterPrompt(e.target.value)}
+                                            className="flex-1 p-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-mono text-xs leading-relaxed resize-none"
+                                            placeholder="Nhập prompt cho writer..."
+                                        />
+                                    </div>
+                                    <div className="flex flex-col h-[500px]">
+                                        <label className="font-bold mb-2 flex items-center gap-2 text-red-700">
+                                            👺 Critic Prompt
+                                            <span className="text-xs font-normal text-slate-500 bg-slate-200 px-2 rounded">Người chửi</span>
+                                        </label>
+                                        <textarea
+                                            value={criticPrompt}
+                                            onChange={(e) => setCriticPrompt(e.target.value)}
+                                            className="flex-1 p-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 font-mono text-xs leading-relaxed resize-none"
+                                            placeholder="Nhập prompt cho critic..."
+                                        />
+                                    </div>
+                                </>
+                            )}
+                        </div>
+
+                        <div className="p-4 border-t border-slate-200 bg-white flex justify-end gap-3">
+                            <button
+                                onClick={() => setShowSettings(false)}
+                                className="px-6 py-2 rounded-lg text-slate-600 hover:bg-slate-100 font-medium"
+                            >
+                                Hủy bỏ
+                            </button>
+                            <button
+                                onClick={handleSavePrompts}
+                                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold flex items-center gap-2 shadow-lg hover:shadow-xl transform active:scale-95 transition-all"
+                            >
+                                <Save size={18} /> Lưu Cấu Hình
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
