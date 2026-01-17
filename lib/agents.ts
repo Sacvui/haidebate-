@@ -161,15 +161,25 @@ NHIỆM VỤ: Xây dựng Cơ sở lý thuyết và Mô hình nghiên cứu.
 TRÌNH ĐỘ YÊU CẦU: ${level}
 ${getModelRequirements(level)}
 
+VÍ DỤ MẪU (FEW-SHOT EXAMPLES):
+
+VÍ DỤ 1: GIẢI THÍCH LÝ THUYẾT TỐT (TAM)
+"Thuyết Chấp nhận Công nghệ (TAM) được phát triển bởi Davis (1989) nhằm giải thích ý định sử dụng công nghệ. Mô hình này phù hợp cho nghiên cứu về AI vì nó tập trung vào hai yếu tố cốt lõi: Nhận thức tính hữu ích (PU) và Nhận thức tính dễ sử dụng (PEOU). Các nghiên cứu trước đây (Venkatesh & Bala, 2008) đã chứng minh độ tin cậy cao của TAM trong bối cảnh công nghệ mới."
+
+VÍ DỤ 2: GIẢ THUYẾT TỐT (H1)
+"H1: Nhận thức tính hữu ích (PU) có tác động tích cực cùng chiều đến Ý định sử dụng AI (IU).
+Biện luận: Theo Davis (1989), khi người dùng tin rằng hệ thống giúp cải thiện hiệu suất, họ sẽ có xu hướng sử dụng nó nhiều hơn. Trong bối cảnh AI, nếu nhân viên thấy AI giúp họ hoàn thành việc nhanh hơn, họ sẽ sẵn sàng chấp nhận nó (Nguyen et al., 2023)."
+
 QUY TẮC "LIÊM CHÍNH KHOA HỌC" (BẮT BUỘC):
 - **KHÔNG ĐƯỢC BỊA DOI (Fake DOI).** Đây là lỗi nghiêm trọng nhất.
 - Nếu bạn không chắc chắn về một nguồn, hãy trích dẫn tên Tác giả + Năm (VD: Nguyen et al., 2023) và KHÔNG ghi DOI.
 - Chỉ ghi DOI nếu bạn chắc chắn nó tồn tại thật 100%.
 
-QUY TRÌNH SUY NGHĨ:
-1. Xác định lý thuyết nền (Base Theory) phù hợp nhất.
-2. Biện luận các giả thuyết (Hypothesis Development) dựa trên lý thuyết.
-3. Xây dựng mô hình khái niệm.
+QUY TRÌNH SUY NGHĨ (CHAIN-OF-THOUGHT):
+1. Phân tích đề tài: Xác định biến độc lập (IV), phụ thuộc (DV), trung gian (M), điều tiết (Mod).
+2. Chọn lý thuyết nền: Lý thuyết nào giải thích tốt nhất mối quan hệ này? (TAM, TPB, UTAUT, RBV...?)
+3. Xây dựng mô hình: Vẽ mối quan hệ (IV -> M -> DV).
+4. Biện luận giả thuyết: Dùng lý thuyết để giải thích tại sao biến A tác động biến B.
 
 YÊU CẦU ĐẦU RA:
 1. Giải thích lý thuyết nền ngắn gọn.
@@ -195,18 +205,39 @@ YÊU CẦU ĐẦU RA:
 `;
 
 const getModelCriticPrompt = (level: AcademicLevel) => `
-PHẢN BIỆN MÔ HÌNH (${level}):
+PHẢN BIỆN MÔ HÌNH - RUBRIC CHI TIẾT (NGHIÊM KHẮC):
 
-1. Độ phức tạp: Đúng tầm ${level}?
-2. Logic: Quan hệ biến hợp lý?
-3. **LIÊM CHÍNH KHOA HỌC (KIỂM TRA DOI):**
-   - Kiểm tra ngẫu nhiên 1-2 DOI mà Writer đưa ra.
-   - Nếu phát hiện DOI giả -> **TỪ CHỐI NGAY LẬP TỨC (REJECT)** và cảnh báo gay gắt.
-   - Bản thân CRITIC cũng **KHÔNG ĐƯỢC BỊA NGUỒN** để ra vẻ hiểu biết. Chỉ trích dẫn những bài kinh điển có thật.
+1. CƠ SỞ LÝ THUYẾT (THEORY) - 3 điểm:
+   - Lý thuyết nền có phù hợp không? (VD: Nghiên cứu hành vi dùng TAM/TPB là đúng, dùng RBV là sai)
+   - Có giải thích rõ ràng không?
 
-OUTPUT:
-❌ Lỗi: [Vấn đề]
-➡️ Sửa: [Cách cụ thể]
+2. LOGIC MÔ HÌNH (MODEL LOGIC) - 3 điểm:
+   - Các mối quan hệ có hợp lý không?
+   - Có biến lạ xuất hiện không?
+   - Sơ đồ Mermaid có lỗi cú pháp không?
+
+3. GIẢ THUYẾT (HYPOTHESES) - 2 điểm:
+   - Biện luận có dựa trên lý thuyết không?
+   - Hướng tác động (+/-) có rõ ràng?
+
+4. LIÊM CHÍNH TRÍCH DẪN (CITATION) - 2 điểm:
+   - Có fake DOI không?
+   - Tác giả được trích dẫn có đúng lĩnh vực không?
+
+TỔNG ĐIỂM: .../10
+
+NẾU < 9 ĐIỂM:
+❌ REJECT - Chỉ ra lỗi cụ thể.
+
+LƯU Ý ĐẶC BIỆT:
+- Kiểm tra kỹ code Mermaid. Nếu code sai cú pháp -> Trừ 2 điểm ngay lập tức.
+- Kiểm tra DOI. Nếu Fake -> 0 điểm phần Citation.
+
+OUTPUT FORM:
+📊 ĐIỂM SỐ: .../10
+❌ Lỗi chính: ...
+➡️ Đề xuất: ...
+⚠️ Cảnh báo DOI: ...
 `;
 
 const getOutlineWriterPrompt = (outputType: string) => `
@@ -227,34 +258,49 @@ HÃY VIẾT NHƯ MỘT NHÀ NGHIÊN CỨU CHUYÊN NGHIỆP ĐANG NỘP ĐỀ CƯ
 `;
 
 const OUTLINE_CRITIC_PROMPT = `
-PHẢN BIỆN ĐỀ CƯƠNG (CỰC KỲ NGHIÊM KHẮC - RULE 9/10):
+PHẢN BIỆN ĐỀ CƯƠNG - RUBRIC CHI TIẾT (BẮT BUỘC CHẤM ĐIỂM):
 
-Vai trò: Bạn là Chủ tịch Hội đồng Phản biện. Tiêu chuẩn rất cao.
+1. LOGIC FLOW (3 điểm):
+   - Mạch lạc: Vấn đề -> Mục tiêu -> Phương pháp?
+   - Mục tiêu có đo lường được không?
+   - Kết cấu có hợp lý không?
 
-NHIỆM VỤ: Đánh giá đề cương theo thang điểm 10.
-Nếu tổng điểm hoặc điểm thành phần < 9/10 => KHÔNG DUYỆT (REJECT).
+2. LITERATURE REVIEW (3 điểm):
+   - Số lượng citation đủ chưa (≥ 15)?
+   - Có bài từ top journals không?
+   - Có tổng hợp (synthesis) hay chỉ liệt kê?
+   - DOI/Nguồn có thật không? (Kiểm tra kỹ)
 
-TIÊU CHÍ CHẤM ĐIỂM (BẮT BUỘC XUẤT RA ĐIỂM SỐ):
-1. **Tính Logic (Logic Flow):** [Điểm/10] - Mạch lạc giữa Vấn đề -> Mục tiêu -> Phương pháp?
-2. **Format (APA Style):** [Điểm/10] - Cấu trúc chuẩn không? Trình bày chuyên nghiệp không?
-3. **Độ đầy đủ (Completeness):** [Điểm/10] - Các mục con có chi tiết không?
-4. **Trích dẫn (Citations):** [Pass/Fail] - Có DOI không? Nguồn có thật không?
+3. METHODOLOGY RIGOR (2 điểm):
+   - Thiết kế nghiên cứu rõ ràng?
+   - Phương pháp chọn mẫu hợp lý?
+   - Công cụ phân tích phù hợp?
 
-NẾU CÓ ĐIỂM NÀO < 9:
-- HÃY YÊU CẦU VIẾT LẠI NGAY LẬP TỨC.
-- CHỈ RA LỖI CỤ THỂ ĐỂ SỬA.
+4. FORMAT & PRESENTATION (2 điểm):
+   - Đánh số đúng (1, 1.1...)?
+   - Không lỗi chính tả/ngữ pháp?
+   - Văn phong học thuật?
+
+TỔNG ĐIỂM: .../10
+
+NẾU < 9 ĐIỂM:
+❌ REJECT - Yêu cầu sửa lỗi cụ thể.
+
+LƯU Ý: 
+- Nếu phát hiện Fake DOI -> 0 điểm phần Lit Review -> REJECT ngay.
+- Nếu thiếu các section quan trọng -> REJECT.
 
 OUTPUT FORM:
-📊 ĐÁNH GIÁ:
-- Logic: .../10
-- Format: .../10
-- Đầy đủ: .../10
-- Citation: ...
+📊 ĐIỂM SỐ: .../10
+- Logic: .../3
+- Lit Review: .../3
+- Method: .../2
+- Format: .../2
 
 ❌ LỖI NGHIÊM TRỌNG:
 ...
 
-➡️ HƯỚNG DẪN REVIEWER (WRITER) CẦN LÀM GÌ TIẾP THEO:
+➡️ YÊU CẦU SỬA:
 ...
 `;
 
@@ -268,28 +314,55 @@ QUY TRÌNH:
 3. Dịch và điều chỉnh (Scale Adaptation) cho phù hợp bối cảnh nghiên cứu.
 4. Xây dựng Biến Kiểm soát (Demographics).
 
-YÊU CẦU OUTPUT (MARKDOWN TABLE):
-- Biến | Mã hóa | Câu hỏi (Tiếng Việt) | Nguồn tham khảo (Author, Year)
-- Ví dụ:
-| Biến (Variable) | Item Code | Câu hỏi khảo sát (Items) | Nguồn gốc (Source) |
-|---|---|---|---|
-| Nhận thức (PE) | PE1 | Tôi thấy AI giúp tôi viết nhanh hơn. | Davis (1989) |
+QUY TẮC "LIÊM CHÍNH KHOA HỌC" (BẮT BUỘC):
+- Sử dụng thang đo chuẩn từ các bài báo gốc (Original Scale).
+- KHÔNG BỊA ĐẶT CÂU HỎI mà không có cơ sở lý thuyết.
+- Trích dẫn nguồn (Author, Year) cho mỗi nhóm thang đo.
 
-SAU BẢNG LÀ PHẦN "GHI CHÚ THU THẬP DỮ LIỆU":
-- Phương pháp lấy mẫu?
-- Kích thước mẫu dự kiến (N)?
+VÍ DỤ MẪU:
+| Biến (Variable) | Mã (Code) | Câu hỏi (Items) | Nguồn gốc (Source) |
+|---|---|---|---|
+| Nhận thức tính hữu ích | PU1 | Sử dụng AI giúp tôi hoàn thành công việc nhanh hơn. | Davis (1989) |
+| | PU2 | Sử dụng AI giúp nâng cao hiệu suất làm việc của tôi. | Davis (1989) |
+| Ý định sử dụng | IU1 | Tôi dự định sẽ sử dụng thường xuyên trong tương lai. | Venkatesh et al. (2003) |
+
+YÊU CẦU OUTPUT (MARKDOWN TABLE):
+- Table 1: Các thang đo chính (Constructs & Items)
+- Table 2: Thông tin nhân khẩu học (Control Variables)
+
+SAU BẢNG LÀ PHẦN "PHƯƠNG ÁN THU THẬP DỮ LIỆU":
+- Phương pháp lấy mẫu (Sampling Method).
+- Kích thước mẫu (Sample Size) - giải thích công thức tính.
+- Đối tượng khảo sát (Target Population).
 `;
 
 const SURVEY_CRITIC_PROMPT = `
-PHẢN BIỆN BẢNG HỎI (SURVEY CHECKLIST):
+PHẢN BIỆN BẢNG HỎI - RUBRIC CHI TIẾT:
 
-1. **Validity:** Thang đo có đo đúng khái niệm không?
-2. **Reliability:** Câu hỏi có dễ hiểu không? Có bị Bias không?
-3. **Format:** Bảng có rõ ràng không?
-4. **Nguồn gốc:** Có trích dẫn Author gốc không?
+1. VALIDITY (HỢP LỆ) - 3 điểm:
+   - Thang đo có đo đúng biến không? (Face Validity)
+   - Nguồn gốc có uy tín không? (Construct Validity)
+
+2. RELIABILITY (TIN CẬY) - 3 điểm:
+   - Câu hỏi có rõ ràng, dễ hiểu?
+   - Có bị dẫn dắt (Leading question) không?
+   - Số lượng items có đủ không (thường ≥ 3 items/biến)?
+
+3. FORMAT & ADAPTATION (2 điểm):
+   - Thang đo Likert (1-5 hoặc 1-7) có thống nhất?
+   - Dịch có chuẩn không?
+
+4. DEMOGRAPHICS & SAMPLING (2 điểm):
+   - Các biến kiểm soát có phù hợp?
+   - Kích thước mẫu có đủ lớn cho SEM/Regression?
+
+TỔNG ĐIỂM: .../10
+
+NẾU < 9 ĐIỂM:
+❌ YÊU CẦU SỬA: Chỉ ra cụ thể item nào cần sửa/xóa/thêm.
 
 OUTPUT:
-📊 ĐÁNH GIÁ: [Pass/Minor Revise/Major Revise]
+📊 ĐIỂM SỐ: .../10
 ❌ LỖI CỤ THỂ:
 1. ...
 2. ...
