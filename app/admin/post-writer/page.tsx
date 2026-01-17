@@ -126,8 +126,13 @@ export default function PostWriterPage() {
             const finalPost = await callStep('final', draft2, critique2);
             setHistory(prev => [...prev, { role: 'Writer', content: finalPost, round: 3 }]);
 
-            setResult(finalPost);
-            toast.success('Đã hoàn thành 3 vòng tranh biện!');
+            // STEP 6: POLISH (Làm Mượt)
+            setStatusText('Bonus Round: Đang chuốt lại văn phong cho mượt...');
+            const polishedPost = await callStep('polish', finalPost);
+            setHistory(prev => [...prev, { role: 'Writer', content: polishedPost + "\n\n(✨ Đã Polish mượt mà ✨)", round: 4 }]);
+
+            setResult(polishedPost);
+            toast.success('Đã hoàn thành 3 vòng + Polish!');
 
         } catch (error: any) {
             toast.error(`Lỗi: ${error.message}`);

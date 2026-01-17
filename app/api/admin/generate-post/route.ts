@@ -73,6 +73,11 @@ export async function POST(req: NextRequest) {
                 role = "Writer";
                 apiKey = safeWriterKey;
                 break;
+            case 'polish':
+                prompt = `${WRITER_PROMPT}\n\nINPUT: "${topic}"\n\nBÀI HOÀN THIỆN:\n${currentDraft}\n\nNHIỆM VỤ: ĐỌC LẠI VÀ CHUỐT LẠI CÂU TỪ CHO MƯỢT MÀ, THANH THOÁT HƠN (POLISH). Giữ nguyên ý chính, chỉ làm cho văn phong trôi chảy như nước, nghệ sĩ hơn.`;
+                role = "Writer";
+                apiKey = safeWriterKey;
+                break;
             default:
                 return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
         }
