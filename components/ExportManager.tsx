@@ -36,6 +36,12 @@ export function ExportManager({
 }: ExportManagerProps) {
     const [exporting, setExporting] = useState<ExportType | null>(null);
     const [exportedFiles, setExportedFiles] = useState<Set<ExportType>>(new Set());
+    const [isMobile] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        }
+        return false;
+    });
 
     const handleExport = async (type: ExportType) => {
         setExporting(type);
@@ -73,7 +79,15 @@ export function ExportManager({
 
         } catch (error) {
             console.error(`Export ${type} failed:`, error);
-            alert(`Lỗi khi export ${type}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+
+            // Better error messages
+            let errorMessage = 'Lỗi không xác định';
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+
+            // Show user-friendly error
+            alert(`❌ Lỗi khi export ${type.toUpperCase()}:\n\n${errorMessage}\n\nVui lòng thử lại hoặc liên hệ hỗ trợ nếu lỗi vẫn tiếp diễn.`);
         } finally {
             setExporting(null);
         }
@@ -117,6 +131,21 @@ export function ExportManager({
                     </div>
                 </div>
             </div>
+
+            {/* Mobile Warning */}
+            {isMobile && (
+                <div className="bg-yellow-50 border-l-4 border-yellow-400 rounded-lg p-4 text-sm">
+                    <div className="flex gap-2">
+                        <span className="text-yellow-600 font-bold text-lg">⚠️</span>
+                        <div>
+                            <strong className="text-yellow-800">Lưu ý cho thiết bị di động:</strong>
+                            <p className="text-yellow-700 mt-1">
+                                Export trên mobile có thể không ổn định. Khuyến nghị sử dụng máy tính để có trải nghiệm tốt nhất.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Export Options Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

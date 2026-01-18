@@ -124,6 +124,15 @@ export async function exportOutlineToWord(
     model: string,
     level: AcademicLevel
 ): Promise<Blob> {
+    // Input validation
+    if (!outline || outline.trim().length === 0) {
+        throw new Error('Đề cương không được để trống');
+    }
+
+    if (outline.length > 100000) {
+        throw new Error('Đề cương quá dài (tối đa 100,000 ký tự). Vui lòng rút gọn nội dung.');
+    }
+
     const sections = parseOutline(outline);
 
     const children: Paragraph[] = [
@@ -233,7 +242,8 @@ export async function exportOutlineToPDF(
     yPos += 7;
 
     doc.setFontSize(10);
-    const modelText = model.substring(0, 500).replace(/[^\x00-\x7F]/g, '?'); // Remove Vietnamese chars for now
+    // Keep Vietnamese characters
+    const modelText = model.substring(0, 500);
     const modelLines = doc.splitTextToSize(modelText, 170);
     doc.text(modelLines, 20, yPos);
     yPos += modelLines.length * 5 + 10;
@@ -244,7 +254,8 @@ export async function exportOutlineToPDF(
     yPos += 7;
 
     doc.setFontSize(10);
-    const outlineText = outline.substring(0, 1000).replace(/[^\x00-\x7F]/g, '?');
+    // Keep Vietnamese characters
+    const outlineText = outline.substring(0, 1000);
     const outlineLines = doc.splitTextToSize(outlineText, 170);
     doc.text(outlineLines, 20, yPos);
 
@@ -256,7 +267,16 @@ export async function exportSurveyToExcel(
     surveyContent: string,
     topic: string
 ): Promise<Blob> {
+    // Input validation
+    if (!surveyContent || surveyContent.trim().length === 0) {
+        throw new Error('Nội dung khảo sát không được để trống');
+    }
+
     const rows = parseSurveyTable(surveyContent);
+
+    if (rows.length === 0) {
+        throw new Error('Không tìm thấy bảng khảo sát hợp lệ. Vui lòng kiểm tra định dạng.');
+    }
 
     // Create worksheet data
     const wsData = [
@@ -291,7 +311,16 @@ export async function exportSurveyToCSV(
     surveyContent: string,
     topic: string
 ): Promise<Blob> {
+    // Input validation
+    if (!surveyContent || surveyContent.trim().length === 0) {
+        throw new Error('Nội dung khảo sát không được để trống');
+    }
+
     const rows = parseSurveyTable(surveyContent);
+
+    if (rows.length === 0) {
+        throw new Error('Không tìm thấy bảng khảo sát hợp lệ. Vui lòng kiểm tra định dạng.');
+    }
 
     // Microsoft Forms CSV format:
     // Question,Option1,Option2,Option3,Option4,Option5
