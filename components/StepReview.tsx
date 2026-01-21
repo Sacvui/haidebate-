@@ -26,6 +26,8 @@ const getStepName = (step: WorkflowStep): string => {
         case '2_MODEL': return 'Bước 2: MODEL (Xây dựng mô hình)';
         case '3_OUTLINE': return 'Bước 3: OUTLINE (Hoàn thiện đề cương)';
         case '4_SURVEY': return 'Bước 4: SURVEY (Xây dựng thang đo)';
+        case '5_GTM': return 'Bước 5: GTM (Kế hoạch triển khai)';
+        default: return 'Bước không xác định';
     }
 };
 
