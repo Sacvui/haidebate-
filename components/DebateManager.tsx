@@ -1,6 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+
+
 import { Play, Bot, User, CheckCircle, ArrowRight, ArrowLeft, FileText, Download, Share2, Home } from 'lucide-react';
 import { AgentSession, WorkflowStep, AcademicLevel, ProjectType, AgentMessage } from '@/lib/agents';
 import { StepIndicator } from './StepIndicator';
@@ -101,9 +105,16 @@ export function DebateManager({
                 } finally {
                     setIsInitialized(true);
                 }
-            };
-            loadData();
+            }
         } else {
+            // New session tracking (fire and forget)
+            if (!isInitialized) {
+                fetch('/api/stats', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'new_session' })
+                }).catch(err => console.error('Tracking failed', err));
+            }
             setIsInitialized(true);
         }
     }, [sessionId, session]);
@@ -303,7 +314,7 @@ export function DebateManager({
         else if (currentStep === '3_OUTLINE') setCurrentStep(projectType === 'STARTUP' ? '5_GTM' : '4_SURVEY');
         else if (currentStep === '5_GTM') setCurrentStep('4_SURVEY');
 
-        setMessages([]);
+        // setMessages([]);
         setRoundCount(0);
         setStepCompleted(false);
         setShowReview(false);
@@ -315,7 +326,7 @@ export function DebateManager({
         else if (currentStep === '5_GTM') setCurrentStep('3_OUTLINE');
         else if (currentStep === '4_SURVEY') setCurrentStep(projectType === 'STARTUP' ? '5_GTM' : '3_OUTLINE');
 
-        setMessages([]);
+        // setMessages([]);
         setRoundCount(0);
         setStepCompleted(true);
         setShowReview(true);
@@ -427,8 +438,11 @@ export function DebateManager({
                                 {msg.role === 'writer' ? <Bot size={24} /> : <User size={24} />}
                             </div>
                             <div className={cn("max-w-[80%] p-4 rounded-xl shadow-sm", msg.role === 'writer' ? "bg-white border" : "bg-purple-50 border-purple-100")}>
-                                <div className="prose prose-slate max-w-none text-sm">{msg.content}</div>
-                            </div>
+                                <div className="prose prose-slate max-w-none text-sm break-words">
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                        {msg.content}
+                                    </ReactMarkdown>
+                                </div>                            </div>
                         </div>
                     ))}
                     <div ref={bottomRef} />

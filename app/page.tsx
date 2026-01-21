@@ -13,6 +13,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { ShareModal } from "@/components/ShareModal";
 import { GuideModal } from "@/components/GuideModal";
 import { HeroDemo } from "@/components/landing/HeroDemo";
+import { ImpactStats } from "@/components/ImpactStats";
 import { signIn } from "next-auth/react";
 import Cookies from "js-cookie";
 import { LoadingH } from "@/components/LoadingH";
@@ -249,8 +250,12 @@ export default function Home() {
                 Điểm danh hàng ngày và kết nạp đồng môn để nhận bí kíp võ công
               </p>
             </div>
-          </div>
 
+            {/* Impact Stats */}
+            <div className="mt-8 w-full">
+              <ImpactStats />
+            </div>
+          </div>
 
           {/* RIGHT COLUMN: PREVIEW */}
           <div className="hidden md:flex flex-1 bg-slate-50 items-center justify-center p-12 relative overflow-hidden">
@@ -270,109 +275,111 @@ export default function Home() {
       )}
 
       {/* --- FULL APP LAYOUT (AUTHED) --- */}
-      {user && (
-        <>
-          {/* Header */}
-          <header className="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-slate-200 z-50 animate-in slide-in-from-top-4 duration-500">
-            <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-              <div
-                className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
-                onClick={handleGoHome}
-              >
-                <div className="w-10 h-10 shadow-md shadow-blue-500/20 rounded-lg overflow-hidden">
-                  <img src="/favicon.ico" alt="Logo" className="w-full h-full object-cover" />
-                </div>
-                <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-700">
-                  Hải Debate
-                </h1>
-              </div>
-              <div className="flex items-center gap-3">
-                {/* Share Button (Points) */}
-                <button
-                  onClick={() => setShowShare(true)}
-                  className="flex items-center gap-2 px-2 md:px-3 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 rounded-lg font-medium text-xs md:text-sm transition-colors border border-green-200"
+      {
+        user && (
+          <>
+            {/* Header */}
+            <header className="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-slate-200 z-50 animate-in slide-in-from-top-4 duration-500">
+              <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+                <div
+                  className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={handleGoHome}
                 >
-                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                  <span className="hidden md:inline">Nhận Điểm</span>
-                  <span className="md:hidden">Điểm</span>
-                </button>
-
-                {/* Projects Button */}
-                <button
-                  onClick={() => setShowProjects(true)}
-                  className="flex items-center gap-2 px-2 md:px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg font-medium text-xs md:text-sm transition-colors border border-blue-200"
-                >
-                  <FolderOpen className="w-4 h-4" />
-                  <span className="hidden md:inline">Dự án</span>
-                </button>
-
-                <div className="h-6 w-px bg-slate-200 mx-1"></div>
-
-                <div className="text-xs text-slate-500 hidden md:flex items-center gap-1">
-                  <span className="font-bold text-slate-700">{user.points || 0} pts</span>
-                  <span className="mx-1">•</span>
-                  {user.name || (user.email ? user.email.split('@')[0] : 'Người dùng')}
+                  <div className="w-10 h-10 shadow-md shadow-blue-500/20 rounded-lg overflow-hidden">
+                    <img src="/favicon.ico" alt="Logo" className="w-full h-full object-cover" />
+                  </div>
+                  <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-700">
+                    Hải Debate
+                  </h1>
                 </div>
+                <div className="flex items-center gap-3">
+                  {/* Share Button (Points) */}
+                  <button
+                    onClick={() => setShowShare(true)}
+                    className="flex items-center gap-2 px-2 md:px-3 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 rounded-lg font-medium text-xs md:text-sm transition-colors border border-green-200"
+                  >
+                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    <span className="hidden md:inline">Nhận Điểm</span>
+                    <span className="md:hidden">Điểm</span>
+                  </button>
 
-                <button onClick={() => setShowSettings(true)} className="p-2 text-slate-400 hover:text-slate-700 transition-colors" title="Cài đặt API Key">
-                  <Settings size={18} />
-                </button>
-                <button onClick={() => setShowGuide(true)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Hướng dẫn lấy Key">
-                  <HelpCircle size={18} />
-                </button>
+                  {/* Projects Button */}
+                  <button
+                    onClick={() => setShowProjects(true)}
+                    className="flex items-center gap-2 px-2 md:px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg font-medium text-xs md:text-sm transition-colors border border-blue-200"
+                  >
+                    <FolderOpen className="w-4 h-4" />
+                    <span className="hidden md:inline">Dự án</span>
+                  </button>
 
-                <button onClick={handleLogout} className="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Đăng xuất">
-                  <LogOut size={18} />
-                </button>
+                  <div className="h-6 w-px bg-slate-200 mx-1"></div>
+
+                  <div className="text-xs text-slate-500 hidden md:flex items-center gap-1">
+                    <span className="font-bold text-slate-700">{user.points || 0} pts</span>
+                    <span className="mx-1">•</span>
+                    {user.name || (user.email ? user.email.split('@')[0] : 'Người dùng')}
+                  </div>
+
+                  <button onClick={() => setShowSettings(true)} className="p-2 text-slate-400 hover:text-slate-700 transition-colors" title="Cài đặt API Key">
+                    <Settings size={18} />
+                  </button>
+                  <button onClick={() => setShowGuide(true)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Hướng dẫn lấy Key">
+                    <HelpCircle size={18} />
+                  </button>
+
+                  <button onClick={handleLogout} className="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Đăng xuất">
+                    <LogOut size={18} />
+                  </button>
+                </div>
               </div>
+            </header>
+
+            <div className="pt-24 px-4 pb-12 transition-all duration-500">
+              {showProjects ? (
+                <ProjectManager
+                  onSelectProject={handleSelectProject}
+                  onCreateNew={() => { setShowProjects(false); setIsStarted(false); setFormData(null); }}
+                />
+              ) : !isStarted || !formData ? (
+                <div className="max-w-xl mx-auto mt-10">
+                  <ResearchForm
+                    onStart={handleStart}
+                    onOpenGuidelines={() => setShowGuidelines(true)}
+                  />
+                </div>
+              ) : (
+                <ErrorBoundary>
+                  <DebateManager
+                    key={sessionId}
+                    topic={formData.topic}
+                    goal={formData.goal}
+                    audience={formData.audience}
+                    level={formData.level}
+                    language={formData.language}
+                    projectType={formData.projectType}
+                    apiKey={apiKey}
+                    apiKeyCritic={apiKeyCritic}
+                    userId={user.id}
+                    sessionId={sessionId}
+                    onExit={() => {
+                      setIsStarted(false);
+                      setShowProjects(true);
+                    }}
+                    onNewProject={() => {
+                      setIsStarted(false);
+                      setFormData(null);
+                    }}
+                  />
+                </ErrorBoundary>
+              )}
             </div>
-          </header>
-
-          <div className="pt-24 px-4 pb-12 transition-all duration-500">
-            {showProjects ? (
-              <ProjectManager
-                onSelectProject={handleSelectProject}
-                onCreateNew={() => { setShowProjects(false); setIsStarted(false); setFormData(null); }}
-              />
-            ) : !isStarted || !formData ? (
-              <div className="max-w-xl mx-auto mt-10">
-                <ResearchForm
-                  onStart={handleStart}
-                  onOpenGuidelines={() => setShowGuidelines(true)}
-                />
-              </div>
-            ) : (
-              <ErrorBoundary>
-                <DebateManager
-                  key={sessionId}
-                  topic={formData.topic}
-                  goal={formData.goal}
-                  audience={formData.audience}
-                  level={formData.level}
-                  language={formData.language}
-                  projectType={formData.projectType}
-                  apiKey={apiKey}
-                  apiKeyCritic={apiKeyCritic}
-                  userId={user.id}
-                  sessionId={sessionId}
-                  onExit={() => {
-                    setIsStarted(false);
-                    setShowProjects(true);
-                  }}
-                  onNewProject={() => {
-                    setIsStarted(false);
-                    setFormData(null);
-                  }}
-                />
-              </ErrorBoundary>
-            )}
-          </div>
-          {/* Footer */}
-          <footer className="py-8 text-center text-slate-400 text-sm border-t border-slate-100 mt-auto bg-slate-50">
-            <p>© 2026 Hải Debate. Powered by <span className="font-bold text-slate-600">Sidewalk Professor Hải Rong Chơi</span>.</p>
-          </footer>
-        </>
-      )}
-    </main>
+            {/* Footer */}
+            <footer className="py-8 text-center text-slate-400 text-sm border-t border-slate-100 mt-auto bg-slate-50">
+              <p>© 2026 Hải Debate. Powered by <span className="font-bold text-slate-600">Sidewalk Professor Hải Rong Chơi</span>.</p>
+            </footer>
+          </>
+        )
+      }
+    </main >
   );
 }

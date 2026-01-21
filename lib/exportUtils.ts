@@ -70,37 +70,47 @@ function parseSurveyTable(surveyContent: string): SurveyRow[] {
         const trimmed = line.trim();
 
         // Detect table start
-        if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
+        if (trimmed.startsWith('|')) {
             inTable = true;
 
-            // Skip header separator line (|---|---|---|---|)
-            if (trimmed.includes('---')) {
+            // Check if this is a separator line (e.g., |---|---|)
+            if (trimmed.match(/\|[\s-]*\|/)) {
                 headerPassed = true;
                 continue;
             }
 
-            // Skip header row
-            if (!headerPassed) {
+            // Skip header row if we haven't passed separator yet
+            // Heuristic: If row contains "Variable" or "Biến", assume it's header
+            if (!headerPassed && (trimmed.toLowerCase().includes('variable') || trimmed.toLowerCase().includes('biến'))) {
                 continue;
             }
 
-            // Parse data rows
+            // If we hit a data row but headerPassed is still false (maybe missing separator),
+            // we should be careful. But standard markdown requires separator.
+            // Let's assume if it doesn't look like a separator and we haven't seen one, it might be header or data.
+            // Safe bet: Require separator for valid markdown table.
+
+            if (!headerPassed) continue;
+
             const cells = trimmed
                 .split('|')
                 .map(cell => cell.trim())
-                .filter(cell => cell.length > 0);
+                .filter((_, i, arr) => i !== 0 && i !== arr.length - 1); // Remove first and last empty split from |...|
 
-            if (cells.length >= 4) {
+            // Standardize cells
+            const cleanCells = cells.length > 0 ? cells : trimmed.split('|').map(c => c.trim()).filter(c => c.length > 0);
+
+            if (cleanCells.length >= 2) {
                 rows.push({
-                    variable: cells[0],
-                    code: cells[1],
-                    items: cells[2],
-                    source: cells[3]
+                    variable: cleanCells[0] || '',
+                    code: cleanCells[1] || '',
+                    items: cleanCells[2] || '',
+                    source: cleanCells[3] || ''
                 });
             }
         } else if (inTable) {
-            // End of table
-            break;
+            // If line is empty, table might be done
+            if (trimmed === '') inTable = false;
         }
     }
 
@@ -119,46 +129,68 @@ function parseOutline(outlineContent: string): OutlineSection[] {
     const lines = outlineContent.split('\n');
 
     let currentSection: OutlineSection | null = null;
+    let fallbackSection: OutlineSection | null = null; // For content appearing before any header
 
     for (const line of lines) {
-        const trimmed = line.trim();
+        let trimmed = line.trim();
+
+        // 1. Cleanup bold/italics wrappers like **1. Title** -> 1. Title
+        trimmed = trimmed.replace(/^[\*\_]{1,3}(.*?)[\*\_]{1,3}$/, '$1').trim();
 
         // Detect headings (# or numbered like 1., 1.1, etc.)
+        // Support: # Title, 1. Title, 1.1 Title, I. Title
         const headingMatch = trimmed.match(/^(#{1,6})\s+(.+)$/);
-        const numberedMatch = trimmed.match(/^(\d+\.(?:\d+\.)*)\s+(.+)$/);
+        const numberedMatch = trimmed.match(/^(\d+(\.\d+)*\.?)\s+(.+)$/);
+        const romanMatch = trimmed.match(/^([IVX]+\.)\s+(.+)$/);
+
+        let level = 0;
+        let title = "";
 
         if (headingMatch) {
-            // Save previous section
-            if (currentSection) {
-                sections.push(currentSection);
-            }
-
-            currentSection = {
-                level: headingMatch[1].length,
-                title: headingMatch[2],
-                content: []
-            };
+            level = headingMatch[1].length;
+            title = headingMatch[2];
         } else if (numberedMatch) {
+            level = numberedMatch[1].split('.').filter(Boolean).length; // 1.1 -> 2
+            title = numberedMatch[3];
+        } else if (romanMatch) {
+            level = 1;
+            title = romanMatch[2];
+        }
+
+        if (level > 0) {
             // Save previous section
             if (currentSection) {
                 sections.push(currentSection);
+            } else if (fallbackSection && fallbackSection.content.length > 0) {
+                // Push fallback as a generic intro if it has content
+                sections.push(fallbackSection);
+                fallbackSection = null;
             }
 
-            const level = numberedMatch[1].split('.').length - 1;
             currentSection = {
-                level: level + 1,
-                title: numberedMatch[2],
+                level: level,
+                title: title.replace(/[\*\_]+/g, '').trim(), // Remove internal formatting
                 content: []
             };
-        } else if (trimmed.length > 0 && currentSection) {
-            // Add content to current section
-            currentSection.content.push(trimmed);
+        } else if (trimmed.length > 0) {
+            // Logic: If we have a section, add to it.
+            // If not, add to fallbackSection (Intro).
+            if (currentSection) {
+                currentSection.content.push(trimmed);
+            } else {
+                if (!fallbackSection) {
+                    fallbackSection = { level: 1, title: 'Introduction / Context', content: [] };
+                }
+                fallbackSection.content.push(trimmed);
+            }
         }
     }
 
     // Save last section
     if (currentSection) {
         sections.push(currentSection);
+    } else if (fallbackSection) {
+        sections.push(fallbackSection);
     }
 
     return sections;
