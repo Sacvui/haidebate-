@@ -40,9 +40,11 @@ const getModelRequirements = (level: AcademicLevel) => {
   }
 };
 
+import { GOAL_OPTIONS } from './constants';
+
 const getOutlineStructure = (outputType: string) => {
   // ... (omitted) match existing
-  if (outputType.includes("Tiểu luận") || outputType.includes("Khóa luận")) {
+  if (outputType === GOAL_OPTIONS.UNDERGRAD_RESEARCH) {
     return `
         CẤU TRÚC TIỂU LUẬN / KHÓA LUẬN:
         1. Mở đầu (Lý do chọn đề tài, Mục tiêu, Đối tượng).
@@ -51,7 +53,7 @@ const getOutlineStructure = (outputType: string) => {
         4. Kết quả mong đợi & Kết luận.
         `;
   }
-  if (outputType.includes("Luận văn") || outputType.includes("Tiến sĩ")) {
+  if (outputType === GOAL_OPTIONS.MASTER_THESIS || outputType === GOAL_OPTIONS.PHD_DISSERTATION) {
     return `
         CẤU TRÚC LUẬN VĂN / LUẬN ÁN (CHƯƠNG HỒI):
         Chương 1: Tổng quan nghiên cứu (Giới thiệu, Tính cấp thiết, Gap).
@@ -61,7 +63,7 @@ const getOutlineStructure = (outputType: string) => {
         Chương 5: Kết luận & Hàm ý quản trị.
         `;
   }
-  if (outputType.includes("Bài báo") || outputType.includes("Nghiên cứu khoa học")) {
+  if (outputType === GOAL_OPTIONS.DOMESTIC_PAPER) {
     return `
         CẤU TRÚC BÀI BÁO KHOA HỌC (IMRAD):
         1. Introduction (Đặt vấn đề, Gap, Mục tiêu).
@@ -71,7 +73,7 @@ const getOutlineStructure = (outputType: string) => {
         5. Discussion & Conclusion (Thảo luận, Đóng góp, Hạn chế).
         `;
   }
-  if (outputType.includes("Đề xuất") || outputType.includes("Proposal")) {
+  if (outputType === GOAL_OPTIONS.GRANT_PROPOSAL) {
     return `
         CẤU TRÚC ĐỀ XUẤT NGHIÊN CỨU (GRANT PROPOSAL):
         1. Executive Summary (Tóm tắt dự án).

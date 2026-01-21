@@ -1,9 +1,8 @@
-"use client";
 
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { Sparkles, HelpCircle, LogOut, Settings, Lock, CheckCircle, ArrowRight, Mail, Globe, BookOpen } from "lucide-react";
-import { AcademicLevel } from "@/lib/agents";
+import { AcademicLevel, ProjectType } from "@/lib/agents";
 import { LevelGuidelines } from "@/components/LevelGuidelines";
 import { SettingsModal } from "@/components/SettingsModal";
 import { ResearchForm } from "@/components/ResearchForm";
@@ -23,6 +22,15 @@ const DebateManager = dynamic(() => import("@/components/DebateManager"), {
   ssr: false
 });
 
+interface ResearchFormData {
+  topic: string;
+  level: AcademicLevel;
+  goal: string;
+  audience: string;
+  language: 'vi' | 'en';
+  projectType: ProjectType;
+}
+
 export default function Home() {
   // State
   const [isStarted, setIsStarted] = useState(false);
@@ -36,9 +44,10 @@ export default function Home() {
 
   // Auth Hook
   const { user, login, logout, isLoading } = useAuth();
-  const [formData, setFormData] = useState<any>(null);
+  const [formData, setFormData] = useState<ResearchFormData | null>(null);
   const [referralCode, setReferralCode] = useState("");
   const [isMounted, setIsMounted] = useState(false);
+  const [sessionId, setSessionId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     setIsMounted(true);
@@ -48,6 +57,21 @@ export default function Home() {
     const savedCriticKey = localStorage.getItem("gemini_api_key_critic");
     if (savedCriticKey) setApiKeyCritic(savedCriticKey);
 
+    // Load saved session state
+    const savedSession = localStorage.getItem("current_session");
+    if (savedSession) {
+      try {
+        const parsed = JSON.parse(savedSession);
+        if (parsed.isStarted && parsed.formData) {
+          setFormData(parsed.formData);
+          setIsStarted(true);
+          setSessionId(parsed.sessionId);
+        }
+      } catch (e) {
+        console.error("Failed to restore session", e);
+      }
+    }
+
     // Check for referral code in URL
     const params = new URLSearchParams(window.location.search);
     const ref = params.get("ref");
@@ -56,6 +80,26 @@ export default function Home() {
       Cookies.set("referral_code", ref, { expires: 7 }); // Save for 7 days
     }
   }, []);
+
+  // Save session state when it changes
+  useEffect(() => {
+    if (isStarted && formData && isMounted) {
+      localStorage.setItem("current_session", JSON.stringify({
+        isStarted,
+        formData,
+        sessionId: sessionId || `session_${Date.now()}` // Generate if missing
+      }));
+      if (!sessionId) {
+        setSessionId(`session_${Date.now()}`);
+      }
+    } else if (isMounted && !isStarted) {
+      // Clear session if reset (optional, or keep for history?)
+      // For now, let's strictly clear if user explicitly exits, 
+      // but here we don't have an explicit exit action besides refresh which we want to survive.
+      // So do nothing.
+    }
+  }, [isStarted, formData, isMounted, sessionId]);
+
 
   const handleManualReferral = (e: React.ChangeEvent<HTMLInputElement>) => {
     const code = e.target.value.toUpperCase();
@@ -67,10 +111,24 @@ export default function Home() {
     }
   };
 
-  const handleStart = (data: any) => {
+  const handleStart = (data: ResearchFormData) => {
+    const newSessionId = `session_${Date.now()}`;
     setFormData(data);
     setIsStarted(true);
+    setSessionId(newSessionId);
+
+    // Explicit save to ensure immediate persistence
+    localStorage.setItem("current_session", JSON.stringify({
+      isStarted: true,
+      formData: data,
+      sessionId: newSessionId
+    }));
   };
+
+  const handleLogout = () => {
+    localStorage.removeItem("current_session");
+    logout();
+  }
 
   if (isLoading) return <div className="flex h-screen items-center justify-center bg-slate-50"><LoadingH /></div>;
 
@@ -200,7 +258,7 @@ export default function Home() {
                   <HelpCircle size={18} />
                 </button>
 
-                <button onClick={logout} className="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Đăng xuất">
+                <button onClick={handleLogout} className="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Đăng xuất">
                   <LogOut size={18} />
                 </button>
               </div>
@@ -208,7 +266,7 @@ export default function Home() {
           </header>
 
           <div className="pt-24 px-4 pb-12 transition-all duration-500">
-            {!isStarted ? (
+            {!isStarted || !formData ? (
               <div className="max-w-xl mx-auto mt-10">
                 <ResearchForm
                   onStart={handleStart}
@@ -227,6 +285,7 @@ export default function Home() {
                   apiKey={apiKey}
                   apiKeyCritic={apiKeyCritic}
                   userId={user.id}
+                  sessionId={sessionId}
                 />
               </ErrorBoundary>
             )}

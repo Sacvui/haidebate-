@@ -21,7 +21,7 @@ interface RoundsConfig {
     '4_SURVEY': number;
 }
 
-interface DebateManagerProps {
+export interface DebateManagerProps {
     topic: string;
     goal: string;
     audience: string;
@@ -31,6 +31,7 @@ interface DebateManagerProps {
     apiKey?: string;
     apiKeyCritic?: string;
     userId?: string;
+    sessionId?: string;
 }
 
 // Helper to extract mermaid code from markdown
@@ -43,8 +44,8 @@ const extractMermaidCode = (content: string): string => {
     return "";
 };
 
-export default function DebateManager({ topic, goal, audience, level, language, projectType = 'RESEARCH', apiKey, apiKeyCritic, userId }: DebateManagerProps) {
-    const [sessionId] = useState(() => `session_${Date.now()}`);
+export default function DebateManager({ topic, goal, audience, level, language, projectType = 'RESEARCH', apiKey, apiKeyCritic, userId, sessionId: propSessionId }: DebateManagerProps) {
+    const [sessionId] = useState(() => propSessionId || `session_${Date.now()}`);
     const [session] = useState(() => new AgentSession(topic, goal, audience, level, language, projectType, apiKey, apiKeyCritic, sessionId, userId));
     const [roundsConfig, setRoundsConfig] = useState<RoundsConfig>({
         '1_TOPIC': 3,
@@ -73,6 +74,75 @@ export default function DebateManager({ topic, goal, audience, level, language, 
     const exportRef = useRef<HTMLDivElement>(null);
 
     const maxRounds = roundsConfig[currentStep];
+
+    // Restore state on mount
+    useEffect(() => {
+        if (sessionId) {
+            const savedState = localStorage.getItem(`debate_state_${sessionId}`);
+            if (savedState) {
+                try {
+                    const parsed = JSON.parse(savedState);
+                    if (messages.length === 0 && parsed.messages?.length > 0) {
+                        setMessages(parsed.messages);
+                        setCurrentStep(parsed.currentStep);
+                        setStepCompleted(parsed.stepCompleted);
+                        setRoundCount(parsed.roundCount || 0);
+                        if (parsed.variableChart) setVariableChart(parsed.variableChart);
+                        if (parsed.finalContent) setFinalContent(parsed.finalContent);
+                        if (parsed.outlineContent) setOutlineContent(parsed.outlineContent);
+                        if (parsed.surveyContent) setSurveyContent(parsed.surveyContent);
+
+                        // Restore session object state
+                        if (parsed.sessionState) {
+                            if (parsed.sessionState.finalizedTopic) session.setFinalizedTopic(parsed.sessionState.finalizedTopic);
+                            if (parsed.sessionState.finalizedModel) session.setFinalizedModel(parsed.sessionState.finalizedModel, parsed.sessionState.finalizedModelChart);
+                            if (parsed.sessionState.finalizedOutline) session.setFinalizedOutline(parsed.sessionState.finalizedOutline);
+                            if (parsed.sessionState.finalizedSurvey) session.setFinalizedSurvey(parsed.sessionState.finalizedSurvey);
+                        }
+                    }
+                } catch (e) {
+                    console.error("Error restoring debate state", e);
+                }
+            }
+        }
+    }, [sessionId]);
+
+    // Save state on change
+    useEffect(() => {
+        if (sessionId && messages.length > 0) {
+            const sessionState = {
+                finalizedTopic: session.finalizedTopic,
+                finalizedModel: session.finalizedModel,
+                finalizedModelChart: session.finalizedModelChart,
+                finalizedOutline: session.finalizedOutline,
+                finalizedSurvey: session.finalizedSurvey
+            };
+
+            localStorage.setItem(`debate_state_${sessionId}`, JSON.stringify({
+                messages,
+                currentStep,
+                stepCompleted,
+                roundCount,
+                variableChart,
+                finalContent,
+                outlineContent,
+                surveyContent,
+                sessionState
+            }));
+        }
+    }, [messages, currentStep, stepCompleted, roundCount, variableChart, finalContent, outlineContent, surveyContent, sessionId, session]);
+
+    // Warn before unload
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (isProcessing || messages.length > 0) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [isProcessing, messages]);
 
     // Fetch rounds config from admin API
     useEffect(() => {
@@ -349,22 +419,33 @@ export default function DebateManager({ topic, goal, audience, level, language, 
                         </button>
                     )}
 
-                    {stepCompleted && currentStep !== '4_SURVEY' && (
-                        <button
-                            onClick={handleNextStep}
-                            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-all shadow-md active:scale-95 animate-bounce"
-                        >
-                            Chuyển Sang Bước Tiếp Theo <ArrowRight size={18} />
-                        </button>
-                    )}
+                    {stepCompleted && (
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setShowReview(true)}
+                                className="flex items-center gap-2 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg font-medium transition-all shadow-sm active:scale-95"
+                            >
+                                <FileText size={18} /> Xem lại & Chỉnh sửa
+                            </button>
 
-                    {stepCompleted && currentStep === '4_SURVEY' && (
-                        <button
-                            onClick={() => setShowExport(true)}
-                            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-bold shadow-lg shadow-indigo-200"
-                        >
-                            <FileText size={18} /> Chuyển sang Bước 5: Export
-                        </button>
+                            {currentStep !== '4_SURVEY' && (
+                                <button
+                                    onClick={handleNextStep}
+                                    className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-all shadow-md active:scale-95 animate-bounce"
+                                >
+                                    Chuyển Sang Bước Tiếp Theo <ArrowRight size={18} />
+                                </button>
+                            )}
+
+                            {currentStep === '4_SURVEY' && (
+                                <button
+                                    onClick={() => setShowExport(true)}
+                                    className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-bold shadow-lg shadow-indigo-200"
+                                >
+                                    <FileText size={18} /> Chuyển sang Bước 5: Export
+                                </button>
+                            )}
+                        </div>
                     )}
                 </div>
             </div>

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { BookOpen, GraduationCap, HelpCircle, Sparkles, Info, Rocket } from 'lucide-react';
 import { AcademicLevel, ProjectType } from '@/lib/agents';
+import { GOAL_OPTIONS, ACADEMIC_LEVELS, PROJECT_TYPES, AUDIENCE_OPTIONS } from '@/lib/constants';
 
 interface ResearchFormProps {
     onStart: (data: { topic: string; level: AcademicLevel; goal: string; audience: string; language: 'vi' | 'en'; projectType: ProjectType }) => void;
@@ -14,7 +15,7 @@ import { GuideModal } from './GuideModal';
 
 export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: ResearchFormProps) => {
     const [topic, setTopic] = useState("");
-    const [goal, setGoal] = useState("Nghiên cứu khoa học/Đăng báo");
+    const [goal, setGoal] = useState<string>(GOAL_OPTIONS.MASTER_THESIS); // Default
     const [audience, setAudience] = useState("Chuyên gia/Nhà nghiên cứu");
     const [level, setLevel] = useState<AcademicLevel>("MASTER");
     const [language, setLanguage] = useState<'vi' | 'en'>('vi');
@@ -34,18 +35,18 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
         if (lvl !== 'UNDERGRAD') {
             setProjectType('RESEARCH');
         }
-        if (lvl === 'UNDERGRAD') setGoal(projectType === 'STARTUP' ? "Pitch Deck / Business Plan" : "Tiểu luận Đại học/Khóa luận");
-        if (lvl === 'MASTER') setGoal("Luận văn Thạc sĩ");
-        if (lvl === 'PHD') setGoal("Bài báo quốc tế (ISI/Scopus) / Đề án Tiến sĩ");
+        if (lvl === 'UNDERGRAD') setGoal(projectType === 'STARTUP' ? GOAL_OPTIONS.STARTUP_PLAN : GOAL_OPTIONS.UNDERGRAD_RESEARCH);
+        if (lvl === 'MASTER') setGoal(GOAL_OPTIONS.MASTER_THESIS);
+        if (lvl === 'PHD') setGoal(GOAL_OPTIONS.PHD_DISSERTATION);
     };
 
     const handleProjectTypeSelect = (type: ProjectType) => {
         setProjectType(type);
         if (type === 'STARTUP') {
-            setGoal("Pitch Deck / Business Plan");
+            setGoal(GOAL_OPTIONS.STARTUP_PLAN);
             setAudience("Nhà đầu tư / Quỹ Khởi nghiệp");
         } else {
-            setGoal("Tiểu luận Đại học/Khóa luận");
+            setGoal(GOAL_OPTIONS.UNDERGRAD_RESEARCH);
             setAudience("Giảng viên hướng dẫn");
         }
     };
@@ -98,19 +99,17 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-2 p-1 bg-slate-100 rounded-xl">
-                        {(['UNDERGRAD', 'MASTER', 'PHD'] as AcademicLevel[]).map((lvl) => (
+                        {ACADEMIC_LEVELS.map((lvl) => (
                             <button
-                                key={lvl}
+                                key={lvl.value}
                                 type="button"
-                                onClick={() => handleLevelSelect(lvl)}
-                                className={`py-2 rounded-lg text-xs font-bold transition-all ${level === lvl
+                                onClick={() => handleLevelSelect(lvl.value)}
+                                className={`py-2 rounded-lg text-xs font-bold transition-all ${level === lvl.value
                                     ? 'bg-white text-blue-700 shadow-sm ring-1 ring-black/5'
                                     : 'text-slate-500 hover:text-slate-700'
                                     }`}
                             >
-                                {lvl === 'UNDERGRAD' && "Sinh Viên"}
-                                {lvl === 'MASTER' && "Thạc Sĩ"}
-                                {lvl === 'PHD' && "Tiến Sĩ / Công Bố"}
+                                {lvl.label}
                             </button>
                         ))}
                     </div>
@@ -122,28 +121,22 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
                                 🎯 Chọn loại dự án
                             </label>
                             <div className="grid grid-cols-2 gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => handleProjectTypeSelect('RESEARCH')}
-                                    className={`py-2.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${projectType === 'RESEARCH'
-                                            ? 'bg-white text-blue-700 shadow-md ring-2 ring-blue-500'
+                                {PROJECT_TYPES.map(type => (
+                                    <button
+                                        key={type.value}
+                                        type="button"
+                                        onClick={() => handleProjectTypeSelect(type.value)}
+                                        className={`py-2.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${projectType === type.value
+                                            ? (type.value === 'STARTUP'
+                                                ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md ring-2 ring-orange-400'
+                                                : 'bg-white text-blue-700 shadow-md ring-2 ring-blue-500')
                                             : 'bg-white/50 text-slate-500 hover:bg-white hover:text-slate-700'
-                                        }`}
-                                >
-                                    <BookOpen size={14} />
-                                    Tiểu luận / Nghiên cứu
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => handleProjectTypeSelect('STARTUP')}
-                                    className={`py-2.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${projectType === 'STARTUP'
-                                            ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md ring-2 ring-orange-400'
-                                            : 'bg-white/50 text-slate-500 hover:bg-white hover:text-slate-700'
-                                        }`}
-                                >
-                                    <Rocket size={14} />
-                                    Dự án Khởi nghiệp
-                                </button>
+                                            }`}
+                                    >
+                                        {type.value === 'STARTUP' ? <Rocket size={14} /> : <BookOpen size={14} />}
+                                        {type.label}
+                                    </button>
+                                ))}
                             </div>
                             {projectType === 'STARTUP' && (
                                 <p className="text-xs text-orange-600 mt-2 flex items-start gap-1">
@@ -173,11 +166,9 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
                             onChange={(e) => setGoal(e.target.value)}
                             className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-slate-700"
                         >
-                            <option>Tiểu luận Đại học/Khóa luận</option>
-                            <option>Luận văn Thạc sĩ</option>
-                            <option>Bài báo quốc tế (ISI/Scopus) / Đề án Tiến sĩ</option>
-                            <option>Nghiên cứu khoa học/Đăng báo trong nước</option>
-                            <option>Đề xuất dự án (Grant Proposal)</option>
+                            {Object.values(GOAL_OPTIONS).map(opt => (
+                                <option key={opt}>{opt}</option>
+                            ))}
                         </select>
                     </div>
                 </div>
@@ -192,10 +183,9 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
                             onChange={(e) => setAudience(e.target.value)}
                             className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-slate-700"
                         >
-                            <option>Hội đồng phản biện chuyên môn</option>
-                            <option>Tạp chí Quốc tế (ISI/Scopus)</option>
-                            <option>Giảng viên hướng dẫn</option>
-                            <option>Cộng đồng học thuật</option>
+                            {AUDIENCE_OPTIONS.map(opt => (
+                                <option key={opt}>{opt}</option>
+                            ))}
                         </select>
                     </div>
                     <div className="space-y-2">
