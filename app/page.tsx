@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-import { Sparkles, HelpCircle, LogOut, Settings, Lock, CheckCircle, ArrowRight, Mail, Globe, BookOpen, FolderOpen } from "lucide-react";
+import { Sparkles, HelpCircle, LogOut, Settings, Lock, CheckCircle, ArrowRight, Mail, BookOpen, FolderOpen } from "lucide-react";
 import { AcademicLevel, ProjectType } from "@/lib/agents";
 import { SavedProject, createNewProject, saveProject, getProject } from "@/lib/projectStorage";
 import { LevelGuidelines } from "@/components/LevelGuidelines";
