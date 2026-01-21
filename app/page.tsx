@@ -117,19 +117,7 @@ export default function Home() {
   };
 
   const handleStart = (data: ResearchFormData) => {
-    const newSessionId = `session_${Date.now()}`;
-    setFormData(data);
-    setIsStarted(true);
-    setSessionId(newSessionId);
-
-    // Explicit save to ensure immediate persistence
-    localStorage.setItem("current_session", JSON.stringify({
-      isStarted: true,
-      formData: data,
-      sessionId: newSessionId
-    }));
-
-    // Also create a new project in localStorage
+    // 1. Create a new project FIRST to get the authoritative ID
     const newProj = createNewProject(
       data.topic,
       data.goal,
@@ -139,7 +127,20 @@ export default function Home() {
       data.projectType
     );
     saveProject(newProj);
+
+    // 2. Use the project ID for everything else
+    const accurateId = newProj.id;
+    setFormData(data);
+    setIsStarted(true);
+    setSessionId(accurateId);
     setCurrentProject(newProj);
+
+    // 3. Explicit save to local session
+    localStorage.setItem("current_session", JSON.stringify({
+      isStarted: true,
+      formData: data,
+      sessionId: accurateId
+    }));
   };
 
   const handleSelectProject = (project: SavedProject) => {

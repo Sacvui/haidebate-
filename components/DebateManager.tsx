@@ -73,12 +73,13 @@ export function DebateManager({
 
     // Initial load from storage if sessionId exists
     useEffect(() => {
-        if (sessionId) {
+        if (sessionId && session) {
             const loadData = async () => {
                 try {
                     const project = await getProject(sessionId);
                     if (project && project.data) {
                         const data = project.data;
+                        // 1. Restore UI state
                         if (data.messages && data.messages.length > 0) setMessages(data.messages);
                         if (project.currentStep) setCurrentStep(project.currentStep);
                         if (data.mermaid) setVariableChart(data.mermaid);
@@ -87,6 +88,13 @@ export function DebateManager({
                         if (data.outlineChart) setOutlineChart(data.outlineChart);
                         if (data.gtmContent) setGtmContent(data.gtmContent);
                         if (data.surveyContent) setSurveyContent(data.surveyContent);
+
+                        // 2. Hydrate underlying session (AgentSession)
+                        if (project.topic) session.setFinalizedTopic(project.topic);
+                        if (data.finalContent) session.setFinalizedModel(data.finalContent, data.mermaid);
+                        if (data.outlineContent) session.setFinalizedOutline(data.outlineContent, data.outlineChart);
+                        if (data.gtmContent) session.setFinalizedGTM(data.gtmContent);
+                        if (data.surveyContent) session.setFinalizedSurvey(data.surveyContent);
                     }
                 } catch (e) {
                     console.error("Failed to load project data:", e);
@@ -98,7 +106,7 @@ export function DebateManager({
         } else {
             setIsInitialized(true);
         }
-    }, [sessionId]);
+    }, [sessionId, session]);
 
     // Auto-save logic
     useEffect(() => {
