@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { kv } from '@/lib/kv';
+import { auth } from '@/lib/auth';
 
 // Base stats to make the system look established (Marketing "Fake it til you make it" strategy for launch)
 // In production, you might want to remove these or set them to actual historical data.
@@ -30,8 +31,20 @@ export async function GET() {
 
 export async function POST(request: Request) {
     try {
+        // Require authentication for tracking to prevent spam
+        const session = await auth();
+        if (!session?.user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const body = await request.json();
         const { type } = body;
+
+        // Strict allowed types
+        const allowedTypes = ['user_signup', 'new_session', 'project_complete'];
+        if (!allowedTypes.includes(type)) {
+            return NextResponse.json({ error: 'Invalid stat type' }, { status: 400 });
+        }
 
         if (type === 'user_signup') {
             await kv.incr('stats:users');

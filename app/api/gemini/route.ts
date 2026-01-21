@@ -87,7 +87,9 @@ export async function POST(request: NextRequest) {
             ? 'CUSTOM (User)'
             : 'SERVER (ENV)';
 
-        console.log(`📡 Gemini API Call: Model=${model}, KeySource=${keySource}, User=${userId}`);
+        // Sanitize PII in logs
+        const safeUserId = userId ? `${userId.substring(0, 3)}***@***` : 'anonymous';
+        console.log(`📡 Gemini API Call: Model=${model}, KeySource=${keySource}, User=${safeUserId}`);
 
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
