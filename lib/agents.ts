@@ -971,7 +971,8 @@ export class AgentSession {
             await new Promise(resolve => setTimeout(resolve, waitTime));
             return this.callGeminiAPI(model, prompt, customKey, retries - 1);
           }
-          throw new Error(`Hết quota hoặc vượt giới hạn. Vui lòng thử lại sau hoặc sử dụng API Key riêng trong Cài đặt.`);
+          // Pass through actual error from server
+          throw new Error(errorMsg || `Hết quota (Model: ${model}). Vui lòng dùng API Key riêng.`);
         }
 
         // Unauthorized (need login)
