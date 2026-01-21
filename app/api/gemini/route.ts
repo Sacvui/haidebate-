@@ -83,6 +83,12 @@ export async function POST(request: NextRequest) {
         }
 
         // 5. Call Gemini API
+        const keySource = useCustomKey && request.headers.get('x-gemini-api-key')
+            ? 'CUSTOM (User)'
+            : 'SERVER (ENV)';
+
+        console.log(`📡 Gemini API Call: Model=${model}, KeySource=${keySource}, User=${userId}`);
+
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
         const response = await fetch(url, {
@@ -104,8 +110,9 @@ export async function POST(request: NextRequest) {
 
             // Return user-friendly error messages
             if (errorCode === 429 || errorMsg.toLowerCase().includes('quota')) {
+                console.error(`🚨 QUOTA EXCEEDED: Model=${model}, KeySource=${keySource}, User=${userId}`);
                 return NextResponse.json(
-                    { error: 'API quota exceeded. Please try again later or use your own API key in Settings.' },
+                    { error: `API quota exceeded (Model: ${model}, Key: ${keySource}). Please wait or use your own API key in Settings.` },
                     { status: 429 }
                 );
             }
