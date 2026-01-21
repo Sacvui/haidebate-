@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { AgentSession, AgentMessage, WorkflowStep, AcademicLevel, ProjectType } from '../lib/agents';
-import { Bot, User, Play, RotateCw, CheckCircle, ArrowRight, FileText, Camera } from 'lucide-react';
+import { Bot, User, Play, RotateCw, CheckCircle, ArrowRight, ArrowLeft, FileText, Camera } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StepIndicator } from './StepIndicator';
 import { MermaidChart } from './MermaidChart';
@@ -327,6 +327,18 @@ export default function DebateManager({ topic, goal, audience, level, language, 
         setShowReview(false);
     };
 
+    const handlePreviousStep = () => {
+        // Navigate to previous step
+        if (currentStep === '2_MODEL') setCurrentStep('1_TOPIC');
+        else if (currentStep === '3_OUTLINE') setCurrentStep('2_MODEL');
+        else if (currentStep === '4_SURVEY') setCurrentStep('3_OUTLINE');
+
+        setMessages([]);
+        setRoundCount(0);
+        setStepCompleted(true); // Mark as completed since we're going back to review
+        setShowReview(true); // Automatically open review mode
+    };
+
     const getStepNumber = (step: WorkflowStep) => {
         if (step === '1_TOPIC') return 1;
         if (step === '2_MODEL') return 2;
@@ -422,6 +434,16 @@ export default function DebateManager({ topic, goal, audience, level, language, 
 
                     {stepCompleted && (
                         <div className="flex gap-2">
+                            {/* Back Button - only show if not on Step 1 */}
+                            {currentStep !== '1_TOPIC' && (
+                                <button
+                                    onClick={handlePreviousStep}
+                                    className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-medium transition-all shadow-sm active:scale-95"
+                                >
+                                    <ArrowLeft size={18} /> Quay lại
+                                </button>
+                            )}
+
                             <button
                                 onClick={() => setShowReview(true)}
                                 className="flex items-center gap-2 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg font-medium transition-all shadow-sm active:scale-95"

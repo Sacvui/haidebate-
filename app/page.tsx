@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-import { Sparkles, HelpCircle, LogOut, Settings, Lock, CheckCircle, ArrowRight, Mail, Globe, BookOpen } from "lucide-react";
+import { Sparkles, HelpCircle, LogOut, Settings, Lock, CheckCircle, ArrowRight, Mail, Globe, BookOpen, FolderOpen } from "lucide-react";
 import { AcademicLevel, ProjectType } from "@/lib/agents";
+import { SavedProject, createNewProject, saveProject, getProject } from "@/lib/projectStorage";
 import { LevelGuidelines } from "@/components/LevelGuidelines";
 import { SettingsModal } from "@/components/SettingsModal";
 import { ResearchForm } from "@/components/ResearchForm";
@@ -16,6 +17,7 @@ import { signIn } from "next-auth/react";
 import Cookies from "js-cookie";
 import { LoadingH } from "@/components/LoadingH";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ProjectManager } from "@/components/ProjectManager";
 
 // Lazy load heavy components
 const DebateManager = dynamic(() => import("@/components/DebateManager"), {
@@ -40,6 +42,8 @@ export default function Home() {
   const [showSignup, setShowSignup] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
+  const [showProjects, setShowProjects] = useState(false);
+  const [currentProject, setCurrentProject] = useState<SavedProject | null>(null);
   const [apiKey, setApiKey] = useState("");
   const [apiKeyCritic, setApiKeyCritic] = useState<string | undefined>(undefined);
 
@@ -124,6 +128,33 @@ export default function Home() {
       formData: data,
       sessionId: newSessionId
     }));
+
+    // Also create a new project in localStorage
+    const newProj = createNewProject(
+      data.topic,
+      data.goal,
+      data.audience,
+      data.level,
+      data.language,
+      data.projectType
+    );
+    saveProject(newProj);
+    setCurrentProject(newProj);
+  };
+
+  const handleSelectProject = (project: SavedProject) => {
+    setCurrentProject(project);
+    setFormData({
+      topic: project.topic,
+      level: project.level,
+      goal: project.goal,
+      audience: project.audience,
+      language: project.language,
+      projectType: project.projectType
+    });
+    setSessionId(project.id);
+    setIsStarted(true);
+    setShowProjects(false);
   };
 
   const handleLogout = () => {
@@ -244,6 +275,15 @@ export default function Home() {
                   Nhận Điểm
                 </button>
 
+                {/* Projects Button */}
+                <button
+                  onClick={() => setShowProjects(true)}
+                  className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg font-medium text-sm transition-colors border border-blue-200"
+                >
+                  <FolderOpen className="w-4 h-4" />
+                  Dự án
+                </button>
+
                 <div className="h-6 w-px bg-slate-200 mx-1"></div>
 
                 <div className="text-xs text-slate-500 hidden md:flex items-center gap-1">
@@ -267,7 +307,12 @@ export default function Home() {
           </header>
 
           <div className="pt-24 px-4 pb-12 transition-all duration-500">
-            {!isStarted || !formData ? (
+            {showProjects ? (
+              <ProjectManager
+                onSelectProject={handleSelectProject}
+                onCreateNew={() => { setShowProjects(false); setIsStarted(false); setFormData(null); }}
+              />
+            ) : !isStarted || !formData ? (
               <div className="max-w-xl mx-auto mt-10">
                 <ResearchForm
                   onStart={handleStart}
@@ -293,7 +338,7 @@ export default function Home() {
           </div>
           {/* Footer */}
           <footer className="py-8 text-center text-slate-400 text-sm border-t border-slate-100 mt-auto bg-slate-50">
-            <p>© 2026 Hải Debate. Powered by <span className="font-bold text-slate-600">Sidewalk Professer Hải Rong Chơi</span>.</p>
+            <p>© 2026 Hải Debate. Powered by <span className="font-bold text-slate-600">Sidewalk Professor Hải Rong Chơi</span>.</p>
           </footer>
         </>
       )}
