@@ -1,35 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { kv } from '@/lib/kv';
+import { z } from 'zod';
 
-// Simple in-memory rate limiter (fallback if KV not available)
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+// Redis-based Rate Limiting Config
+const RATE_LIMIT_WINDOW = 60; // 1 minute
+const MAX_REQUESTS = 10; // Max requests per window
 
-function checkRateLimit(userId: string, limit = 10, windowMs = 60000): boolean {
-    const now = Date.now();
-    const userLimit = rateLimitMap.get(userId);
+// Input Validation Schema
+const GeminiRequestSchema = z.object({
+    model: z.string().min(1, "Model is required"),
+    prompt: z.string().min(1, "Prompt is required"),
+    useCustomKey: z.boolean().optional().default(false),
+    userId: z.string().optional() // Optional for tracking
+});
 
-    if (!userLimit || now > userLimit.resetTime) {
-        rateLimitMap.set(userId, { count: 1, resetTime: now + windowMs });
-        return true;
-    }
-
-    if (userLimit.count >= limit) {
-        return false;
-    }
-
-    userLimit.count++;
-    return true;
-}
-
-// Cleanup old entries every 5 minutes
-setInterval(() => {
-    const now = Date.now();
-    for (const [userId, data] of rateLimitMap.entries()) {
-        if (now > data.resetTime) {
-            rateLimitMap.delete(userId);
-        }
-    }
-}, 5 * 60 * 1000);
+export const runtime = 'edge'; // Optional: Use Edge if Vercel KV works well
 
 export async function POST(request: NextRequest) {
     try {
@@ -42,18 +28,43 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // 2. Rate limiting
-        const userId = session.user.email;
-        if (!checkRateLimit(userId)) {
+        // 2. Parse and Validate Request Body
+        const json = await request.json();
+        const validation = GeminiRequestSchema.safeParse(json);
+
+        if (!validation.success) {
             return NextResponse.json(
-                { error: 'Rate limit exceeded. Please wait a moment before trying again.' },
-                { status: 429 }
+                { error: 'Invalid Input', details: validation.error.format() },
+                { status: 400 }
             );
         }
 
-        // 3. Parse request body
-        const body = await request.json();
-        const { model, prompt, useCustomKey } = body;
+        const { model, prompt, useCustomKey } = validation.data;
+
+        // 3. Rate Limiting (Redis/KV based)
+        const userId = session.user.email || 'anonymous';
+
+        // Logic: specific limit for standard users, bypass for custom key
+        if (!useCustomKey) {
+            // Use UserID if available, fallback to IP
+            const ip = request.headers.get('x-forwarded-for') || 'anonymous_ip';
+            const identifier = userId || ip;
+            const rateKey = `ratelimit:${identifier}`;
+
+            const current = await kv.incr(rateKey);
+
+            // Set expiration on first request
+            if (current === 1) {
+                await kv.expire(rateKey, RATE_LIMIT_WINDOW);
+            }
+
+            if (current > MAX_REQUESTS) {
+                return NextResponse.json(
+                    { error: 'System busy (Rate Limit). Please wait a moment or use your own API Key.' },
+                    { status: 429 }
+                );
+            }
+        }
 
         if (!model || !prompt) {
             return NextResponse.json(

@@ -74,6 +74,14 @@ class KVAdapter {
             await this.redis.del(key);
         }
     }
+
+    async expire(key: string, seconds: number): Promise<void> {
+        if (this.useVercelKV) {
+            await vercelKv.expire(key, seconds);
+        } else if (this.redis) {
+            await this.redis.expire(key, seconds);
+        }
+    }
 }
 
 export const kv = new KVAdapter();
