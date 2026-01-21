@@ -30,8 +30,8 @@ export interface SavedProject {
         '1_TOPIC'?: ProjectStep;
         '2_MODEL'?: ProjectStep;
         '3_OUTLINE'?: ProjectStep;
-        '5_GTM'?: ProjectStep;
         '4_SURVEY'?: ProjectStep;
+        '5_GTM'?: ProjectStep;
     };
     status: 'in_progress' | 'completed';
     data?: {

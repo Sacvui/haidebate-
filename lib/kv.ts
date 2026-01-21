@@ -1,6 +1,7 @@
 import { kv as vercelKv } from '@vercel/kv';
 import Redis from 'ioredis';
 import { hash } from 'bcryptjs';
+import { WorkflowStep } from './agents';
 
 // Adapter to handle both Vercel KV (HTTP) and Standard Redis (TCP)
 class KVAdapter {
@@ -354,12 +355,13 @@ export interface SessionData {
     step2_model?: StepResult;
     step3_outline?: StepResult;
     step4_survey?: StepResult;
+    step5_gtm?: StepResult;
 }
 
 export async function saveStepResult(
     userId: string,
     sessionId: string,
-    step: '1_TOPIC' | '2_MODEL' | '3_OUTLINE' | '4_SURVEY',
+    step: WorkflowStep,
     data: StepResult
 ): Promise<void> {
     const sessionKey = `session:${userId}:${sessionId}`;
@@ -421,7 +423,7 @@ export async function deleteCloudProject(userId: string, projectId: string): Pro
 export async function getFinalizedStepResult(
     userId: string,
     sessionId: string,
-    step: '1_TOPIC' | '2_MODEL' | '3_OUTLINE' | '4_SURVEY'
+    step: WorkflowStep
 ): Promise<string | null> {
     const sessionKey = `session:${userId}:${sessionId}`;
     const session = await kv.get<SessionData>(sessionKey);
