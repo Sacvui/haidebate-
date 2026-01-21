@@ -1090,8 +1090,8 @@ export class AgentSession {
         ? `${context}\n\nPHẢN HỒI CỦA CRITIC (Vòng trước): ${previousCriticFeedback}\n\n${sysPrompt}\nHãy cải thiện/viết tiếp dựa trên phản hồi này.`
         : `${context}\n\n${sysPrompt}\nHãy bắt đầu thực hiện nhiệm vụ cho giai đoạn này.`;
 
-      // Use Gemini 3 Flash Preview (pass custom key if available)
-      return await this.callGeminiAPI('gemini-3-flash-preview', prompt, finalKey);
+      // Use Gemini 2.0 Flash Exp (stable, publicly available)
+      return await this.callGeminiAPI('gemini-2.0-flash-exp', prompt, finalKey);
 
     } catch (error: any) {
       console.error("Gemini Writer Error:", error);
@@ -1128,8 +1128,8 @@ export class AgentSession {
 
       const prompt = `${sysPrompt}\n\nBÀI LÀM CỦA WRITER:\n${writerDraft}\n\nHãy đóng vai trò Critic và đưa ra nhận xét chi tiết, khắt khe.`;
 
-      // Use Gemini 3 Flash Preview (pass custom key if available)
-      return await this.callGeminiAPI('gemini-3-flash-preview', prompt, geminiKey);
+      // Use Gemini 2.0 Flash Exp (stable, publicly available)
+      return await this.callGeminiAPI('gemini-2.0-flash-exp', prompt, geminiKey);
 
     } catch (error) {
       return `Lỗi Critic (Quota/Network): ${error}`;
