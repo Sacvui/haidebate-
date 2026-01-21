@@ -13,6 +13,52 @@ interface SurveyRow {
     source: string;
 }
 
+// Helper: Parse markdown table to a generic array of arrays
+function parseGeneralTable(content: string, headers: string[]): string[][] {
+    const rows: string[][] = [];
+    const lines = content.split('\n');
+
+    let inTable = false;
+    let headerPassed = false;
+
+    // Check if the table is the one we want by looking for headers
+    const findTable = (line: string) => {
+        const trimmed = line.trim();
+        if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
+            const cells = trimmed.split('|').map(c => c.trim().toLowerCase());
+            return headers.every(h => cells.some(cell => cell.includes(h.toLowerCase())));
+        }
+        return false;
+    };
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (findTable(line)) {
+            inTable = true;
+            // The next line should be the separator
+            if (lines[i + 1]?.includes('---')) {
+                i++; // skip separator
+            }
+            continue;
+        }
+
+        if (inTable) {
+            const trimmed = line.trim();
+            if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
+                const cells = trimmed
+                    .split('|')
+                    .map(cell => cell.trim())
+                    .filter((_, idx, arr) => idx > 0 && idx < arr.length - 1);
+                rows.push(cells);
+            } else {
+                inTable = false;
+            }
+        }
+    }
+
+    return rows;
+}
+
 function parseSurveyTable(surveyContent: string): SurveyRow[] {
     const rows: SurveyRow[] = [];
     const lines = surveyContent.split('\n');
@@ -297,4 +343,53 @@ export function downloadBlob(blob: Blob, filename: string) {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+}
+
+// Export financial projections to Excel
+export async function exportFinancialToExcel(
+    content: string,
+    topic: string
+): Promise<Blob> {
+    if (!content) throw new Error('Nội dung không được để trống');
+
+    // Extract Financial Table (Year, Revenue, Cost, Profit)
+    const financialHeaders = ['Năm', 'Doanh thu', 'Chi phí', 'Lợi nhuận'];
+    const financialRows = parseGeneralTable(content, financialHeaders);
+
+    // Extract Unit Economics Table
+    const ueHeaders = ['Metric', 'Giá trị', 'Giải thích'];
+    const ueRows = parseGeneralTable(content, ueHeaders);
+
+    const wb = XLSX.utils.book_new();
+
+    if (financialRows.length > 0) {
+        const wsData = [
+            ['KẾ HOẠCH TÀI CHÍNH DỰ KIẾN (3 NĂM)'],
+            ['Đề tài:', topic],
+            [],
+            ['Năm', 'Doanh thu', 'Chi phí', 'Lợi nhuận', 'Tăng trưởng'],
+            ...financialRows
+        ];
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        ws['!cols'] = [{ wch: 15 }, { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 15 }];
+        XLSX.utils.book_append_sheet(wb, ws, 'Financial Projections');
+    }
+
+    if (ueRows.length > 0) {
+        const wsData = [
+            ['PHÂN TÍCH UNIT ECONOMICS'],
+            ['Metric', 'Giá trị', 'Giải thích'],
+            ...ueRows
+        ];
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        ws['!cols'] = [{ wch: 20 }, { wch: 20 }, { wch: 60 }];
+        XLSX.utils.book_append_sheet(wb, ws, 'Unit Economics');
+    }
+
+    if (financialRows.length === 0 && ueRows.length === 0) {
+        throw new Error('Không tìm thấy bảng dữ liệu tài chính hợp lệ trong nội dung.');
+    }
+
+    const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    return new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 }

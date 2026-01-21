@@ -478,12 +478,15 @@ CẤU TRÚC LEAN CANVAS(BẮT BUỘC 9 Ô):
 ├─────────────────────┼─────────────────────┼─────────────────────┤
 │ 8. KEY METRICS      │ 5. UNFAIR           │ 9. CHANNELS         │
 │ Chỉ số đo lường     │ ADVANTAGE           │ Kênh tiếp cận       │
-│ thành công          │ Lợi thế không thể   │ copy                │
+│ thành công          │ Lợi thế không thể   │ & Phương thức       │
+│                     │ copy                │                     │
 ├─────────────────────┴─────────────────────┴─────────────────────┤
 │ 7. COST STRUCTURE                │ 6. REVENUE STREAMS            │
 │ Chi phí cố định & biến đổi       │ Các nguồn doanh thu           │
-└──────────────────────────────────┴───────────────────────────────┘
+├──────────────────────────────────┴───────────────────────────────┤
 │ 1. CUSTOMER SEGMENTS: Phân khúc khách hàng mục tiêu             │
+├─────────────────────────────────────────────────────────────────┤
+│ 10. UNIT ECONOMICS (CAC, LTV, Margin, Payback Period)           │
 └─────────────────────────────────────────────────────────────────┘
 
 YÊU CẦU ĐẦU RA:
@@ -524,6 +527,7 @@ QUY TẮC MERMAID:
 - Không ký tự đặc biệt: (), {}, "", ''
 
 3. Giải thích ngắn gọn cho mỗi ô (2-3 câu).
+4. PHÂN TÍCH UNIT ECONOMICS CHI TIẾT (BẮT BUỘC): Trình bày dạng bảng so sánh CAC vs LTV.
 `;
 
 const STARTUP_MODEL_CRITIC_PROMPT = `
@@ -598,10 +602,16 @@ PHẦN A: PITCH DECK (10 SLIDES) - CHO NHÀ ĐẦU TƯ
 - User flow chính
 - Screenshots/Mockups (mô tả)
 
-📌 SLIDE 6: BUSINESS MODEL
+📌 SLIDE 6: BUSINESS MODEL & UNIT ECONOMICS
 - Cách kiếm tiền (Revenue streams)
-- Pricing (Bảng giá)
-- Unit Economics (CAC, LTV, Margin)
+- Chiến lược giá (Pricing strategy)
+- Bảng Unit Economics:
+| Metric | Giá trị | Giải thích |
+|--------|---------|------------|
+| CAC | ... | Chi phí marketing/sales có 1 khách |
+| LTV | ... | Doanh thu trọn đời khách hàng mang lại |
+| LTV/CAC | ... | Tỷ lệ sức khỏe doanh nghiệp (Mục tiêu >3) |
+| Payback | ... | Thời gian hoàn vốn mỗi khách hàng |
 
 📌 SLIDE 7: TRACTION
 - Số liệu đạt được (Users, Revenue, Growth)
@@ -613,10 +623,15 @@ PHẦN A: PITCH DECK (10 SLIDES) - CHO NHÀ ĐẦU TƯ
 - Advisors (nếu có)
 - Tại sao team này sẽ thành công?
 
-📌 SLIDE 9: COMPETITION
-- Competitive landscape (ma trận cạnh tranh)
-- Điểm khác biệt so với từng đối thủ
-- Barriers to entry
+📌 SLIDE 9: COMPETITION MATRIX (Ma trận Cạnh tranh)
+- Bảng so sánh trực tiếp với 3 đối thủ chính:
+| Tính năng / Đặc điểm | Giải pháp của bạn | Đối thủ A | Đối thủ B | Đối thủ C |
+|----------------------|-------------------|-----------|-----------|-----------|
+| Giá | ... | ... | ... | ... |
+| Tính năng chính A | ✅ | ❌ | ✅ | ❌ |
+| Tính năng chính B | ✅ | ✅ | ❌ | ❌ |
+| Điểm khác biệt lớn nhất | [USP] | [Weakness] | [Weakness] | [Weakness] |
+- Phân tích rào cản gia nhập (Barriers to entry).
 
 📌 SLIDE 10: ASK
 - Số tiền cần gọi
@@ -630,12 +645,12 @@ PHẦN B: KẾ HOẠCH TÀI CHÍNH (FINANCIAL PLAN) - CHI TIẾT
 
 📌 SLIDE 11: FINANCIAL PROJECTIONS (Dự báo Tài chính)
 
-11.1 DỰ BÁO DOANH THU (Revenue Forecast) - 3 năm:
-| Năm | Số khách hàng | ARPU | Doanh thu | Tăng trưởng |
-|-----|---------------|------|-----------|-------------|
-| Y1  | ...           | ...  | ...       | -           |
-| Y2  | ...           | ...  | ...       | ...%        |
-| Y3  | ...           | ...  | ...       | ...%        |
+11.1 DỰ BÁO TÀI CHÍNH 3 NĂM (BẮT BUỘC FORMAT NÀY):
+| Năm | Doanh thu | Chi phí | Lợi nhuận | Tăng trưởng |
+|-----|-----------|---------|-----------|-------------|
+| Năm 1 (Y1) | ... | ... | ... | - |
+| Năm 2 (Y2) | ... | ... | ... | ...% |
+| Năm 3 (Y3) | ... | ... | ... | ...% |
 
 11.2 CƠ CẤU CHI PHÍ (Cost Structure):
 - Chi phí cố định: Văn phòng, Lương core team, Phần mềm...

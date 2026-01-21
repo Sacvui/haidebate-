@@ -8,6 +8,7 @@ import {
     exportOutlineToPDF,
     exportSurveyToExcel,
     exportSurveyToCSV,
+    exportFinancialToExcel,
     downloadBlob
 } from '@/lib/exportUtils';
 import ReactMarkdown from 'react-markdown';
@@ -27,7 +28,7 @@ interface ExportManagerProps {
     onViewReport?: () => void;
 }
 
-type ExportType = 'word' | 'pdf' | 'excel' | 'csv';
+type ExportType = 'word' | 'pdf' | 'excel' | 'csv' | 'financial';
 
 export function ExportManager({
     topic,
@@ -76,6 +77,11 @@ export function ExportManager({
                 case 'csv':
                     blob = await exportSurveyToCSV(surveyContent, topic);
                     filename = `Survey_Microsoft_Forms_${topic.substring(0, 20).replace(/\s+/g, '_')}.csv`;
+                    break;
+
+                case 'financial':
+                    blob = await exportFinancialToExcel(outlineContent, topic);
+                    filename = `Tai_Chinh_${topic.substring(0, 30).replace(/\s+/g, '_')}.xlsx`;
                     break;
             }
 
@@ -319,6 +325,50 @@ export function ExportManager({
                         </div>
                     </div>
                 </div>
+
+                {/* Financial Export for Startup - NEW */}
+                {level === 'UNDERGRAD' && (
+                    <div className="bg-white border-2 border-green-600 rounded-xl p-6 shadow-sm hover:shadow-md transition-all relative overflow-hidden">
+                        <div className="absolute top-0 right-0 bg-green-600 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg">
+                            STARTUP ONLY
+                        </div>
+                        <div className="flex items-start gap-4">
+                            <div className="w-14 h-14 bg-green-50 rounded-lg flex items-center justify-center shrink-0 border border-green-100">
+                                <Table size={28} className="text-green-600" />
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="text-lg font-bold text-slate-800 mb-1">
+                                    Kế hoạch Tài chính (.xlsx)
+                                </h3>
+                                <p className="text-sm text-slate-600 mb-4">
+                                    Bảng dự phóng tài chính 3 năm & Unit Economics (CAC/LTV) bóc tách từ kế hoạch.
+                                </p>
+                                <button
+                                    onClick={() => handleExport('financial')}
+                                    disabled={exporting !== null}
+                                    className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {exporting === 'financial' ? (
+                                        <>
+                                            <Loader2 size={18} className="animate-spin" />
+                                            Đang tạo...
+                                        </>
+                                    ) : exportedFiles.has('financial') ? (
+                                        <>
+                                            <CheckCircle size={18} />
+                                            Tải lại
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Download size={18} />
+                                            Xuất Excel Tài Chính
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Preview Sections */}
