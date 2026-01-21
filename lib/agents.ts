@@ -633,8 +633,10 @@ PHẦN A: PITCH DECK (10 SLIDES) - CHO NHÀ ĐẦU TƯ
 | Điểm khác biệt lớn nhất | [USP] | [Weakness] | [Weakness] | [Weakness] |
 - Phân tích rào cản gia nhập (Barriers to entry).
 
-📌 SLIDE 10: ASK
-- Số tiền cần gọi
+📌 SLIDE 10: EXIT STRATEGY & ASK
+- Chiến lược thoái vốn (Exit Strategy): IPO, M&A (đối thủ/đối tác tiềm năng mua lại)
+- Thời gian dự kiến thoái vốn (Exit Timeline): [VD: 5-7 năm]
+- Số tiền cần gọi (Investment Ask)
 - Mục đích sử dụng vốn (Use of funds)
 - Milestones sau khi nhận vốn
 - Thông tin liên hệ
@@ -663,10 +665,11 @@ PHẦN B: KẾ HOẠCH TÀI CHÍNH (FINANCIAL PLAN) - CHI TIẾT
 - LTV/CAC Ratio: Phải > 3x để bền vững
 - Payback Period: Thời gian hoàn vốn mỗi khách
 
-11.4 BREAK-EVEN ANALYSIS (Điểm hòa vốn):
-- Số khách hàng cần để hòa vốn: X khách
-- Thời gian dự kiến đạt break-even: Y tháng
-- Runway với số vốn hiện tại: Z tháng
+11.4 BREAK-EVEN ANALYSIS (Phân tích Điểm hòa vốn):
+- Doanh thu hòa vốn (Break-even Revenue): $...
+- Số khách hàng cần đạt để hòa vốn (Break-even Units): ... khách
+- Thời điểm hòa vốn dự kiến: Tháng thứ ... kể từ khi ra mắt
+- Runway (Thời gian sống sót với số vốn hiện tại): ... tháng
 
 📌 SLIDE 12: FUNDING & USE OF FUNDS (Vốn & Sử dụng vốn)
 
@@ -842,9 +845,10 @@ PHẢN BIỆN PITCH DECK - RUBRIC CHI TIẾT (BẮT BUỘC CHẤM ĐIỂM):
    - Team có đủ năng lực không?
    - Có unfair advantage từ background không?
 
-4. ASK & USE OF FUNDS (2 điểm):
+4. ASK & EXIT STRATEGY (2 điểm):
    - Số tiền xin có hợp lý với milestones?
-   - Use of funds có rõ ràng không?
+   - Exit strategy có thực tế không? (Có đối thủ nào đủ lớn để mua lại không?)
+   - Break-even analysis có dựa trên dữ liệu tài chính ở Slide 11 không?
 
 TỔNG ĐIỂM: .../10
 
