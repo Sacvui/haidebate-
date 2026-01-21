@@ -1,10 +1,10 @@
 
 import React, { useState } from 'react';
-import { BookOpen, GraduationCap, HelpCircle, Sparkles, Info } from 'lucide-react';
-import { AcademicLevel } from '@/lib/agents';
+import { BookOpen, GraduationCap, HelpCircle, Sparkles, Info, Rocket } from 'lucide-react';
+import { AcademicLevel, ProjectType } from '@/lib/agents';
 
 interface ResearchFormProps {
-    onStart: (data: { topic: string; level: AcademicLevel; goal: string; audience: string; language: 'vi' | 'en' }) => void;
+    onStart: (data: { topic: string; level: AcademicLevel; goal: string; audience: string; language: 'vi' | 'en'; projectType: ProjectType }) => void;
     onOpenGuidelines: () => void;
     // Visual props for Preview Mode
     isPreview?: boolean;
@@ -18,20 +18,36 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
     const [audience, setAudience] = useState("Chuyên gia/Nhà nghiên cứu");
     const [level, setLevel] = useState<AcademicLevel>("MASTER");
     const [language, setLanguage] = useState<'vi' | 'en'>('vi');
+    const [projectType, setProjectType] = useState<ProjectType>('RESEARCH');
     const [showGuide, setShowGuide] = useState(false);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (topic.trim()) {
-            onStart({ topic, level, goal, audience, language });
+            onStart({ topic, level, goal, audience, language, projectType });
         }
     };
 
     const handleLevelSelect = (lvl: AcademicLevel) => {
         setLevel(lvl);
-        if (lvl === 'UNDERGRAD') setGoal("Tiểu luận Đại học/Khóa luận");
+        // Reset project type when level changes
+        if (lvl !== 'UNDERGRAD') {
+            setProjectType('RESEARCH');
+        }
+        if (lvl === 'UNDERGRAD') setGoal(projectType === 'STARTUP' ? "Pitch Deck / Business Plan" : "Tiểu luận Đại học/Khóa luận");
         if (lvl === 'MASTER') setGoal("Luận văn Thạc sĩ");
         if (lvl === 'PHD') setGoal("Bài báo quốc tế (ISI/Scopus) / Đề án Tiến sĩ");
+    };
+
+    const handleProjectTypeSelect = (type: ProjectType) => {
+        setProjectType(type);
+        if (type === 'STARTUP') {
+            setGoal("Pitch Deck / Business Plan");
+            setAudience("Nhà đầu tư / Quỹ Khởi nghiệp");
+        } else {
+            setGoal("Tiểu luận Đại học/Khóa luận");
+            setAudience("Giảng viên hướng dẫn");
+        }
     };
 
     return (
@@ -98,6 +114,45 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
                             </button>
                         ))}
                     </div>
+
+                    {/* Startup Project Toggle - Only show when UNDERGRAD is selected */}
+                    {level === 'UNDERGRAD' && (
+                        <div className="mt-3 p-3 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-xl animate-in fade-in slide-in-from-top-2 duration-300">
+                            <label className="text-xs font-bold text-orange-700 mb-2 block">
+                                🎯 Chọn loại dự án
+                            </label>
+                            <div className="grid grid-cols-2 gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => handleProjectTypeSelect('RESEARCH')}
+                                    className={`py-2.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${projectType === 'RESEARCH'
+                                            ? 'bg-white text-blue-700 shadow-md ring-2 ring-blue-500'
+                                            : 'bg-white/50 text-slate-500 hover:bg-white hover:text-slate-700'
+                                        }`}
+                                >
+                                    <BookOpen size={14} />
+                                    Tiểu luận / Nghiên cứu
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => handleProjectTypeSelect('STARTUP')}
+                                    className={`py-2.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${projectType === 'STARTUP'
+                                            ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md ring-2 ring-orange-400'
+                                            : 'bg-white/50 text-slate-500 hover:bg-white hover:text-slate-700'
+                                        }`}
+                                >
+                                    <Rocket size={14} />
+                                    Dự án Khởi nghiệp
+                                </button>
+                            </div>
+                            {projectType === 'STARTUP' && (
+                                <p className="text-xs text-orange-600 mt-2 flex items-start gap-1">
+                                    <Sparkles size={12} className="mt-0.5 flex-shrink-0" />
+                                    Workflow: Ý tưởng → Lean Canvas → Pitch Deck + Kế hoạch Tài chính/Marketing → Customer Discovery
+                                </p>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

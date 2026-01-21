@@ -223,6 +223,7 @@ export default function Home() {
                   audience={formData.audience}
                   level={formData.level}
                   language={formData.language}
+                  projectType={formData.projectType}
                   apiKey={apiKey}
                   apiKeyCritic={apiKeyCritic}
                   userId={user.id}

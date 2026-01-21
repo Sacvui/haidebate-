@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { AgentSession, AgentMessage, WorkflowStep, AcademicLevel } from '../lib/agents';
+import { AgentSession, AgentMessage, WorkflowStep, AcademicLevel, ProjectType } from '../lib/agents';
 import { Bot, User, Play, RotateCw, CheckCircle, ArrowRight, FileText, Camera } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StepIndicator } from './StepIndicator';
@@ -27,6 +27,7 @@ interface DebateManagerProps {
     audience: string;
     level: AcademicLevel;
     language: 'vi' | 'en';
+    projectType?: ProjectType;
     apiKey?: string;
     apiKeyCritic?: string;
     userId?: string;
@@ -42,9 +43,9 @@ const extractMermaidCode = (content: string): string => {
     return "";
 };
 
-export default function DebateManager({ topic, goal, audience, level, language, apiKey, apiKeyCritic, userId }: DebateManagerProps) {
+export default function DebateManager({ topic, goal, audience, level, language, projectType = 'RESEARCH', apiKey, apiKeyCritic, userId }: DebateManagerProps) {
     const [sessionId] = useState(() => `session_${Date.now()}`);
-    const [session] = useState(() => new AgentSession(topic, goal, audience, level, language, apiKey, apiKeyCritic, sessionId, userId));
+    const [session] = useState(() => new AgentSession(topic, goal, audience, level, language, projectType, apiKey, apiKeyCritic, sessionId, userId));
     const [roundsConfig, setRoundsConfig] = useState<RoundsConfig>({
         '1_TOPIC': 3,
         '2_MODEL': 3,
