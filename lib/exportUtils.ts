@@ -3,6 +3,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { AcademicLevel } from './agents';
+import { generateDocx } from './docxGenerator';
 
 // Helper: Parse markdown table to array of objects
 interface SurveyRow {
@@ -117,96 +118,27 @@ function parseOutline(outlineContent: string): OutlineSection[] {
     return sections;
 }
 
-// Export đề cương ra Word
+// Export đề cương ra Word (Consolidated to use generateDocx)
 export async function exportOutlineToWord(
     topic: string,
     outline: string,
     model: string,
-    level: AcademicLevel
-): Promise<Blob> {
-    // Input validation
-    if (!outline || outline.trim().length === 0) {
-        throw new Error('Đề cương không được để trống');
-    }
-
-    if (outline.length > 100000) {
-        throw new Error('Đề cương quá dài (tối đa 100,000 ký tự). Vui lòng rút gọn nội dung.');
-    }
-
-    const sections = parseOutline(outline);
-
-    const children: Paragraph[] = [
-        // Title page
-        new Paragraph({
-            text: 'ĐỀ CƯƠNG NGHIÊN CỨU CHI TIẾT',
-            heading: HeadingLevel.TITLE,
-            alignment: AlignmentType.CENTER,
-            spacing: { after: 400 }
-        }),
-        new Paragraph({
-            text: topic,
-            heading: HeadingLevel.HEADING_1,
-            alignment: AlignmentType.CENTER,
-            spacing: { after: 400 }
-        }),
-        new Paragraph({
-            children: [
-                new TextRun({
-                    text: `Trình độ: ${level}`,
-                    bold: true
-                })
-            ],
-            alignment: AlignmentType.CENTER,
-            spacing: { after: 800 }
-        }),
-
-        // Model section
-        new Paragraph({
-            text: 'MÔ HÌNH NGHIÊN CỨU',
-            heading: HeadingLevel.HEADING_1,
-            spacing: { before: 400, after: 200 }
-        }),
-        new Paragraph({
-            text: model.substring(0, 500) + '...',
-            spacing: { after: 400 }
-        }),
-
-        // Outline sections
-        new Paragraph({
-            text: 'ĐỀ CƯƠNG CHI TIẾT',
-            heading: HeadingLevel.HEADING_1,
-            spacing: { before: 400, after: 200 }
-        })
-    ];
-
-    // Add parsed sections
-    for (const section of sections) {
-        const headingLevel = section.level === 1 ? HeadingLevel.HEADING_1 :
-            section.level === 2 ? HeadingLevel.HEADING_2 :
-                section.level === 3 ? HeadingLevel.HEADING_3 : HeadingLevel.HEADING_4;
-
-        children.push(new Paragraph({
-            text: section.title,
-            heading: headingLevel,
-            spacing: { before: 200, after: 100 }
-        }));
-
-        for (const content of section.content) {
-            children.push(new Paragraph({
-                text: content,
-                spacing: { after: 100 }
-            }));
-        }
-    }
-
-    const doc = new Document({
-        sections: [{
-            properties: {},
-            children
-        }]
+    level: AcademicLevel,
+    gtm?: string,
+    survey?: string,
+    outlineChart?: string,
+    template?: any
+): Promise<void> {
+    await generateDocx({
+        topic,
+        level,
+        modelContent: model,
+        outlineContent: outline,
+        gtmContent: gtm,
+        surveyContent: survey,
+        outlineChart: outlineChart,
+        template: template
     });
-
-    return await Packer.toBlob(doc);
 }
 
 // Export đề cương ra PDF

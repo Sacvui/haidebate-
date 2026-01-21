@@ -6,7 +6,7 @@ export interface AgentMessage {
   round?: number;
 }
 
-export type WorkflowStep = '1_TOPIC' | '2_MODEL' | '3_OUTLINE' | '4_SURVEY';
+export type WorkflowStep = '1_TOPIC' | '2_MODEL' | '3_OUTLINE' | '4_SURVEY' | '5_GTM';
 export type AcademicLevel = 'UNDERGRAD' | 'MASTER' | 'PHD';
 export type ProjectType = 'RESEARCH' | 'STARTUP';
 
@@ -307,7 +307,8 @@ OUTPUT FORM:
 ...
 `;
 
-const getSurveyWriterPrompt = (level: AcademicLevel) => `
+export function getSurveyPrompt(level: AcademicLevel): string {
+  const prompt = `
 NHIỆM VỤ: Xây dựng Thang đo (Scale) và Bảng hỏi Khảo sát (Survey Questionnaire).
 TRÌNH ĐỘ: ${level}
 
@@ -337,7 +338,25 @@ SAU BẢNG LÀ PHẦN "PHƯƠNG ÁN THU THẬP DỮ LIỆU":
 - Phương pháp lấy mẫu (Sampling Method).
 - Kích thước mẫu (Sample Size) - giải thích công thức tính.
 - Đối tượng khảo sát (Target Population).
-`;
+
+═══════════════════════════════════════════════════════════════
+📌 BIỂU ĐỒ MINH HỌA (SMART DATA CHART)
+═══════════════════════════════════════════════════════════════
+YÊU CẦU BẮT BUỘNG: Vẽ một biểu đồ cột (Bar Chart) minh họa kết quả dự kiến (hoặc dữ liệu thăm dò thử nghiệm) bằng Mermaid.
+
+Lưu ý format:
+\```mermaid
+pie title Kết quả khảo sát dự kiến
+    "Rất đồng ý" : 45
+    "Đồng ý" : 35
+    "Trung lập" : 10
+    "Không đồng ý" : 7
+    "Rất không đồng ý" : 3
+\```
+Hoặc dùng bar chart nếu phù hợp.
+  `;
+  return prompt;
+}
 
 const SURVEY_CRITIC_PROMPT = `
 PHẢN BIỆN BẢNG HỎI - RUBRIC CHI TIẾT:
@@ -376,7 +395,7 @@ OUTPUT:
 // =============================================================================
 
 const STARTUP_TOPIC_WRITER_PROMPT = `
-NHIỆM VỤ: Đề xuất/tinh chỉnh Ý Tưởng Kinh Doanh Khởi Nghiệp.
+NHIỆM VỤ: Đề xuất/tinh chỉnh Ý TƯỞNG KINH DOANH Khởi Nghiệp.
 
 VÍ DỤ MẪU (FEW-SHOT EXAMPLES):
 
@@ -459,8 +478,7 @@ CẤU TRÚC LEAN CANVAS (BẮT BUỘC 9 Ô):
 ├─────────────────────┼─────────────────────┼─────────────────────┤
 │ 8. KEY METRICS      │ 5. UNFAIR           │ 9. CHANNELS         │
 │ Chỉ số đo lường     │ ADVANTAGE           │ Kênh tiếp cận       │
-│ thành công          │ Lợi thế không thể   │ khách hàng          │
-│                     │ copy                │                     │
+│ thành công          │ Lợi thế không thể   │ copy                │
 ├─────────────────────┴─────────────────────┴─────────────────────┤
 │ 7. COST STRUCTURE                │ 6. REVENUE STREAMS            │
 │ Chi phí cố định & biến đổi       │ Các nguồn doanh thu           │
@@ -709,13 +727,14 @@ PHẦN C: KẾ HOẠCH MARKETING & LAUNCHING (GO-TO-MARKET STRATEGY)
 15.1 NORTH STAR METRIC:
 - Metric chính để đo thành công: [VD: Monthly Active Users, Revenue, etc.]
 
-15.2 MILESTONES 12 THÁNG:
-| Milestone | Timeline | Target | Status |
-|-----------|----------|--------|--------|
-| MVP Launch | M1-2 | Live product | 🟡 |
-| Product-Market Fit | M3-6 | 40% retention | ⚪ |
-| Break-even | M9-12 | Profitable unit | ⚪ |
 | Series A Ready | M12 | 10K users, 500M revenue | ⚪ |
+
+📌 SLIDE 16: FINANCIAL PROJECTION (Dự phóng Tài chính)
+- Biểu đồ doanh thu 12 tháng.
+- Ước tính CAPEX và OPEX.
+
+16.1 FINANCIAL CHART (Biểu đồ Tài chính)
+- **YÊU CẦU BẮT BUỘNG**: Vẽ một biểu đồ doanh thu (Revenue Projection) bằng Mermaid code block (dạng xy-chart hoặc bar-chart).
 
 YÊU CẦU ĐẶC BIỆT VỀ FORMAT:
 1. **KHÔNG** thêm bất kỳ lời dẫn nhập nào.
@@ -725,6 +744,70 @@ YÊU CẦU ĐẶC BIỆT VỀ FORMAT:
 5. Số liệu phải realistic và có logic.
 
 HÃY VIẾT NHƯ MỘT FOUNDER ĐANG CHUẨN BỊ GỌI VỐN SERIES A.
+`;
+
+const STARTUP_GTM_WRITER_PROMPT = `
+NHIỆM VỤ: Xây dựng Chiến lược Ra Mắt và Marketing (Go-To-Market & Launch Strategy).
+
+BỐI CẢNH: Dựa trên Ý tưởng, Lean Canvas và Pitch Deck đã được phê duyệt, hãy xây dựng một kế hoạch thực thi cực kỳ chi tiết để đưa sản phẩm ra thị trường.
+
+YÊU CẦU CHI TIẾT (4 PHẦN CHÍNH):
+
+📌 PHẦN 1: CHIẾN LƯỢC NỘI DUNG (CONTENT STRATEGY)
+- Content Pillars (3-5 chủ đề chính để thu hút khách hàng).
+- Kênh chủ đạo (TikTok, Facebook, LinkedIn, Instagram...).
+- Tần suất đăng bài & Loại hình nội dung (Video ngắn, Blog, Infographic).
+- Ví dụ 3 mẫu Headline thu hút (Hook).
+
+📌 PHẦN 2: LỘ TRÌNH RA MẮT (LAUNCH ROADMAP - 90 NGÀY)
+- Giai đoạn 1: Pre-launch (Build waitlist, seeding).
+- Giai đoạn 2: Soft launch (Beta test, thu thập feedback).
+- Giai đoạn 3: Hard launch (Vùng nổ truyền thông, ads).
+- KPIs cụ thể cho từng giai đoạn.
+
+📌 PHẦN 3: CHIẾN LƯỢC KOL/INFLUENCER (INFLUENCER STRATEGY)
+- Tiêu chí chọn KOL (Nano, Micro hay Macro).
+- Danh sách 5-10 KOLs tiềm năng (mô tả đặc điểm).
+- Chiến dịch hợp tác (Review, Challenge, Livestream).
+
+📌 PHẦN 4: NGÂN SÁCH & QUẢN TRỊ (BUDGET & OPS)
+- Phân bổ ngân sách chi tiết (Ads, Creative, KOL).
+- Các chỉ số cần theo dõi (CAC, ROAS, Engagement Rate).
+- Kế hoạch dự phòng nếu không đạt mục tiêu.
+
+YÊU CẦU ĐẦU RA:
+- Sử dụng bảng (Markdown Table) để trình bày lộ trình và ngân sách.
+- Sử dụng Bullet points để mô tả chi tiết các hoạt động.
+- Văn phong năng động, thực chiến nhưng vẫn chuyên nghiệp.
+`;
+
+const STARTUP_GTM_CRITIC_PROMPT = `
+PHẢN BIỆN CHIẾN LƯỢC GTM - RUBRIC CHI TIẾT (KHẮT KHE):
+
+1. TÍNH KHẢ THI (FEASIBILITY) - 3 điểm:
+   - Ngân sách có phù hợp với quy mô startup không?
+   - Kênh tiếp cận có đúng nơi khách hàng mục tiêu hiện diện không?
+   - Lộ trình 90 ngày có quá tham vọng hay quá chậm không?
+
+2. TÍNH SÁNG TẠO & THU HÚT (CREATIVITY) - 3 điểm:
+   - Hook/Headline có đủ hấp dẫn để viral không?
+   - Chiến lược KOL có đặc sắc không hay chỉ là thuê đơn thuần?
+
+3. SỰ THỐNG NHẤT (COHESION) - 2 điểm:
+   - Chiến lược GTM có nhất quán với giá trị cốt lõi (USP) của sản phẩm không?
+
+4. ĐO LƯỜNG (MEASURABILITY) - 2 điểm:
+   - Các KPIs có rõ ràng và có thể đo lường được không?
+
+TỔNG ĐIỂM: .../10
+
+NẾU < 9 ĐIỂM:
+❌ REJECT - Chỉ ra lỗ hổng trong chiến lược thực thi.
+
+OUTPUT FORM:
+📊 ĐIỂM SỐ: .../10
+❌ Điểm yếu chí mạng: [Vấn đề]
+➡️ Đề xuất thực chiến: [Cách sửa cụ thể]
 `;
 
 const STARTUP_OUTLINE_CRITIC_PROMPT = `
@@ -776,7 +859,7 @@ NHIỆM VỤ: Thiết kế Bảng Khảo Sát CUSTOMER DISCOVERY (Khám Phá Kh�
 
 BỐI CẢNH: Dựa trên Ý tưởng và Lean Canvas đã xây dựng, thiết kế bảng khảo sát để validate giả định với khách hàng thực tế.
 
-PHƯƠNG PHÁP: THE MOM TEST (BẮT BUỘC)
+PHƯƠNG PHÁP: THE MOM TEST (BẮT BUỘNG)
 - KHÔNG hỏi ý kiến -> Hỏi về HÀNH VI trong quá khứ
 - KHÔNG dẫn dắt câu trả lời -> Để khách hàng tự nói
 - KHÔNG pitch sản phẩm -> Chỉ lắng nghe vấn đề
@@ -877,6 +960,8 @@ export class AgentSession {
   public finalizedModel?: string;
   public finalizedModelChart?: string;
   public finalizedOutline?: string;
+  public finalizedOutlineChart?: string;
+  public finalizedGTM?: string;
   public finalizedSurvey?: string;
   private sessionId: string;
   private userId?: string;
@@ -911,8 +996,13 @@ export class AgentSession {
     this.finalizedModelChart = chart;
   }
 
-  public setFinalizedOutline(outline: string) {
+  public setFinalizedOutline(outline: string, chart?: string) {
     this.finalizedOutline = outline;
+    this.finalizedOutlineChart = chart;
+  }
+
+  public setFinalizedGTM(gtm: string) {
+    this.finalizedGTM = gtm;
   }
 
   public setFinalizedSurvey(survey: string) {
@@ -1051,6 +1141,18 @@ export class AgentSession {
               contextAddition += `\n\nSƠ ĐỒ BUSINESS MODEL:\n\`\`\`mermaid\n${this.finalizedModelChart}\n\`\`\``;
             }
             break;
+          case '5_GTM':
+            sysPrompt = STARTUP_GTM_WRITER_PROMPT;
+            if (this.finalizedTopic) {
+              contextAddition += `\n\nÝ TƯỞNG: "${this.finalizedTopic}"`;
+            }
+            if (this.finalizedModel) {
+              contextAddition += `\n\nLEAN CANVAS: ${this.finalizedModel.substring(0, 500)}...`;
+            }
+            if (this.finalizedOutline) {
+              contextAddition += `\n\nPITCH DECK: ${this.finalizedOutline.substring(0, 1000)}...`;
+            }
+            break;
           case '4_SURVEY':
             sysPrompt = STARTUP_SURVEY_WRITER_PROMPT;
             if (this.finalizedTopic) {
@@ -1060,7 +1162,10 @@ export class AgentSession {
               contextAddition += `\n\nLEAN CANVAS: ${this.finalizedModel.substring(0, 500)}...`;
             }
             if (this.finalizedOutline) {
-              contextAddition += `\n\nPITCH DECK (trích đoạn): ${this.finalizedOutline.substring(0, 500)}...`;
+              contextAddition += `\n\nPITCH DECK: ${this.finalizedOutline.substring(0, 500)}...`;
+            }
+            if (this.finalizedGTM) {
+              contextAddition += `\n\nCHIẾN LƯỢC GTM: ${this.finalizedGTM.substring(0, 500)}...`;
             }
             break;
         }
@@ -1089,7 +1194,7 @@ export class AgentSession {
             }
             break;
           case '4_SURVEY':
-            sysPrompt = getSurveyWriterPrompt(this.level);
+            sysPrompt = getSurveyPrompt(this.level);
             if (this.finalizedTopic) {
               contextAddition += `\n\nĐỀ TÀI: "${this.finalizedTopic}"`;
             }
@@ -1103,13 +1208,13 @@ export class AgentSession {
         }
       }
 
-      const context = `CHỦ ĐỀ GỐC: ${this.topic}\nLOẠI HÌNH (OUTPUT): ${this.goal}\nĐỐI TƯỢNG: ${this.audience}\nTRÌNH ĐỘ: ${this.level}\nNGÔN NGỮ ĐẦU RA (OUTPUT LANGUAGE): ${this.language === 'en' ? 'ENGLISH (100%)' : 'VIETNAMESE (100%)'}${contextAddition}`;;
+      const context = `CHỦ ĐỀ GỐC: ${this.topic}\nLOẠI HÌNH (OUTPUT): ${this.goal}\nĐỐI TƯỢNG: ${this.audience}\nTRÌNH ĐỘ: ${this.level}\nNGÔN NGỮ ĐẦU RA (OUTPUT LANGUAGE): ${this.language === 'en' ? 'ENGLISH (100%)' : 'VIETNAMESE (100%)'}${contextAddition}`;
 
       const prompt = previousCriticFeedback
         ? `${context}\n\nPHẢN HỒI CỦA CRITIC (Vòng trước): ${previousCriticFeedback}\n\n${sysPrompt}\nHãy cải thiện/viết tiếp dựa trên phản hồi này.`
         : `${context}\n\n${sysPrompt}\nHãy bắt đầu thực hiện nhiệm vụ cho giai đoạn này.`;
 
-      // Use Gemini 3 Flash Preview
+      // Use Preferred Model
       return await this.callGeminiAPI('gemini-3-flash-preview', prompt, finalKey);
 
     } catch (error: any) {
@@ -1135,6 +1240,7 @@ export class AgentSession {
           case '2_MODEL': sysPrompt = STARTUP_MODEL_CRITIC_PROMPT; break;
           case '3_OUTLINE': sysPrompt = STARTUP_OUTLINE_CRITIC_PROMPT; break;
           case '4_SURVEY': sysPrompt = STARTUP_SURVEY_CRITIC_PROMPT; break;
+          case '5_GTM': sysPrompt = STARTUP_GTM_CRITIC_PROMPT; break;
         }
       } else {
         switch (step) {
@@ -1147,7 +1253,7 @@ export class AgentSession {
 
       const prompt = `${sysPrompt}\n\nBÀI LÀM CỦA WRITER:\n${writerDraft}\n\nHãy đóng vai trò Critic và đưa ra nhận xét chi tiết, khắt khe.`;
 
-      // Use Gemini 3 Flash Preview
+      // Use Preferred Model
       return await this.callGeminiAPI('gemini-3-flash-preview', prompt, geminiKey);
 
     } catch (error) {

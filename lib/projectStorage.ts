@@ -1,6 +1,7 @@
 "use client";
 
 import { WorkflowStep, AcademicLevel, ProjectType, AgentMessage } from './agents';
+import { db } from './db';
 
 // ============================================
 // PROJECT DATA STRUCTURE
@@ -29,68 +30,95 @@ export interface SavedProject {
         '1_TOPIC'?: ProjectStep;
         '2_MODEL'?: ProjectStep;
         '3_OUTLINE'?: ProjectStep;
+        '5_GTM'?: ProjectStep;
         '4_SURVEY'?: ProjectStep;
     };
     status: 'in_progress' | 'completed';
+    data?: {
+        messages?: AgentMessage[];
+        mermaid?: string;
+        finalContent?: string;
+        outlineContent?: string;
+        outlineChart?: string;
+        gtmContent?: string;
+        surveyContent?: string;
+        completedAt?: string;
+    };
 }
 
-const STORAGE_KEY = 'haidebate_projects';
-
 // ============================================
-// CRUD OPERATIONS
+// INDEXEDDB STORAGE (NEW)
 // ============================================
 
-export function getAllProjects(): SavedProject[] {
-    if (typeof window === 'undefined') return [];
-
+export async function getAllProjects(): Promise<SavedProject[]> {
     try {
-        const data = localStorage.getItem(STORAGE_KEY);
-        if (!data) return [];
-        const projects = JSON.parse(data) as SavedProject[];
-        // Sort by updatedAt (newest first)
-        return projects.sort((a, b) =>
-            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-        );
-    } catch {
-        console.error('Failed to load projects from localStorage');
+        // Initial migration if needed
+        if (typeof window !== 'undefined' && localStorage.getItem('haidebate_projects')) {
+            await migrateFromLocalStorage();
+        }
+        return await db.projects.toArray();
+    } catch (e) {
+        console.error('Error getting projects from DB:', e);
         return [];
     }
 }
 
-export function getProject(id: string): SavedProject | null {
-    const projects = getAllProjects();
-    return projects.find(p => p.id === id) || null;
-}
-
-export function saveProject(project: SavedProject): void {
-    if (typeof window === 'undefined') return;
-
-    const projects = getAllProjects();
-    const existingIndex = projects.findIndex(p => p.id === project.id);
-
-    project.updatedAt = new Date().toISOString();
-
-    if (existingIndex >= 0) {
-        projects[existingIndex] = project;
-    } else {
-        projects.push(project);
+export async function getProject(id: string): Promise<SavedProject | undefined> {
+    try {
+        return await db.projects.get(id);
+    } catch (e) {
+        console.error(`Error getting project ${id}:`, e);
+        return undefined;
     }
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
 }
 
-export function deleteProject(id: string): void {
-    if (typeof window === 'undefined') return;
-
-    const projects = getAllProjects().filter(p => p.id !== id);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+export async function saveProject(project: SavedProject): Promise<void> {
+    try {
+        project.updatedAt = new Date().toISOString(); // Ensure updatedAt is always current
+        await db.projects.put(project);
+    } catch (e) {
+        console.error('Error saving project to DB:', e);
+    }
 }
 
-export function renameProject(id: string, newName: string): void {
-    const project = getProject(id);
-    if (project) {
-        project.name = newName;
-        saveProject(project);
+export async function deleteProject(id: string): Promise<void> {
+    try {
+        await db.projects.delete(id);
+    } catch (e) {
+        console.error(`Error deleting project ${id}:`, e);
+    }
+}
+
+export async function renameProject(id: string, newName: string): Promise<void> {
+    try {
+        const project = await db.projects.get(id);
+        if (project) {
+            project.name = newName;
+            project.updatedAt = new Date().toISOString();
+            await db.projects.put(project);
+        }
+    } catch (e) {
+        console.error(`Error renaming project ${id}:`, e);
+    }
+}
+
+async function migrateFromLocalStorage() {
+    try {
+        const raw = localStorage.getItem('haidebate_projects');
+        if (raw) {
+            const projects: SavedProject[] = JSON.parse(raw);
+            if (projects.length > 0) {
+                console.log(`Migrating ${projects.length} projects to IndexedDB...`);
+                await db.projects.bulkPut(projects);
+                // Clear LS after successful migration OR keep as backup? 
+                // Let's rename for safety.
+                localStorage.setItem('haidebate_projects_migrated', raw);
+                localStorage.removeItem('haidebate_projects');
+                console.log('Migration complete.');
+            }
+        }
+    } catch (e) {
+        console.error('Migration failed:', e);
     }
 }
 
@@ -131,18 +159,23 @@ export function getStepLabel(step: WorkflowStep): string {
         case '1_TOPIC': return 'Đề tài';
         case '2_MODEL': return 'Mô hình';
         case '3_OUTLINE': return 'Đề cương';
+        case '5_GTM': return 'GTM Strategy';
         case '4_SURVEY': return 'Bảng hỏi';
         default: return step;
     }
 }
 
 export function getProjectProgress(project: SavedProject): number {
-    const steps = ['1_TOPIC', '2_MODEL', '3_OUTLINE', '4_SURVEY'] as const;
+    const isStartup = project.projectType === 'STARTUP';
+    const steps = isStartup
+        ? ['1_TOPIC', '2_MODEL', '3_OUTLINE', '5_GTM', '4_SURVEY'] as const
+        : ['1_TOPIC', '2_MODEL', '3_OUTLINE', '4_SURVEY'] as const;
+
     let completed = 0;
     for (const step of steps) {
         if (project.steps[step]?.finalized) completed++;
     }
-    return Math.round((completed / 4) * 100);
+    return Math.round((completed / steps.length) * 100);
 }
 
 export function getProjectTypeLabel(type: ProjectType): string {

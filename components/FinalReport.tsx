@@ -15,12 +15,14 @@ interface FinalReportProps {
     finalContent?: string; // Optional legacy prop
     modelContent?: string;
     outlineContent?: string;
+    gtmContent?: string;
     surveyContent?: string;
     variableChart?: string;
+    outlineChart?: string;
     onBack: () => void;
 }
 
-export const FinalReport = ({ topic, goal, audience, level, finalContent, modelContent, variableChart, surveyContent, outlineContent, onBack }: FinalReportProps) => {
+export const FinalReport = ({ topic, goal, audience, level, finalContent, modelContent, variableChart, outlineChart, surveyContent, gtmContent, outlineContent, onBack }: FinalReportProps) => {
     const [includeChart, setIncludeChart] = useState(true);
     const [showOutlineModal, setShowOutlineModal] = useState(false);
 
@@ -48,8 +50,10 @@ export const FinalReport = ({ topic, goal, audience, level, finalContent, modelC
                             onClick={() => generateDocx({
                                 topic,
                                 level,
-                                modelContent: finalContent,
+                                modelContent: modelContent || finalContent,
                                 outlineContent: outlineContent,
+                                outlineChart: outlineChart,
+                                gtmContent: gtmContent,
                                 surveyContent: surveyContent
                             })}
                             className="flex items-center gap-2 px-3 py-1.5 bg-blue-700 hover:bg-blue-800 rounded-lg text-xs font-bold transition-colors shadow"
@@ -79,9 +83,9 @@ export const FinalReport = ({ topic, goal, audience, level, finalContent, modelC
                         </div>
                     </div>
 
-                    {/* 2. MAIN CONTENT (Introduction, Lit Review, etc.) */}
+                    {/* 2. MAIN CONTENT */}
                     <div className="prose prose-slate max-w-none font-serif prose-headings:font-bold prose-headings:font-serif prose-headings:uppercase prose-headings:text-base prose-p:indent-8 prose-p:text-justify prose-p:leading-7 text-black">
-                        {/* Section 1: Model & Theory */}
+                        {/* Section I: Model & Theory */}
                         {modelContent && (
                             <div className="mb-12">
                                 <h2 className="text-xl font-bold uppercase mb-4">I. Cơ Sở Lý Thuyết & Mô Hình</h2>
@@ -91,7 +95,7 @@ export const FinalReport = ({ topic, goal, audience, level, finalContent, modelC
                             </div>
                         )}
 
-                        {/* Section 2: Outline */}
+                        {/* Section II: Outline */}
                         {outlineContent && (
                             <div className="mb-12">
                                 <h2 className="text-xl font-bold uppercase mb-4">II. Đề Cương Chi Tiết</h2>
@@ -101,7 +105,30 @@ export const FinalReport = ({ topic, goal, audience, level, finalContent, modelC
                             </div>
                         )}
 
-                        {/* Fallback for legacy Final Content if strictly needed */}
+                        {/* Financial Chart for Startup */}
+                        {outlineChart && includeChart && (
+                            <div className="mb-12 break-inside-avoid">
+                                <h3 className="text-center font-bold uppercase mb-6 text-sm">Biểu đồ Dự phóng Tài chính (Financial Projection)</h3>
+                                <div className="border border-slate-300 p-6 rounded-lg bg-white shadow-sm flex justify-center">
+                                    <MermaidChart chart={outlineChart} />
+                                </div>
+                                <p className="text-center text-sm italic mt-3">
+                                    <strong>Hình 1.</strong> Dự phóng doanh thu và tài chính.
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Section III: GTM Strategy (Startup Only) */}
+                        {gtmContent && (
+                            <div className="mb-12">
+                                <h2 className="text-xl font-bold uppercase mb-4">III. Chiến Lược Ra Mắt (GTM Strategy)</h2>
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                    {gtmContent}
+                                </ReactMarkdown>
+                            </div>
+                        )}
+
+                        {/* Fallback for legacy Final Content */}
                         {finalContent && !modelContent && !outlineContent && (
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                 {finalContent}
@@ -109,16 +136,15 @@ export const FinalReport = ({ topic, goal, audience, level, finalContent, modelC
                         )}
                     </div>
 
-                    {/* 3. FIGURES (SEM Model) - "Kéo xuống mô hình xịn" */}
+                    {/* 3. FIGURES (SEM Model for Research) */}
                     {variableChart && includeChart && (
                         <div className="mt-12 break-inside-avoid">
                             <h3 className="text-center font-bold uppercase mb-6 text-sm">Mô Hình Nghiên Cứu Đề Xuất (SEM)</h3>
-
                             <div className="border border-slate-300 p-6 rounded-lg bg-white shadow-sm flex justify-center">
                                 <MermaidChart chart={variableChart} />
                             </div>
                             <p className="text-center text-sm italic mt-3">
-                                <strong>Hình 1.</strong> Mô hình cấu trúc tuyến tính (SEM) đề xuất cho nghiên cứu.
+                                <strong>Hình {outlineChart ? '2' : '1'}.</strong> Mô hình cấu trúc tuyến tính (SEM).
                             </p>
                         </div>
                     )}
@@ -126,7 +152,9 @@ export const FinalReport = ({ topic, goal, audience, level, finalContent, modelC
                     {/* 4. APPENDIX (Survey) */}
                     {surveyContent && (
                         <div className="mt-12 pt-8 border-t border-black/20 break-before-page">
-                            <h3 className="text-center font-bold uppercase mb-6 text-lg">Phụ Lục: Thang Đo & Câu Hỏi Khảo Sát</h3>
+                            <h3 className="text-center font-bold uppercase mb-6 text-lg">
+                                {gtmContent ? 'IV' : 'III'}. Phụ Lục: Thang Đo & Câu Hỏi Khảo Sát
+                            </h3>
                             <div className="prose prose-slate max-w-none font-serif prose-table:border-collapse prose-table:border prose-table:border-black prose-th:border prose-th:border-black prose-th:p-2 prose-td:border prose-td:border-black prose-td:p-2 text-sm">
                                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                     {surveyContent}
@@ -146,33 +174,24 @@ export const FinalReport = ({ topic, goal, audience, level, finalContent, modelC
             {showOutlineModal && outlineContent && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-                        {/* Modal Header */}
                         <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white p-6 flex justify-between items-center">
                             <div>
                                 <h2 className="text-2xl font-bold flex items-center gap-3">
-                                    <FileText size={28} />
-                                    Đề Cương Chi Tiết
+                                    <FileText size={28} /> Đề Cương Chi Tiết
                                 </h2>
-                                <p className="text-green-100 text-sm mt-1">Kết quả giai đoạn 3 - Outline</p>
+                                <p className="text-green-100 text-sm mt-1">Kết quả giai đoạn hoàn thiện</p>
                             </div>
-                            <button
-                                onClick={() => setShowOutlineModal(false)}
-                                className="text-white/80 hover:text-white transition-colors"
-                            >
+                            <button onClick={() => setShowOutlineModal(false)} className="text-white/80 hover:text-white">
                                 <Eye size={24} />
                             </button>
                         </div>
-
-                        {/* Modal Content */}
                         <div className="p-8 overflow-y-auto flex-1 bg-slate-50">
-                            <div className="prose prose-slate max-w-none prose-headings:text-green-700 prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg">
+                            <div className="prose prose-slate max-w-none">
                                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                     {outlineContent}
                                 </ReactMarkdown>
                             </div>
                         </div>
-
-                        {/* Modal Footer */}
                         <div className="bg-slate-100 p-4 flex justify-end gap-3">
                             <button
                                 onClick={() => {

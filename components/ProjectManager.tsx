@@ -46,7 +46,11 @@ export const ProjectManager: React.FC<ProjectManagerProps> = ({
     const [activeMenu, setActiveMenu] = useState<string | null>(null);
 
     useEffect(() => {
-        setProjects(getAllProjects());
+        const load = async () => {
+            const all = await getAllProjects();
+            setProjects(all.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()));
+        };
+        load();
     }, []);
 
     const filteredProjects = projects.filter(p =>
@@ -54,17 +58,18 @@ export const ProjectManager: React.FC<ProjectManagerProps> = ({
         p.topic.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const handleDelete = (id: string) => {
-        deleteProject(id);
-        setProjects(getAllProjects());
+    const handleDelete = async (id: string) => {
+        await deleteProject(id);
+        const all = await getAllProjects();
+        setProjects(all.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()));
         setDeleteConfirm(null);
     };
 
-    const handleRename = (id: string) => {
-        if (editName.trim()) {
-            renameProject(id, editName.trim());
-            setProjects(getAllProjects());
-        }
+    const handleRename = async (id: string) => {
+        if (!editName.trim()) return;
+        await renameProject(id, editName.trim());
+        const all = await getAllProjects();
+        setProjects(all.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()));
         setEditingId(null);
         setEditName('');
     };
@@ -167,7 +172,7 @@ export const ProjectManager: React.FC<ProjectManagerProps> = ({
                         transition={{ delay: 0.2 }}
                         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
                     >
-                        <AnimatePresence>
+                        <AnimatePresence mode="popLayout">
                             {filteredProjects.map((project, index) => (
                                 <motion.div
                                     key={project.id}
@@ -180,8 +185,8 @@ export const ProjectManager: React.FC<ProjectManagerProps> = ({
                                     {/* Project Type Badge */}
                                     <div className="absolute top-4 right-4 flex items-center gap-2">
                                         <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${project.projectType === 'STARTUP'
-                                                ? 'bg-orange-500/20 text-orange-400'
-                                                : 'bg-blue-500/20 text-blue-400'
+                                            ? 'bg-orange-500/20 text-orange-400'
+                                            : 'bg-blue-500/20 text-blue-400'
                                             }`}>
                                             {project.projectType === 'STARTUP' ? (
                                                 <><Rocket className="w-3 h-3 inline mr-1" />{getProjectTypeLabel(project.projectType)}</>
@@ -268,8 +273,8 @@ export const ProjectManager: React.FC<ProjectManagerProps> = ({
                                                 animate={{ width: `${getProjectProgress(project)}%` }}
                                                 transition={{ duration: 0.5, delay: index * 0.05 }}
                                                 className={`h-full rounded-full ${getProjectProgress(project) === 100
-                                                        ? 'bg-gradient-to-r from-green-500 to-emerald-500'
-                                                        : 'bg-gradient-to-r from-blue-500 to-purple-500'
+                                                    ? 'bg-gradient-to-r from-green-500 to-emerald-500'
+                                                    : 'bg-gradient-to-r from-blue-500 to-purple-500'
                                                     }`}
                                             />
                                         </div>

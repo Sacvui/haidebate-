@@ -65,6 +65,14 @@ class KVAdapter {
         if (this.redis) return this.redis.sismember(key, member);
         return 0;
     }
+
+    async del(key: string): Promise<void> {
+        if (this.useVercelKV) {
+            await vercelKv.del(key);
+        } else if (this.redis) {
+            await this.redis.del(key);
+        }
+    }
 }
 
 export const kv = new KVAdapter();
@@ -369,6 +377,45 @@ export async function saveStepResult(
     session[stepKey] = data;
 
     await kv.set(sessionKey, session);
+}
+
+/**
+ * Cloud Persistence for SavedProject (Integration with LocalStorage)
+ */
+export async function saveCloudProject(userId: string, project: any): Promise<void> {
+    const key = `project:${userId}:${project.id}`;
+    await kv.set(key, project);
+    // Add to user's project list
+    await kv.sadd(`user:${userId}:projects`, project.id);
+}
+
+export async function getCloudProject(userId: string, projectId: string): Promise<any | null> {
+    return await kv.get(`project:${userId}:${projectId}`);
+}
+
+export async function listCloudProjects(userId: string): Promise<any[]> {
+    const projectIds = await kv.get<string[]>(`user:${userId}:projects`) || [];
+    const projects: any[] = [];
+
+    // sadd in kv returns 1/0, but some KV implementations might return the set if asked differently
+    // Here we assume sadd followed by smembers or similar if supported.
+    // Our KVAdapter doesn't have smembers yet. Let's add it or use keys.
+
+    const keys = await kv.keys(`project:${userId}:*`);
+    for (const key of keys) {
+        const project = await kv.get(key);
+        if (project) projects.push(project);
+    }
+
+    return projects.sort((a, b) =>
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    );
+}
+
+export async function deleteCloudProject(userId: string, projectId: string): Promise<void> {
+    const key = `project:${userId}:${projectId}`;
+    await kv.del(key);
+    // Remove from set if possible (optional for now as we use keys() in list)
 }
 
 export async function getFinalizedStepResult(

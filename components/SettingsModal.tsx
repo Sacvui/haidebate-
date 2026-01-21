@@ -31,14 +31,14 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
         if (apiKey.trim()) {
             localStorage.setItem("gemini_api_key", apiKey.trim());
             if (apiKeyCritic.trim()) localStorage.setItem("gemini_api_key_critic", apiKeyCritic.trim());
-            alert("✅ Đã lưu API Key riêng của bạn!\n\nHệ thống sẽ dùng quota của bạn thay vì key chung.");
+            alert("✅ Đã lưu cấu hình API Key!\n\nHệ thống sẽ dùng quota của bạn thay vì key chung.");
             onClose();
-            window.location.reload(); // Reload to apply key
+            window.location.reload(); // Reload to apply changes
         } else {
             // Clear if empty
             localStorage.removeItem("gemini_api_key");
             localStorage.removeItem("gemini_api_key_critic");
-            alert("ℹ️ Đã xóa API Key riêng.\n\nHệ thống sẽ dùng key chung (có giới hạn quota).");
+            alert("ℹ️ Đã xóa API Key riêng. Hệ thống sẽ dùng key chung.\n\nLưu ý: Model Pro có thể không khả dụng với key chung.");
             onClose();
             window.location.reload();
         }

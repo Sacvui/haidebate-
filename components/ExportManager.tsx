@@ -12,6 +12,7 @@ import {
 } from '@/lib/exportUtils';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { ExportTemplateSelector, ExportTemplate } from './ExportTemplateSelector';
 
 interface ExportManagerProps {
     topic: string;
@@ -19,6 +20,8 @@ interface ExportManagerProps {
     goal: string;
     modelContent?: string;
     outlineContent?: string;
+    outlineChart?: string;
+    gtmContent?: string;
     surveyContent?: string;
     onBack: () => void;
     onViewReport?: () => void;
@@ -32,12 +35,15 @@ export function ExportManager({
     goal,
     modelContent = '',
     outlineContent = '',
+    outlineChart = '',
+    gtmContent = '',
     surveyContent = '',
     onBack,
     onViewReport
 }: ExportManagerProps) {
     const [exporting, setExporting] = useState<ExportType | null>(null);
     const [exportedFiles, setExportedFiles] = useState<Set<ExportType>>(new Set());
+    const [selectedTemplate, setSelectedTemplate] = useState<ExportTemplate>('academic');
     const [isMobile] = useState(() => {
         if (typeof window !== 'undefined') {
             return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -54,9 +60,8 @@ export function ExportManager({
 
             switch (type) {
                 case 'word':
-                    blob = await exportOutlineToWord(topic, outlineContent, modelContent, level);
-                    filename = `De_Cuong_${topic.substring(0, 30).replace(/\s+/g, '_')}.docx`;
-                    break;
+                    await exportOutlineToWord(topic, outlineContent, modelContent, level, gtmContent, surveyContent, outlineChart, selectedTemplate);
+                    return; // generateDocx handles download
 
                 case 'pdf':
                     blob = await exportOutlineToPDF(topic, outlineContent, modelContent, level);
@@ -148,6 +153,14 @@ export function ExportManager({
                     </div>
                 </div>
             )}
+
+            {/* Template Selector */}
+            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+                <ExportTemplateSelector
+                    selectedTemplate={selectedTemplate}
+                    onTemplateSelect={setSelectedTemplate}
+                />
+            </div>
 
             {/* Export Options Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -341,8 +354,25 @@ export function ExportManager({
                 </div>
             </div>
 
+            {/* GTM Preview - Only for Startup */}
+            {gtmContent && (
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 mt-6">
+                    <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <CheckCircle size={20} className="text-purple-600" />
+                        Preview: Chiến lược Ra mắt (GTM Strategy)
+                    </h3>
+                    <div className="bg-white rounded-lg p-4 max-h-96 overflow-y-auto border border-slate-200">
+                        <div className="prose prose-sm max-w-none">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                {gtmContent.substring(0, 1000) + '...'}
+                            </ReactMarkdown>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Instructions */}
-            <div className="bg-amber-50 border-l-4 border-amber-400 rounded-lg p-4 text-sm text-amber-800">
+            <div className="bg-amber-50 border-l-4 border-amber-400 rounded-lg p-4 text-sm text-amber-800 mt-8">
                 <div className="flex gap-2">
                     <span className="text-amber-500 font-bold">💡</span>
                     <div>

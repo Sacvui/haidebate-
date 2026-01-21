@@ -6,9 +6,10 @@ import { cn } from '@/lib/utils';
 interface StepIndicatorProps {
     currentStep: number;
     totalSteps: number;
+    projectType?: 'RESEARCH' | 'STARTUP';
 }
 
-const STEPS = [
+const RESEARCH_STEPS = [
     { id: 1, label: "Tên Đề Tài (Topic)" },
     { id: 2, label: "Mô Hình (Research Model)" },
     { id: 3, label: "Đề Cương (Outline)" },
@@ -16,7 +17,17 @@ const STEPS = [
     { id: 5, label: "Export Files" }
 ];
 
-export function StepIndicator({ currentStep }: StepIndicatorProps) {
+const STARTUP_STEPS = [
+    { id: 1, label: "Ý tưởng (Topic)" },
+    { id: 2, label: "Lean Canvas" },
+    { id: 3, label: "Pitch Deck" },
+    { id: 4, label: "GTM Strategy" },
+    { id: 5, label: "Discovery" },
+    { id: 6, label: "Export" }
+];
+
+export function StepIndicator({ currentStep, projectType = 'RESEARCH' }: StepIndicatorProps) {
+    const steps = projectType === 'STARTUP' ? STARTUP_STEPS : RESEARCH_STEPS;
     return (
         <div className="w-full py-4 mb-6">
             <div className="flex items-center justify-between relative max-w-3xl mx-auto">
@@ -24,10 +35,10 @@ export function StepIndicator({ currentStep }: StepIndicatorProps) {
                 <div className="absolute top-1/2 left-0 w-full h-1 bg-slate-100 -z-10 rounded-full" />
                 <div
                     className="absolute top-1/2 left-0 h-1 bg-green-500 -z-10 rounded-full transition-all duration-500 ease-in-out"
-                    style={{ width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%` }}
+                    style={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }}
                 />
 
-                {STEPS.map((step) => {
+                {steps.map((step) => {
                     const isCompleted = currentStep > step.id;
                     const isCurrent = currentStep === step.id;
 

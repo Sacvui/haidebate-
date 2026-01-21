@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, XCircle, AlertTriangle, ExternalLink, Loader2 } from 'lucide-react';
 import { extractDOIs } from '@/lib/citationUtils';
-import { verifyAllDOIs, getVerificationSummary, type DOIVerificationResult } from '@/lib/doiVerifier';
+import { verifyAllDOIs, verifyByQuery, getVerificationSummary, type DOIVerificationResult } from '@/lib/doiVerifier';
+import { Search } from 'lucide-react';
 
 interface CitationCheckerProps {
     content: string;
@@ -15,6 +16,8 @@ export function CitationChecker({ content, onVerificationComplete }: CitationChe
     const [verifying, setVerifying] = useState(false);
     const [results, setResults] = useState<DOIVerificationResult[]>([]);
     const [progress, setProgress] = useState({ current: 0, total: 0 });
+    const [manualQuery, setManualQuery] = useState("");
+    const [manualVerifying, setManualVerifying] = useState(false);
 
     useEffect(() => {
         const extracted = extractDOIs(content);
@@ -40,6 +43,21 @@ export function CitationChecker({ content, onVerificationComplete }: CitationChe
             alert('Lỗi khi verify citations. Vui lòng thử lại.');
         } finally {
             setVerifying(false);
+        }
+    };
+
+    const handleManualSearch = async () => {
+        if (!manualQuery.trim()) return;
+
+        setManualVerifying(true);
+        try {
+            const result = await verifyByQuery(manualQuery.trim());
+            setResults(prev => [result, ...prev]);
+            setManualQuery("");
+        } catch (error) {
+            alert('Lỗi khi tìm kiếm. Vui lòng thử lại.');
+        } finally {
+            setManualVerifying(false);
         }
     };
 
@@ -70,6 +88,28 @@ export function CitationChecker({ content, onVerificationComplete }: CitationChe
                     ) : (
                         'Verify Citations'
                     )}
+                </button>
+            </div>
+
+            {/* Manual Search Input */}
+            <div className="flex gap-2">
+                <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                    <input
+                        type="text"
+                        value={manualQuery}
+                        onChange={(e) => setManualQuery(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleManualSearch()}
+                        placeholder="Tìm bài báo theo tiêu đề hoặc tác giả..."
+                        className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                    />
+                </div>
+                <button
+                    onClick={handleManualSearch}
+                    disabled={manualVerifying || !manualQuery.trim()}
+                    className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 disabled:opacity-50 text-sm font-bold transition-all"
+                >
+                    {manualVerifying ? <Loader2 className="animate-spin" size={16} /> : 'Tìm Paper'}
                 </button>
             </div>
 
