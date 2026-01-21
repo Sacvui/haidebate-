@@ -984,6 +984,8 @@ export class AgentSession {
   public finalizedSurvey?: string;
   private sessionId: string;
   private userId?: string;
+  private contextSummary?: string;  // NEW: AI-generated summary of key decisions
+  private static CONTEXT_SUMMARY_THRESHOLD = 30; // Trigger summary after this many messages
 
   constructor(
     public topic: string,
@@ -1030,6 +1032,44 @@ export class AgentSession {
 
   public getSessionId(): string {
     return this.sessionId;
+  }
+
+  public getContextSummary(): string | undefined {
+    return this.contextSummary;
+  }
+
+  public setContextSummary(summary: string): void {
+    this.contextSummary = summary;
+  }
+
+  // Generate a summary of key decisions when conversation gets too long
+  public async generateContextSummary(): Promise<string | null> {
+    if (this.messages.length < AgentSession.CONTEXT_SUMMARY_THRESHOLD) {
+      return null; // Not enough messages to summarize
+    }
+
+    const summaryPrompt = `
+Bạn là trợ lý tóm tắt hội thoại. Hãy tóm tắt các ĐIỂM ĐÃ CHỐT sau từ cuộc hội thoại:
+
+Đề tài: ${this.topic}
+Loại dự án: ${this.projectType}
+
+${this.finalizedTopic ? `✅ Ý tưởng/Đề tài đã chốt: ${this.finalizedTopic}` : ''}
+${this.finalizedModel ? `✅ Mô hình đã chốt: ${this.finalizedModel.substring(0, 500)}...` : ''}
+${this.finalizedOutline ? `✅ Đề cương đã chốt: ${this.finalizedOutline.substring(0, 500)}...` : ''}
+${this.finalizedGTM ? `✅ GTM đã chốt: ${this.finalizedGTM.substring(0, 500)}...` : ''}
+
+YÊU CẦU: Tóm tắt trong 5-7 bullet points ngắn gọn. Tập trung vào các quyết định quan trọng và hướng đi đã thống nhất.
+    `;
+
+    try {
+      const summary = await this.callGeminiAPI(AgentSession.PRIMARY_MODEL, summaryPrompt);
+      this.contextSummary = summary;
+      return summary;
+    } catch (e) {
+      console.error('Failed to generate context summary:', e);
+      return null;
+    }
   }
 
   public isUsingSameKey(): boolean {
@@ -1134,6 +1174,11 @@ export class AgentSession {
 
       let sysPrompt = "";
       let contextAddition = "";
+
+      // Add context summary if available (for long conversations)
+      if (this.contextSummary) {
+        contextAddition += `\n\n📌 TÓM TẮT CÁC ĐIỂM ĐÃ CHỐT:\n${this.contextSummary}\n\n`;
+      }
 
       // Choose prompts based on project type
       if (this.projectType === 'STARTUP') {

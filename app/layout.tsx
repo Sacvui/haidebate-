@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google"; // Switch to Inter for better Vietnamese support
 import "./globals.css";
 import { Toaster } from "sonner";
+import { Analytics } from "@vercel/analytics/react";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -54,6 +55,7 @@ export default function RootLayout({
           </AuthProvider>
         </NextAuthProvider>
         <Toaster position="top-right" richColors closeButton />
+        <Analytics />
       </body>
     </html>
   );
