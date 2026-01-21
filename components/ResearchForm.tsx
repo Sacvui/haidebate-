@@ -172,6 +172,25 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
                             ))}
                         </select>
                     </div>
+
+                    {/* Paper Methodology Selector - New Feature */}
+                    <div className="space-y-2">
+                        <div className="flex justify-between items-center h-6">
+                            <label className="text-sm font-semibold text-slate-700">Phương pháp / Loại bài báo</label>
+                        </div>
+                        <select
+                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-slate-700 bg-white"
+                            defaultValue="quant"
+                        >
+                            <option value="quant">✨ Original Research (Quantitative)</option>
+                            <option value="qual" disabled>Qualitative Research (Coming Soon)</option>
+                            <option value="review" disabled>Systematic Review (Coming Soon)</option>
+                            <option value="method" disabled>Methodological Paper (Coming Soon)</option>
+                        </select>
+                        <p className="text-[10px] text-slate-400 italic px-1">
+                            *Hiện tại hệ thống tối ưu cho nghiên cứu định lượng (Mô hình & Kiểm định)
+                        </p>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
