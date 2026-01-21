@@ -308,7 +308,7 @@ OUTPUT FORM:
 `;
 
 export function getSurveyPrompt(level: AcademicLevel): string {
-  const prompt = `
+  const surveyPromptText = `
 NHIỆM VỤ: Xây dựng Thang đo (Scale) và Bảng hỏi Khảo sát (Survey Questionnaire).
 TRÌNH ĐỘ: ${level}
 
@@ -345,116 +345,116 @@ SAU BẢNG LÀ PHẦN "PHƯƠNG ÁN THU THẬP DỮ LIỆU":
 YÊU CẦU BẮT BUỘNG: Vẽ một biểu đồ cột (Bar Chart) minh họa kết quả dự kiến (hoặc dữ liệu thăm dò thử nghiệm) bằng Mermaid.
 
 Lưu ý format:
-\```mermaid
+\`\`\`mermaid
 pie title Kết quả khảo sát dự kiến
     "Rất đồng ý" : 45
     "Đồng ý" : 35
     "Trung lập" : 10
     "Không đồng ý" : 7
     "Rất không đồng ý" : 3
-\```
+\`\`\`
 Hoặc dùng bar chart nếu phù hợp.
   `;
-  return prompt;
+  return surveyPromptText;
 }
 
 const SURVEY_CRITIC_PROMPT = `
 PHẢN BIỆN BẢNG HỎI - RUBRIC CHI TIẾT:
 
-1. VALIDITY (HỢP LỆ) - 3 điểm:
-   - Thang đo có đo đúng biến không? (Face Validity)
-   - Nguồn gốc có uy tín không? (Construct Validity)
+  1. VALIDITY(HỢP LỆ) - 3 điểm:
+  - Thang đo có đo đúng biến không ? (Face Validity)
+  - Nguồn gốc có uy tín không ? (Construct Validity)
 
-2. RELIABILITY (TIN CẬY) - 3 điểm:
-   - Câu hỏi có rõ ràng, dễ hiểu?
-   - Có bị dẫn dắt (Leading question) không?
-   - Số lượng items có đủ không (thường ≥ 3 items/biến)?
+  2. RELIABILITY(TIN CẬY) - 3 điểm:
+  - Câu hỏi có rõ ràng, dễ hiểu ?
+    - Có bị dẫn dắt(Leading question) không ?
+      - Số lượng items có đủ không(thường ≥ 3 items / biến) ?
 
-3. FORMAT & ADAPTATION (2 điểm):
-   - Thang đo Likert (1-5 hoặc 1-7) có thống nhất?
-   - Dịch có chuẩn không?
+        3. FORMAT & ADAPTATION(2 điểm):
+  - Thang đo Likert(1 - 5 hoặc 1 - 7) có thống nhất ?
+    - Dịch có chuẩn không ?
 
-4. DEMOGRAPHICS & SAMPLING (2 điểm):
-   - Các biến kiểm soát có phù hợp?
-   - Kích thước mẫu có đủ lớn cho SEM/Regression?
+      4. DEMOGRAPHICS & SAMPLING(2 điểm):
+  - Các biến kiểm soát có phù hợp ?
+    - Kích thước mẫu có đủ lớn cho SEM / Regression ?
 
-TỔNG ĐIỂM: .../10
+      TỔNG ĐIỂM: .../10
 
-NẾU < 9 ĐIỂM:
-❌ YÊU CẦU SỬA: Chỉ ra cụ thể item nào cần sửa/xóa/thêm.
+  NẾU < 9 ĐIỂM:
+❌ YÊU CẦU SỬA: Chỉ ra cụ thể item nào cần sửa / xóa / thêm.
 
-OUTPUT:
+    OUTPUT:
 📊 ĐIỂM SỐ: .../10
 ❌ LỖI CỤ THỂ:
-1. ...
-2. ...
-`;
+  1. ...
+  2. ...
+  `;
 
 // =============================================================================
 // STARTUP PROJECT PROMPTS (COMPLETELY SEPARATE FROM RESEARCH)
 // =============================================================================
 
 const STARTUP_TOPIC_WRITER_PROMPT = `
-NHIỆM VỤ: Đề xuất/tinh chỉnh Ý TƯỞNG KINH DOANH Khởi Nghiệp.
+NHIỆM VỤ: Đề xuất / tinh chỉnh Ý TƯỞNG KINH DOANH Khởi Nghiệp.
 
-VÍ DỤ MẪU (FEW-SHOT EXAMPLES):
+VÍ DỤ MẪU(FEW - SHOT EXAMPLES):
 
-VÍ DỤ 1: Ý TƯỞNG TỐT (9/10)
-Input: "App giao đồ ăn cho dân văn phòng"
-Output:
-🎯 VẤN ĐỀ (PROBLEM): Nhân viên văn phòng tại TP.HCM thường xuyên bỏ bữa trưa hoặc ăn đồ ăn nhanh thiếu dinh dưỡng do thiếu thời gian và lựa chọn healthy gần công ty.
-💡 GIẢI PHÁP (SOLUTION): Ứng dụng "HealthyBox" - đặt trước bữa trưa healthy từ các bếp địa phương, giao tận nơi đúng 12h.
-👤 KHÁCH HÀNG (TARGET): Nhân viên văn phòng 25-40 tuổi, thu nhập 15-30tr/tháng, quan tâm sức khỏe.
-⭐ ĐIỂM KHÁC BIỆT (USP): Đặt trước 1 tuần, menu theo chế độ ăn (Keto, Low-carb, Thuần chay), cam kết dưới 500 calo.
-💰 MÔ HÌNH DOANH THU: Commission 15% mỗi đơn + Gói subscription tuần/tháng.
+VÍ DỤ 1: Ý TƯỞNG TỐT(9 / 10)
+  Input: "App giao đồ ăn cho dân văn phòng"
+  Output:
+🎯 VẤN ĐỀ(PROBLEM): Nhân viên văn phòng tại TP.HCM thường xuyên bỏ bữa trưa hoặc ăn đồ ăn nhanh thiếu dinh dưỡng do thiếu thời gian và lựa chọn healthy gần công ty.
+💡 GIẢI PHÁP(SOLUTION): Ứng dụng "HealthyBox" - đặt trước bữa trưa healthy từ các bếp địa phương, giao tận nơi đúng 12h.
+👤 KHÁCH HÀNG(TARGET): Nhân viên văn phòng 25 - 40 tuổi, thu nhập 15 - 30tr / tháng, quan tâm sức khỏe.
+⭐ ĐIỂM KHÁC BIỆT(USP): Đặt trước 1 tuần, menu theo chế độ ăn(Keto, Low - carb, Thuần chay), cam kết dưới 500 calo.
+💰 MÔ HÌNH DOANH THU: Commission 15 % mỗi đơn + Gói subscription tuần / tháng.
 
-VÍ DỤ 2: Ý TƯỞNG YẾU (4/10)
-Input: "Bán hàng online"
-Output: "Mở shop bán đồ online"
+VÍ DỤ 2: Ý TƯỞNG YẾU(4 / 10)
+  Input: "Bán hàng online"
+  Output: "Mở shop bán đồ online"
 ❌ Lý do yếu: Quá chung chung, không rõ vấn đề giải quyết, không có điểm khác biệt.
 
 QUY TRÌNH:
-1. Phân tích input/phản biện
-2. Đề xuất:
-   - Lần đầu: 3 phương án (Táo bạo | An toàn | Cân bằng)
-   - Sau phản biện: Cải thiện theo góp ý
-   - Vòng cuối: In đậm "CHỐT Ý TƯỞNG: [Mô tả ngắn gọn]"
+  1. Phân tích input / phản biện
+  2. Đề xuất:
+  - Lần đầu: 3 phương án(Táo bạo | An toàn | Cân bằng)
+    - Sau phản biện: Cải thiện theo góp ý
+      - Vòng cuối: In đậm "CHỐT Ý TƯỞNG: [Mô tả ngắn gọn]"
 
 FORMAT OUTPUT BẮT BUỘC:
-🎯 VẤN ĐỀ (PROBLEM): [Khách hàng đang gặp vấn đề gì?]
-💡 GIẢI PHÁP (SOLUTION): [Sản phẩm/dịch vụ của bạn giải quyết thế nào?]
-👤 KHÁCH HÀNG (TARGET CUSTOMER): [Ai sẽ mua? Mô tả chi tiết]
-⭐ ĐIỂM KHÁC BIỆT (USP): [Tại sao chọn bạn thay vì đối thủ?]
-💰 MÔ HÌNH DOANH THU (REVENUE MODEL): [Kiếm tiền bằng cách nào?]
+🎯 VẤN ĐỀ(PROBLEM): [Khách hàng đang gặp vấn đề gì ?]
+💡 GIẢI PHÁP(SOLUTION): [Sản phẩm / dịch vụ của bạn giải quyết thế nào ?]
+👤 KHÁCH HÀNG(TARGET CUSTOMER): [Ai sẽ mua ? Mô tả chi tiết]
+⭐ ĐIỂM KHÁC BIỆT(USP): [Tại sao chọn bạn thay vì đối thủ ?]
+💰 MÔ HÌNH DOANH THU(REVENUE MODEL): [Kiếm tiền bằng cách nào ?]
 
 YÊU CẦU: Ngắn gọn, tập trung vào tính khả thi và thị trường.
 `;
 
 const STARTUP_TOPIC_CRITIC_PROMPT = `
-PHẢN BIỆN Ý TƯỞNG KINH DOANH - RUBRIC CHI TIẾT (BẮT BUỘC CHẤM ĐIỂM):
+PHẢN BIỆN Ý TƯỞNG KINH DOANH - RUBRIC CHI TIẾT(BẮT BUỘC CHẤM ĐIỂM):
 
-1. VẤN ĐỀ THẬT SỰ (PROBLEM-SOLUTION FIT) - 3 điểm:
-   - Đây có phải vấn đề thực sự không? (Pain point rõ ràng?)
-   - Khách hàng có sẵn sàng trả tiền để giải quyết?
-   - Hiện tại họ đang giải quyết bằng cách nào?
+  1. VẤN ĐỀ THẬT SỰ(PROBLEM - SOLUTION FIT) - 3 điểm:
+  - Đây có phải vấn đề thực sự không ? (Pain point rõ ràng ?)
+  - Khách hàng có sẵn sàng trả tiền để giải quyết ?
+    - Hiện tại họ đang giải quyết bằng cách nào ?
 
-2. QUY MÔ THỊ TRƯỜNG (MARKET SIZE) - 3 điểm:
-   - TAM (Total Addressable Market) có đủ lớn không?
-   - Thị trường đang tăng hay giảm?
-   - Có rào cản gia nhập không?
+      2. QUY MÔ THỊ TRƯỜNG(MARKET SIZE) - 3 điểm:
+  - TAM(Total Addressable Market) có đủ lớn không ?
+    - Thị trường đang tăng hay giảm ?
+      - Có rào cản gia nhập không ?
 
-3. TÍNH KHẢ THI (FEASIBILITY) - 2 điểm:
-   - Founder có đủ năng lực thực hiện?
-   - Chi phí khởi đầu có hợp lý?
-   - Có thể MVP trong 3 tháng không?
+        3. TÍNH KHẢ THI(FEASIBILITY) - 2 điểm:
+  - Founder có đủ năng lực thực hiện ?
+    - Chi phí khởi đầu có hợp lý ?
+      - Có thể MVP trong 3 tháng không ?
 
-4. LỢI THẾ CẠNH TRANH (COMPETITIVE ADVANTAGE) - 2 điểm:
-   - Điểm khác biệt có bền vững không?
-   - Đối thủ có dễ dàng copy không?
+        4. LỢI THẾ CẠNH TRANH(COMPETITIVE ADVANTAGE) - 2 điểm:
+  - Điểm khác biệt có bền vững không ?
+    - Đối thủ có dễ dàng copy không ?
 
-TỔNG ĐIỂM: .../10
+      TỔNG ĐIỂM: .../10
 
-NẾU < 9 ĐIỂM:
+  NẾU < 9 ĐIỂM:
 ❌ KẾT LUẬN: CHƯA SẴN SÀNG - Yêu cầu pivot hoặc tinh chỉnh.
 
 OUTPUT FORM:
@@ -462,14 +462,14 @@ OUTPUT FORM:
 ❌ Điểm yếu chính: [Vấn đề lớn nhất]
 ➡️ Đề xuất pivot: [Cách điều chỉnh cụ thể]
 💡 Gợi ý: [Ý tưởng bổ sung nếu có]
-`;
+    `;
 
 const STARTUP_MODEL_WRITER_PROMPT = `
-NHIỆM VỤ: Xây dựng Mô Hình Kinh Doanh (Business Model) theo LEAN CANVAS.
+NHIỆM VỤ: Xây dựng Mô Hình Kinh Doanh(Business Model) theo LEAN CANVAS.
 
 BỐI CẢNH: Dựa trên ý tưởng kinh doanh đã được phê duyệt, xây dựng mô hình kinh doanh chi tiết.
 
-CẤU TRÚC LEAN CANVAS (BẮT BUỘC 9 Ô):
+CẤU TRÚC LEAN CANVAS(BẮT BUỘC 9 Ô):
 
 ┌─────────────────────┬─────────────────────┬─────────────────────┐
 │ 2. PROBLEM          │ 4. SOLUTION         │ 3. UNIQUE VALUE     │
@@ -487,11 +487,11 @@ CẤU TRÚC LEAN CANVAS (BẮT BUỘC 9 Ô):
 └─────────────────────────────────────────────────────────────────┘
 
 YÊU CẦU ĐẦU RA:
-1. Điền đầy đủ 9 ô của Lean Canvas với nội dung chi tiết.
+  1. Điền đầy đủ 9 ô của Lean Canvas với nội dung chi tiết.
 2. SƠ ĐỒ MERMAID BẮT BUỘC:
 
 VÍ DỤ CHUẨN:
-\`\`\`mermaid
+  \`\`\`mermaid
 graph TD
     subgraph Customer["👤 CUSTOMER"]
         CS[Nhân viên văn phòng 25-40t]
