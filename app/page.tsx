@@ -163,6 +163,23 @@ export default function Home() {
     logout();
   }
 
+  const handleGoHome = () => {
+    setIsStarted(false);
+    setShowProjects(false);
+
+    // Update local session to not auto-start on refresh
+    const savedSession = localStorage.getItem("current_session");
+    if (savedSession) {
+      try {
+        const parsed = JSON.parse(savedSession);
+        localStorage.setItem("current_session", JSON.stringify({
+          ...parsed,
+          isStarted: false
+        }));
+      } catch (e) { }
+    }
+  }
+
   if (isLoading) return <div className="flex h-screen items-center justify-center bg-slate-50"><LoadingH /></div>;
 
   return (
@@ -258,7 +275,10 @@ export default function Home() {
           {/* Header */}
           <header className="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-slate-200 z-50 animate-in slide-in-from-top-4 duration-500">
             <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-              <div className="flex items-center gap-2">
+              <div
+                className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={handleGoHome}
+              >
                 <div className="w-10 h-10 shadow-md shadow-blue-500/20 rounded-lg overflow-hidden">
                   <img src="/favicon.ico" alt="Logo" className="w-full h-full object-cover" />
                 </div>
