@@ -566,15 +566,15 @@ OUTPUT FORM:
 `;
 
 const STARTUP_OUTLINE_WRITER_PROMPT = `
-NHIỆM VỤ: Lập PITCH DECK + BUSINESS PLAN (Kế hoạch Kinh doanh Toàn diện) PHIÊN BẢN HOÀN CHỈNH.
+LẬP PITCH DECK (10 SLIDES) + FINANCIAL PLAN cho Nhà Đầu tư.
 
-BỐI CẢNH: Dựa trên Ý tưởng và Lean Canvas đã được phê duyệt, xây dựng Pitch Deck + Business Plan chuẩn để gọi vốn đầu tư.
+QUAN TRỌNG NHẤT - XUẤT TRƯỚC:
+- SLIDE 6: Unit Economics (CAC, LTV, Payback) - QUYẾT ĐỊNH ĐẦU TƯ
+- SLIDE 9: Competitor Matrix (So sánh 3 đối thủ)
+- SLIDE 10: Exit Strategy & Ask (Chiến lược thoái vốn)
+- SLIDE 11: Financial Projections (Dự báo 3 năm - BẢNG MARKDOWN)
 
-CẤU TRÚC 15 PHẦN (BẮT BUỘC):
-
-═══════════════════════════════════════════════════════════════
-PHẦN A: PITCH DECK (10 SLIDES) - CHO NHÀ ĐẦU TƯ
-═══════════════════════════════════════════════════════════════
+PHẦN A: PITCH DECK (10 SLIDES)
 
 📌 SLIDE 1: TITLE
 - Tên startup + Logo (mô tả)
@@ -641,9 +641,7 @@ PHẦN A: PITCH DECK (10 SLIDES) - CHO NHÀ ĐẦU TƯ
 - Milestones sau khi nhận vốn
 - Thông tin liên hệ
 
-═══════════════════════════════════════════════════════════════
-PHẦN B: KẾ HOẠCH TÀI CHÍNH (FINANCIAL PLAN) - CHI TIẾT
-═══════════════════════════════════════════════════════════════
+PHẦN B: FINANCIAL PLAN (BẮT BUỘC BẢNG MARKDOWN)
 
 📌 SLIDE 11: FINANCIAL PROJECTIONS (Dự báo Tài chính)
 
@@ -690,9 +688,7 @@ PHẦN B: KẾ HOẠCH TÀI CHÍNH (FINANCIAL PLAN) - CHI TIẾT
 | Operations | 20% | ... | Văn phòng, pháp lý, HR |
 | Reserve | 10% | ... | Dự phòng chi phí |
 
-═══════════════════════════════════════════════════════════════
-PHẦN C: KẾ HOẠCH MARKETING & LAUNCHING (GO-TO-MARKET STRATEGY)
-═══════════════════════════════════════════════════════════════
+LƯU Ý: Các phần GTM Strategy (Slide 13-15) sẽ được xử lý chi tiết ở Bước GTM riêng.
 
 📌 SLIDE 13: GO-TO-MARKET STRATEGY (Chiến lược ra thị trường)
 
