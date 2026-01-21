@@ -54,6 +54,7 @@ export function DebateManager({
     const [lastSaved, setLastSaved] = useState<string | null>(null);
     const [isLoadingConfig, setIsLoadingConfig] = useState(false);
     const [roundsConfig, setRoundsConfig] = useState<any>(null);
+    const [isInitialized, setIsInitialized] = useState(false);
 
     // State for captured outputs
     const [variableChart, setVariableChart] = useState<string>("");
@@ -74,20 +75,28 @@ export function DebateManager({
     useEffect(() => {
         if (sessionId) {
             const loadData = async () => {
-                const project = await getProject(sessionId);
-                if (project && project.data) {
-                    const data = project.data;
-                    if (data.messages) setMessages(data.messages);
-                    if (project.currentStep) setCurrentStep(project.currentStep);
-                    if (data.mermaid) setVariableChart(data.mermaid);
-                    if (data.finalContent) setFinalContent(data.finalContent);
-                    if (data.outlineContent) setOutlineContent(data.outlineContent);
-                    if (data.outlineChart) setOutlineChart(data.outlineChart);
-                    if (data.gtmContent) setGtmContent(data.gtmContent);
-                    if (data.surveyContent) setSurveyContent(data.surveyContent);
+                try {
+                    const project = await getProject(sessionId);
+                    if (project && project.data) {
+                        const data = project.data;
+                        if (data.messages && data.messages.length > 0) setMessages(data.messages);
+                        if (project.currentStep) setCurrentStep(project.currentStep);
+                        if (data.mermaid) setVariableChart(data.mermaid);
+                        if (data.finalContent) setFinalContent(data.finalContent);
+                        if (data.outlineContent) setOutlineContent(data.outlineContent);
+                        if (data.outlineChart) setOutlineChart(data.outlineChart);
+                        if (data.gtmContent) setGtmContent(data.gtmContent);
+                        if (data.surveyContent) setSurveyContent(data.surveyContent);
+                    }
+                } catch (e) {
+                    console.error("Failed to load project data:", e);
+                } finally {
+                    setIsInitialized(true);
                 }
             };
             loadData();
+        } else {
+            setIsInitialized(true);
         }
     }, [sessionId]);
 
@@ -99,7 +108,7 @@ export function DebateManager({
     }, [messages, currentStep, stepCompleted, roundCount, variableChart, finalContent, outlineContent, gtmContent, surveyContent, sessionId, session]);
 
     const saveToProjectStorage = async () => {
-        if (!sessionId) return;
+        if (!sessionId || !isInitialized) return;
         const existing = await getProject(sessionId);
         if (existing) {
             const updated: SavedProject = {
