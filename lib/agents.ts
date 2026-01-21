@@ -928,7 +928,13 @@ export class AgentSession {
     return this.writerKey === this.criticKey || (!this.criticKey && !!this.writerKey);
   }
 
-  private async callGeminiAPI(model: string, prompt: string, customKey?: string, retries = 3): Promise<string> {
+  // Primary and fallback models
+  private static PRIMARY_MODEL = 'gemini-3-flash-preview';
+  private static FALLBACK_MODEL = 'gemini-flash-latest';
+
+  private async callGeminiAPI(model: string, prompt: string, customKey?: string, retries = 3, useFallback = false): Promise<string> {
+    const currentModel = useFallback ? AgentSession.FALLBACK_MODEL : model;
+
     try {
       // Call server-side proxy instead of direct API
       const headers: HeadersInit = {
@@ -944,7 +950,7 @@ export class AgentSession {
         method: 'POST',
         headers,
         body: JSON.stringify({
-          model,
+          model: currentModel,
           prompt,
           useCustomKey: !!customKey
         })
@@ -957,22 +963,31 @@ export class AgentSession {
         const errorMsg = data.error || 'Unknown error';
 
         console.error(`🚨 Gemini Proxy Error:`, {
-          model,
+          model: currentModel,
           status: response.status,
           message: errorMsg,
-          retriesLeft: retries
+          retriesLeft: retries,
+          useFallback
         });
 
         // Handle Rate Limit (429)
         if (response.status === 429) {
-          if (retries > 0) {
+          // If still on primary model and has retries, retry with delay
+          if (retries > 0 && !useFallback) {
             const waitTime = 10000 * (4 - retries); // 10s, 20s, 30s
-            console.warn(`⚠️ Rate Limit. Retrying in ${waitTime / 1000}s... (${retries} retries left)`);
+            console.warn(`⚠️ Rate Limit on ${currentModel}. Retrying in ${waitTime / 1000}s... (${retries} retries left)`);
             await new Promise(resolve => setTimeout(resolve, waitTime));
-            return this.callGeminiAPI(model, prompt, customKey, retries - 1);
+            return this.callGeminiAPI(model, prompt, customKey, retries - 1, false);
           }
-          // Pass through actual error from server
-          throw new Error(errorMsg || `Hết quota (Model: ${model}). Vui lòng dùng API Key riêng.`);
+
+          // If primary exhausted, try fallback model
+          if (!useFallback) {
+            console.warn(`🔄 Switching to fallback model: ${AgentSession.FALLBACK_MODEL}`);
+            return this.callGeminiAPI(model, prompt, customKey, 2, true);
+          }
+
+          // Both models failed
+          throw new Error(`Cả hai model đều hết quota. Vui lòng thử lại sau hoặc dùng API Key riêng.`);
         }
 
         // Unauthorized (need login)
@@ -984,6 +999,10 @@ export class AgentSession {
         throw new Error(errorMsg);
       }
 
+      if (useFallback) {
+        console.log(`✅ Fallback model ${currentModel} succeeded!`);
+      }
+
       return data.text || "Lỗi: Không có phản hồi từ AI.";
 
     } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -991,7 +1010,7 @@ export class AgentSession {
       if (retries > 0 && (error.message?.includes('fetch') || error.message?.includes('network'))) {
         console.warn(`Network error, retrying... (${retries} left)`);
         await new Promise(resolve => setTimeout(resolve, 3000));
-        return this.callGeminiAPI(model, prompt, customKey, retries - 1);
+        return this.callGeminiAPI(model, prompt, customKey, retries - 1, useFallback);
       }
       throw error;
     }
@@ -1090,8 +1109,8 @@ export class AgentSession {
         ? `${context}\n\nPHẢN HỒI CỦA CRITIC (Vòng trước): ${previousCriticFeedback}\n\n${sysPrompt}\nHãy cải thiện/viết tiếp dựa trên phản hồi này.`
         : `${context}\n\n${sysPrompt}\nHãy bắt đầu thực hiện nhiệm vụ cho giai đoạn này.`;
 
-      // Use Gemini 2.0 Flash Exp (stable, publicly available)
-      return await this.callGeminiAPI('gemini-2.0-flash-exp', prompt, finalKey);
+      // Use Gemini 3 Flash Preview
+      return await this.callGeminiAPI('gemini-3-flash-preview', prompt, finalKey);
 
     } catch (error: any) {
       console.error("Gemini Writer Error:", error);
@@ -1128,8 +1147,8 @@ export class AgentSession {
 
       const prompt = `${sysPrompt}\n\nBÀI LÀM CỦA WRITER:\n${writerDraft}\n\nHãy đóng vai trò Critic và đưa ra nhận xét chi tiết, khắt khe.`;
 
-      // Use Gemini 2.0 Flash Exp (stable, publicly available)
-      return await this.callGeminiAPI('gemini-2.0-flash-exp', prompt, geminiKey);
+      // Use Gemini 3 Flash Preview
+      return await this.callGeminiAPI('gemini-3-flash-preview', prompt, geminiKey);
 
     } catch (error) {
       return `Lỗi Critic (Quota/Network): ${error}`;
