@@ -20,7 +20,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ProjectManager } from "@/components/ProjectManager";
 
 // Lazy load heavy components
-const DebateManager = dynamic(() => import("@/components/DebateManager"), {
+const DebateManager = dynamic(() => import("@/components/DebateManager").then(mod => mod.DebateManager), {
   loading: () => <div className="flex items-center justify-center min-h-screen"><LoadingH /></div>,
   ssr: false
 });

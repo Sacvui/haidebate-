@@ -25,6 +25,7 @@ interface DebateManagerProps {
     sessionId?: string;
     userId?: string;
     onExit?: () => void;
+    onNewProject?: () => void;
 }
 
 export function DebateManager({
@@ -38,7 +39,8 @@ export function DebateManager({
     apiKeyCritic,
     sessionId,
     userId,
-    onExit
+    onExit,
+    onNewProject
 }: DebateManagerProps) {
     const [messages, setMessages] = useState<AgentMessage[]>([]);
     const [currentStep, setCurrentStep] = useState<WorkflowStep>('1_TOPIC');
