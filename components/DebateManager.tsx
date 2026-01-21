@@ -117,28 +117,59 @@ export function DebateManager({
 
     const saveToProjectStorage = async () => {
         if (!sessionId || !isInitialized) return;
-        const existing = await getProject(sessionId);
-        if (existing) {
-            const updated: SavedProject = {
-                ...existing,
-                currentStep,
-                updatedAt: new Date().toISOString(),
-                data: {
-                    ...existing.data,
-                    messages: messages,
-                    mermaid: variableChart,
-                    outlineContent,
-                    outlineChart,
-                    gtmContent,
-                    surveyContent,
-                    completedAt: stepCompleted ? new Date().toISOString() : undefined
-                }
+
+        try {
+            const existing = await getProject(sessionId);
+
+            const updatedData = {
+                messages: messages,
+                mermaid: variableChart,
+                finalContent,
+                outlineContent,
+                outlineChart,
+                gtmContent,
+                surveyContent,
+                completedAt: stepCompleted ? new Date().toISOString() : undefined
             };
-            if (currentStep === '1_TOPIC' && session.finalizedTopic) {
-                updated.topic = session.finalizedTopic;
+
+            if (existing) {
+                const updated: SavedProject = {
+                    ...existing,
+                    currentStep,
+                    updatedAt: new Date().toISOString(),
+                    data: {
+                        ...existing.data,
+                        ...updatedData
+                    }
+                };
+                if (currentStep === '1_TOPIC' && session.finalizedTopic) {
+                    updated.topic = session.finalizedTopic;
+                }
+                await saveProject(updated);
+            } else {
+                // If somehow lost from DB, recreate it to prevent data loss
+                console.warn(`Project ${sessionId} not found in DB during save. Re-creating...`);
+                const newProj: SavedProject = {
+                    id: sessionId,
+                    name: topic.substring(0, 50) || 'Dự án khôi phục',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    projectType,
+                    level,
+                    language: language as 'vi' | 'en',
+                    topic,
+                    goal,
+                    audience,
+                    currentStep,
+                    steps: {},
+                    status: 'in_progress',
+                    data: updatedData
+                };
+                await saveProject(newProj);
             }
-            await saveProject(updated);
             setLastSaved(new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+        } catch (e) {
+            console.error("Error in saveToProjectStorage:", e);
         }
     };
 

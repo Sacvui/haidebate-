@@ -324,6 +324,7 @@ export default function Home() {
             ) : (
               <ErrorBoundary>
                 <DebateManager
+                  key={sessionId}
                   topic={formData.topic}
                   goal={formData.goal}
                   audience={formData.audience}
