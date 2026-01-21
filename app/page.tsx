@@ -266,22 +266,23 @@ export default function Home() {
                 </h1>
               </div>
               <div className="flex items-center gap-3">
-                {/* Share Button */}
+                {/* Share Button (Points) */}
                 <button
                   onClick={() => setShowShare(true)}
-                  className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 rounded-lg font-medium text-sm transition-colors border border-green-200"
+                  className="flex items-center gap-2 px-2 md:px-3 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 rounded-lg font-medium text-xs md:text-sm transition-colors border border-green-200"
                 >
                   <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                  Nhận Điểm
+                  <span className="hidden md:inline">Nhận Điểm</span>
+                  <span className="md:hidden">Điểm</span>
                 </button>
 
                 {/* Projects Button */}
                 <button
                   onClick={() => setShowProjects(true)}
-                  className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg font-medium text-sm transition-colors border border-blue-200"
+                  className="flex items-center gap-2 px-2 md:px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg font-medium text-xs md:text-sm transition-colors border border-blue-200"
                 >
                   <FolderOpen className="w-4 h-4" />
-                  Dự án
+                  <span className="hidden md:inline">Dự án</span>
                 </button>
 
                 <div className="h-6 w-px bg-slate-200 mx-1"></div>
@@ -332,6 +333,14 @@ export default function Home() {
                   apiKeyCritic={apiKeyCritic}
                   userId={user.id}
                   sessionId={sessionId}
+                  onExit={() => {
+                    setIsStarted(false);
+                    setShowProjects(true);
+                  }}
+                  onNewProject={() => {
+                    setIsStarted(false);
+                    setFormData(null);
+                  }}
                 />
               </ErrorBoundary>
             )}

@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { AgentSession, AgentMessage, WorkflowStep, AcademicLevel, ProjectType } from '../lib/agents';
-import { Bot, User, Play, RotateCw, CheckCircle, ArrowRight, ArrowLeft, FileText, Camera } from 'lucide-react';
+import { Bot, User, Play, RotateCw, CheckCircle, ArrowRight, ArrowLeft, FileText, Camera, Home, Plus, Sparkles } from 'lucide-react';
+import { saveProject, getProject, SavedProject } from '@/lib/projectStorage';
 import { cn } from '@/lib/utils';
 import { StepIndicator } from './StepIndicator';
 import { MermaidChart } from './MermaidChart';
@@ -33,6 +34,8 @@ export interface DebateManagerProps {
     apiKeyCritic?: string;
     userId?: string;
     sessionId?: string;
+    onExit?: () => void;
+    onNewProject?: () => void;
 }
 
 // Helper to extract mermaid code from markdown
@@ -45,7 +48,7 @@ const extractMermaidCode = (content: string): string => {
     return "";
 };
 
-export default function DebateManager({ topic, goal, audience, level, language, projectType = 'RESEARCH', apiKey, apiKeyCritic, userId, sessionId: propSessionId }: DebateManagerProps) {
+export default function DebateManager({ topic, goal, audience, level, language, projectType = 'RESEARCH', apiKey, apiKeyCritic, userId, sessionId: propSessionId, onExit, onNewProject }: DebateManagerProps) {
     const [sessionId] = useState(() => propSessionId || `session_${Date.now()}`);
     const [session] = useState(() => new AgentSession(topic, goal, audience, level, language, projectType, apiKey, apiKeyCritic, sessionId, userId));
     const [roundsConfig, setRoundsConfig] = useState<RoundsConfig>({
@@ -119,6 +122,7 @@ export default function DebateManager({ topic, goal, audience, level, language, 
                 finalizedSurvey: session.finalizedSurvey
             };
 
+            // 1. Local Debate State (Detailed)
             localStorage.setItem(`debate_state_${sessionId}`, JSON.stringify({
                 messages,
                 currentStep,
@@ -130,8 +134,47 @@ export default function DebateManager({ topic, goal, audience, level, language, 
                 surveyContent,
                 sessionState
             }));
+
+            // 2. Global Project List (Summary)
+            saveToProjectStorage();
         }
     }, [messages, currentStep, stepCompleted, roundCount, variableChart, finalContent, outlineContent, surveyContent, sessionId, session]);
+
+    const saveToProjectStorage = () => {
+        if (!sessionId) return;
+
+        // Get existing project or create partial updates
+        const existing = getProject(sessionId);
+
+        // If it doesn't exist yet (e.g. direct start without create), we might skip 
+        // OR we can try to reconstruct it. But usually it's created in Home.
+        if (existing) {
+            const updated: SavedProject = {
+                ...existing,
+                currentStep,
+                updatedAt: new Date().toISOString(),
+                // Update specific step data if finalized or in progress
+                steps: {
+                    ...existing.steps,
+                    [currentStep]: {
+                        finalized: stepCompleted ? (messages.filter(m => m.role === 'writer').pop()?.content || '') : existing.steps[currentStep]?.finalized || '',
+                        messages: messages, // Note: This might get heavy. Maybe store only recent? 
+                        // actually projectStorage types messages as AgentMessage[], so it's fine.
+                        mermaid: variableChart,
+                        completedAt: stepCompleted ? new Date().toISOString() : undefined
+                    }
+                }
+            };
+
+            // Update topic if changed in Step 1
+            if (currentStep === '1_TOPIC' && session.finalizedTopic) {
+                updated.topic = session.finalizedTopic;
+                updated.name = session.finalizedTopic.substring(0, 50);
+            }
+
+            saveProject(updated);
+        }
+    };
 
     // Warn before unload
     useEffect(() => {
@@ -399,6 +442,19 @@ export default function DebateManager({ topic, goal, audience, level, language, 
                         {currentStep === '3_OUTLINE' && "Giai Đoạn 3: Hoàn Thiện Đề Cương"}
                         {currentStep === '4_SURVEY' && "Giai Đoạn 4: Xây Dựng Thang Đo (Survey)"}
                     </h2>
+
+                    {/* Home Button */}
+                    <button
+                        onClick={() => {
+                            saveToProjectStorage();
+                            if (onExit) onExit();
+                        }}
+                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors absolute right-6 top-6"
+                        title="Về trang chủ & Lưu"
+                    >
+                        <Home size={20} />
+                    </button>
+
                     <div className="flex gap-2 text-sm text-slate-500">
                         <span className="font-medium bg-slate-100 px-3 py-1 rounded-full">
                             Mục tiêu: {goal}
@@ -521,21 +577,21 @@ export default function DebateManager({ topic, goal, audience, level, language, 
                                         )}
                                     >
                                         <div className={cn(
-                                            "w-10 h-10 rounded-full flex items-center justify-center shrink-0 shadow-sm",
+                                            "w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shrink-0 shadow-sm",
                                             msg.role === 'writer' ? "bg-blue-100 text-blue-600" : "bg-orange-100 text-orange-600"
                                         )}>
-                                            {msg.role === 'writer' ? <User size={20} /> : <Bot size={20} />}
+                                            {msg.role === 'writer' ? <User size={18} /> : <Bot size={18} />}
                                         </div>
 
                                         <div className={cn(
-                                            "p-5 rounded-2xl shadow-sm text-sm leading-relaxed",
+                                            "p-4 md:p-5 rounded-2xl shadow-sm text-sm leading-relaxed max-w-[85vw] md:max-w-none",
                                             msg.role === 'writer' ? "bg-white text-slate-800 rounded-tl-none border border-slate-100"
-                                                : "bg-orange-50 text-slate-800 rounded-tr-none border border-orange-100"
+                                                : "bg-orange-50 text-slate-800 rounded-tr-none border border-orange-100 md:mr-12"
                                         )}>
                                             <div className="font-bold mb-2 uppercase text-xs tracking-wider opacity-70">
                                                 {msg.role === 'writer' ? "Người Viết (Writer)" : "Hội Đồng Phản Biện (Critic)"}
                                             </div>
-                                            <div className="prose prose-sm max-w-none prose-p:my-1 prose-headings:my-2 prose-ul:my-1 prose-li:my-0">
+                                            <div className="prose prose-sm max-w-none prose-p:my-1 prose-headings:my-2 prose-ul:my-1 prose-li:my-0 break-words">
                                                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                                     {contentWithoutChart}
                                                 </ReactMarkdown>
