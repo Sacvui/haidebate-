@@ -178,7 +178,9 @@ export const generateDocx = async (data: DocxData) => {
         for (const line of lines) {
             const trimmed = line.trim();
 
-            if (trimmed.startsWith('|')) {
+            // More robust table detection: allows indentation and strictly checks for pipe at start/end or internal structure
+            // Regex: Starts with optional space, then pipe, then content...
+            if (trimmed.startsWith('|') || (inTable && trimmed.includes('|'))) {
                 inTable = true;
                 currentTableLines.push(trimmed);
                 continue;

@@ -438,7 +438,7 @@ export function DebateManager({
                                 {msg.role === 'writer' ? <Bot size={24} /> : <User size={24} />}
                             </div>
                             <div className={cn("max-w-[80%] p-4 rounded-xl shadow-sm", msg.role === 'writer' ? "bg-white border" : "bg-purple-50 border-purple-100")}>
-                                <div className="prose prose-slate max-w-none text-sm break-words">
+                                <div className="prose prose-slate max-w-none text-sm break-words prose-table:border-collapse prose-table:border prose-table:w-full prose-th:border prose-th:bg-slate-100 prose-th:p-2 prose-td:border prose-td:p-2">
                                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                         {msg.content}
                                     </ReactMarkdown>

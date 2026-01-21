@@ -15,7 +15,7 @@ const GeminiRequestSchema = z.object({
     userId: z.string().optional() // Optional for tracking
 });
 
-export const runtime = 'edge'; // Optional: Use Edge if Vercel KV works well
+// export const runtime = 'edge'; // Disabled for Node.js compatibility (ioredis)
 
 export async function POST(request: NextRequest) {
     try {
