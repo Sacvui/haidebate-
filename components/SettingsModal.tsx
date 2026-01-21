@@ -1,3 +1,4 @@
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import { X, Key, Save, RefreshCw } from 'lucide-react';

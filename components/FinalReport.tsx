@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import { Download, CheckCircle, FileText, ArrowLeft, Printer, Eye, EyeOff } from 'lucide-react';
 import { MermaidChart } from './MermaidChart';

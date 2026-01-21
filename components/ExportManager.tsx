@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import { FileText, Download, FileSpreadsheet, Table, CheckCircle, Loader2, ArrowLeft } from 'lucide-react';
 import { AcademicLevel } from '@/lib/agents';

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { WorkflowStep, AcademicLevel } from '@/lib/agents';
 import { CheckCircle, Copy, X, AlertTriangle } from 'lucide-react';

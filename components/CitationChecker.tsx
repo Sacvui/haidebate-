@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, XCircle, AlertTriangle, ExternalLink, Loader2 } from 'lucide-react';
 import { extractDOIs } from '@/lib/citationUtils';
@@ -129,8 +131,8 @@ export function CitationChecker({ content, onVerificationComplete }: CitationChe
                             <div
                                 key={idx}
                                 className={`p-4 rounded-lg border-l-4 ${result.valid
-                                        ? 'bg-green-50 border-green-500'
-                                        : 'bg-red-50 border-red-500'
+                                    ? 'bg-green-50 border-green-500'
+                                    : 'bg-red-50 border-red-500'
                                     }`}
                             >
                                 <div className="flex justify-between items-start gap-3">
