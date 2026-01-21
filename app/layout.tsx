@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     apple: '/og-image.jpg', // Using OG image as a placeholder for apple touch icon if we don't have a specific one
   },
   openGraph: {
-    title: "Hải Debate - Cãi tay đôi với Reviewer",
+    title: "Hai Debate: The art of 'clapping back' Reviewer #2",
     description: "Công cụ hỗ trợ viết luận văn và nghiên cứu khoa học chuyên sâu với AI Phản biện.",
     url: 'https://haidebate-ocsd.vercel.app', // Explicitly setting the URL if known or using a default
     siteName: 'Hải Debate',
