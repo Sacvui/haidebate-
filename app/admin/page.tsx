@@ -260,6 +260,7 @@ export default function AdminPage() {
                                 <thead>
                                     <tr className="bg-slate-50 border-b border-slate-200">
                                         <th className="p-4 font-semibold text-slate-600 text-sm">User Info</th>
+                                        <th className="p-4 font-semibold text-slate-600 text-sm">Joined</th>
                                         <th className="p-4 font-semibold text-slate-600 text-sm">Auth</th>
                                         <th className="p-4 font-semibold text-slate-600 text-sm">Referral</th>
                                         <th className="p-4 font-semibold text-slate-600 text-sm">Points</th>
@@ -272,6 +273,10 @@ export default function AdminPage() {
                                             <td className="p-4">
                                                 <div className="font-bold text-slate-800">{user.name || "No Name"}</div>
                                                 <div className="text-xs text-slate-500 font-mono">{user.id}</div>
+                                            </td>
+                                            <td className="p-4">
+                                                <div className="text-sm text-slate-600">{user.createdAt ? new Date(user.createdAt).toLocaleDateString('vi-VN') : '-'}</div>
+                                                <div className="text-xs text-slate-400">{user.createdAt ? new Date(user.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : ''}</div>
                                             </td>
                                             <td className="p-4">
                                                 <div className="text-sm text-slate-700">{user.email}</div>
