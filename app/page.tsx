@@ -325,6 +325,16 @@ export default function Home() {
                     <span className="hidden md:inline">Hướng dẫn</span>
                   </Link>
 
+                  {/* About Link */}
+                  <Link
+                    href="/about"
+                    className="flex items-center gap-2 px-2 md:px-3 py-1.5 bg-slate-50 text-slate-700 hover:bg-slate-100 rounded-lg font-medium text-xs md:text-sm transition-colors border border-slate-200"
+                    title="Về chúng tôi"
+                  >
+                    <Sparkles className="w-4 h-4 text-purple-500" />
+                    <span className="hidden md:inline">Giới thiệu</span>
+                  </Link>
+
                   <div className="h-6 w-px bg-slate-200 mx-1"></div>
 
                   <div className="text-xs text-slate-500 hidden md:flex items-center gap-1">

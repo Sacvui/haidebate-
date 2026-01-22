@@ -13,6 +13,9 @@ interface SurveyRow {
     source: string;
 }
 
+// Cache font in memory to avoid re-downloading
+let cachedVietnameseFont: string | null = null;
+
 // Helper: Parse markdown table to a generic array of arrays
 function parseGeneralTable(content: string, headers: string[]): string[][] {
     const rows: string[][] = [];
@@ -230,19 +233,23 @@ export async function exportOutlineToPDF(
 
     // 1. Load Unicode Font (Roboto Regular) - Vietnamese Support
     try {
-        const fontUrl = 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Regular.ttf';
-        const fontResponse = await fetch(fontUrl);
+        if (!cachedVietnameseFont) {
+            const fontUrl = 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Regular.ttf';
+            const fontResponse = await fetch(fontUrl);
 
-        if (fontResponse.ok) {
-            const fontBuffer = await fontResponse.arrayBuffer();
-            const fontBase64 = arrayBufferToBase64(fontBuffer);
+            if (fontResponse.ok) {
+                const fontBuffer = await fontResponse.arrayBuffer();
+                cachedVietnameseFont = arrayBufferToBase64(fontBuffer);
+            } else {
+                console.warn("Failed to load Vietnamese font, fallback to default.");
+            }
+        }
 
+        if (cachedVietnameseFont) {
             // Add font to VFS and register it
-            doc.addFileToVFS('Roboto-Regular.ttf', fontBase64);
+            doc.addFileToVFS('Roboto-Regular.ttf', cachedVietnameseFont);
             doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
             doc.setFont('Roboto'); // Activate font
-        } else {
-            console.warn("Failed to load Vietnamese font, fallback to default.");
         }
     } catch (e) {
         console.warn("Error loading font:", e);
