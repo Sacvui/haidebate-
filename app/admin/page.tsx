@@ -85,23 +85,32 @@ export default function AdminPage() {
     const fetchUsers = async () => {
         try {
             const res = await fetch("/api/admin/users");
-            const data = await res.json();
+
+            // Check Content Type
+            const contentType = res.headers.get("content-type");
+            let data;
+
+            if (contentType && contentType.includes("application/json")) {
+                data = await res.json();
+            } else {
+                const text = await res.text();
+                throw new Error(`Server returned ${res.status} (Not JSON): ${text.substring(0, 50)}...`);
+            }
 
             if (!res.ok) {
                 console.error("Admin Fetch Error:", data);
-                alert(`Lỗi tải dữ liệu: ${data.error} ${data.details || ''} ${data.debug || ''}`);
+                alert(`Lỗi API (${res.status}): ${data.error || 'Unknown'} \n${data.debug || ''} \n${data.details || ''}`);
                 return;
             }
 
             if (data.users) {
                 setUsers(data.users);
             } else {
-                // Empty list is fine, but if structure is wrong warn
                 console.warn("No users array returned", data);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error("Failed to fetch users", error);
-            alert("Lỗi kết nối đến server.");
+            alert(`Lỗi kết nối: ${error.message}`);
         } finally {
             setIsLoading(false);
         }
