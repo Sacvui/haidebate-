@@ -6,7 +6,7 @@ import { AcademicLevel, ProjectType } from '@/lib/agents';
 import { GOAL_OPTIONS, ACADEMIC_LEVELS, PROJECT_TYPES, AUDIENCE_OPTIONS } from '@/lib/constants';
 
 interface ResearchFormProps {
-    onStart: (data: { topic: string; level: AcademicLevel; goal: string; audience: string; language: 'vi' | 'en'; projectType: ProjectType }) => void;
+    onStart: (data: { topic: string; level: AcademicLevel; goal: string; audience: string; language: 'vi' | 'en'; projectType: ProjectType; paperType?: string }) => void;
     onOpenGuidelines: () => void;
     // Visual props for Preview Mode
     isPreview?: boolean;
@@ -21,12 +21,15 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
     const [level, setLevel] = useState<AcademicLevel>("MASTER");
     const [language, setLanguage] = useState<'vi' | 'en'>('vi');
     const [projectType, setProjectType] = useState<ProjectType>('RESEARCH');
+    const [paperType, setPaperType] = useState<string>('quant');
     const [showGuide, setShowGuide] = useState(false);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (topic.trim()) {
-            onStart({ topic, level, goal, audience, language, projectType });
+            if (topic.trim()) {
+                onStart({ topic, level, goal, audience, language, projectType, paperType });
+            }
         }
     };
 
@@ -180,15 +183,17 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
                         </div>
                         <select
                             className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-slate-700 bg-white"
-                            defaultValue="quant"
+                            value={paperType}
+                            onChange={(e) => setPaperType(e.target.value)}
                         >
-                            <option value="quant">✨ Original Research (Quantitative)</option>
+                            <option value="quant">Original Research (Quantitative)</option>
+                            <option value="software">Software / Tool Publication (New)</option>
                             <option value="qual" disabled>Qualitative Research (Coming Soon)</option>
                             <option value="review" disabled>Systematic Review (Coming Soon)</option>
                             <option value="method" disabled>Methodological Paper (Coming Soon)</option>
                         </select>
                         <p className="text-[10px] text-slate-400 italic px-1">
-                            *Hiện tại hệ thống tối ưu cho nghiên cứu định lượng (Mô hình & Kiểm định)
+                            *Chọn "Software" nếu bài viết về công cụ, phần mềm, hoặc giải pháp kỹ thuật
                         </p>
                     </div>
                 </div>

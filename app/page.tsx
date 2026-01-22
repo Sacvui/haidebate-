@@ -33,6 +33,7 @@ interface ResearchFormData {
   audience: string;
   language: 'vi' | 'en';
   projectType: ProjectType;
+  paperType?: string;
 }
 
 export default function Home() {
@@ -152,7 +153,8 @@ export default function Home() {
       goal: project.goal,
       audience: project.audience,
       language: project.language,
-      projectType: project.projectType
+      projectType: project.projectType,
+      paperType: (project.data as any)?.paperType || 'quant'
     });
     setSessionId(project.id);
     setIsStarted(true);
@@ -361,6 +363,7 @@ export default function Home() {
                     apiKeyCritic={apiKeyCritic}
                     userId={user.id}
                     sessionId={sessionId}
+                    paperType={formData.paperType}
                     onExit={() => {
                       setIsStarted(false);
                       setShowProjects(true);

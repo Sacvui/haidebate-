@@ -44,8 +44,9 @@ export function DebateManager({
     sessionId,
     userId,
     onExit,
-    onNewProject
-}: DebateManagerProps) {
+    onNewProject,
+    paperType = 'quant' // Default to quantitative
+}: DebateManagerProps & { paperType?: string }) {
     const [messages, setMessages] = useState<AgentMessage[]>([]);
     const [currentStep, setCurrentStep] = useState<WorkflowStep>('1_TOPIC');
     const [isProcessing, setIsProcessing] = useState(false);
@@ -309,9 +310,9 @@ export function DebateManager({
             }
         }
 
-        if (currentStep === '1_TOPIC') setCurrentStep('2_MODEL');
-        else if (currentStep === '2_MODEL') setCurrentStep('3_OUTLINE');
-        else if (currentStep === '3_OUTLINE') setCurrentStep(projectType === 'STARTUP' ? '5_GTM' : '4_SURVEY');
+        if (currentStep === '1_TOPIC') setCurrentStep(paperType === 'software' ? '2_ARCH' : '2_MODEL');
+        else if (currentStep === '2_MODEL' || currentStep === '2_ARCH') setCurrentStep('3_OUTLINE');
+        else if (currentStep === '3_OUTLINE') setCurrentStep(projectType === 'STARTUP' ? '5_GTM' : (paperType === 'software' ? '4_BENCHMARK' : '4_SURVEY'));
         else if (currentStep === '5_GTM') setCurrentStep('4_SURVEY');
 
         // setMessages([]);
@@ -321,10 +322,10 @@ export function DebateManager({
     };
 
     const handlePreviousStep = () => {
-        if (currentStep === '2_MODEL') setCurrentStep('1_TOPIC');
-        else if (currentStep === '3_OUTLINE') setCurrentStep('2_MODEL');
+        if (currentStep === '2_MODEL' || currentStep === '2_ARCH') setCurrentStep('1_TOPIC');
+        else if (currentStep === '3_OUTLINE') setCurrentStep(paperType === 'software' ? '2_ARCH' : '2_MODEL');
         else if (currentStep === '5_GTM') setCurrentStep('3_OUTLINE');
-        else if (currentStep === '4_SURVEY') setCurrentStep(projectType === 'STARTUP' ? '5_GTM' : '3_OUTLINE');
+        else if (currentStep === '4_SURVEY' || currentStep === '4_BENCHMARK') setCurrentStep(projectType === 'STARTUP' ? '5_GTM' : '3_OUTLINE');
 
         // setMessages([]);
         setRoundCount(0);
@@ -383,9 +384,11 @@ export function DebateManager({
                     <h2 className="text-xl font-bold text-slate-800">
                         {currentStep === '1_TOPIC' && "Giai Đoạn 1: Thẩm Định Đề Tài"}
                         {currentStep === '2_MODEL' && "Giai Đoạn 2: Xây Dựng Mô Hình"}
+                        {currentStep === '2_ARCH' && "Giai Đoạn 2: Kiến Trúc Hệ Thống & Tech Stack"}
                         {currentStep === '3_OUTLINE' && (projectType === 'STARTUP' ? "Giai Đoạn 3: Pitch Deck" : "Giai Đoạn 3: Hoàn Thiện Đề Cương")}
                         {currentStep === '5_GTM' && "Giai Đoạn 4: Chiến lược Ra mắt"}
                         {currentStep === '4_SURVEY' && (projectType === 'STARTUP' ? "Giai Đoạn 5: Customer Discovery" : "Giai Đoạn 4: Xây Dựng Bảng Hỏi")}
+                        {currentStep === '4_BENCHMARK' && "Giai Đoạn 4: Kiểm Thử & Đánh Giá Hiệu Năng"}
                     </h2>
                     <button onClick={() => { saveToProjectStorage(); if (onExit) onExit(); }} className="p-2 text-slate-400 hover:text-blue-600">
                         <Home size={20} />

@@ -1,4 +1,4 @@
-
+﻿
 export interface AgentMessage {
   role: 'writer' | 'critic';
   content: string;
@@ -6,7 +6,7 @@ export interface AgentMessage {
   round?: number;
 }
 
-export type WorkflowStep = '1_TOPIC' | '2_MODEL' | '3_OUTLINE' | '4_SURVEY' | '5_GTM';
+export type WorkflowStep = '1_TOPIC' | '2_MODEL' | '2_ARCH' | '3_OUTLINE' | '4_SURVEY' | '4_BENCHMARK' | '5_GTM';
 export type AcademicLevel = 'UNDERGRAD' | 'MASTER' | 'PHD';
 export type ProjectType = 'RESEARCH' | 'STARTUP';
 
@@ -17,375 +17,376 @@ const getModelRequirements = (level: AcademicLevel) => {
   switch (level) {
     case 'UNDERGRAD':
       return `
-            - CẤP ĐỘ 1: TIỂU LUẬN ĐẠI HỌC (MÔ HÌNH MÔ TẢ).
-            - Số lượng biến: 2 - 4 biến chính.
-            - Loại biến: Chủ yếu biến Độc lập (IV) -> Phụ thuộc (DV).
-            - Cấu trúc: Tuyến tính đơn giản.
+            - Cáº¤P Äá»˜ 1: TIá»‚U LUáº¬N Äáº I Há»ŒC (MÃ” HÃŒNH MÃ” Táº¢).
+            - Sá»‘ lÆ°á»£ng biáº¿n: 2 - 4 biáº¿n chÃ­nh.
+            - Loáº¡i biáº¿n: Chá»§ yáº¿u biáº¿n Äá»™c láº­p (IV) -> Phá»¥ thuá»™c (DV).
+            - Cáº¥u trÃºc: Tuyáº¿n tÃ­nh Ä‘Æ¡n giáº£n.
             `;
     case 'MASTER':
       return `
-            - CẤP ĐỘ 2: LUẬN VĂN THẠC SĨ (MÔ HÌNH GIẢI THÍCH).
-            - Số lượng biến: 5 - 8 biến.
-            - BẮT BUỘC có biến Trung gian (Mediator) hoặc Điều tiết (Moderator).
-            - Cấu trúc: Quan hệ nhân quả có căn cứ lý thuyết (TPB, TAM...).
+            - Cáº¤P Äá»˜ 2: LUáº¬N VÄ‚N THáº C SÄ¨ (MÃ” HÃŒNH GIáº¢I THÃCH).
+            - Sá»‘ lÆ°á»£ng biáº¿n: 5 - 8 biáº¿n.
+            - Báº®T BUá»˜C cÃ³ biáº¿n Trung gian (Mediator) hoáº·c Äiá»u tiáº¿t (Moderator).
+            - Cáº¥u trÃºc: Quan há»‡ nhÃ¢n quáº£ cÃ³ cÄƒn cá»© lÃ½ thuyáº¿t (TPB, TAM...).
             `;
     case 'PHD':
       return `
-            - CẤP ĐỘ 3: BÀI BÁO QUỐC TẾ / TIẾN SĨ (MÔ HÌNH CƠ CHẾ).
-            - Số lượng biến: 8 - 15 biến (hoặc hơn).
-            - Phức tạp: Trung gian đa lớp, Điều tiết hỗn hợp, Biến tiềm ẩn bậc cao.
-            - Cấu trúc: Đa tầng. Giải quyết mâu thuẫn lý thuyết & Cơ chế (Mechanism).
+            - Cáº¤P Äá»˜ 3: BÃ€I BÃO QUá»C Táº¾ / TIáº¾N SÄ¨ (MÃ” HÃŒNH CÆ  CHáº¾).
+            - Sá»‘ lÆ°á»£ng biáº¿n: 8 - 15 biáº¿n (hoáº·c hÆ¡n).
+            - Phá»©c táº¡p: Trung gian Ä‘a lá»›p, Äiá»u tiáº¿t há»—n há»£p, Biáº¿n tiá»m áº©n báº­c cao.
+            - Cáº¥u trÃºc: Äa táº§ng. Giáº£i quyáº¿t mÃ¢u thuáº«n lÃ½ thuyáº¿t & CÆ¡ cháº¿ (Mechanism).
             `;
     default: return "";
   }
 };
 
 import { GOAL_OPTIONS } from './constants';
+import { SOFTWARE_ARCH_CRITIC_PROMPT, SOFTWARE_ARCH_WRITER_PROMPT, SOFTWARE_BENCHMARK_WRITER_PROMPT } from './software_prompts';
 
 const getOutlineStructure = (outputType: string) => {
   // ... (omitted) match existing
   if (outputType === GOAL_OPTIONS.UNDERGRAD_RESEARCH) {
     return `
-        CẤU TRÚC TIỂU LUẬN / KHÓA LUẬN:
-        1. Mở đầu (Lý do chọn đề tài, Mục tiêu, Đối tượng).
-        2. Cơ sở lý thuyết (Các khái niệm chính).
-        3. Phương pháp nghiên cứu (Mô hình, Thang đo).
-        4. Kết quả mong đợi & Kết luận.
+        Cáº¤U TRÃšC TIá»‚U LUáº¬N / KHÃ“A LUáº¬N:
+        1. Má»Ÿ Ä‘áº§u (LÃ½ do chá»n Ä‘á» tÃ i, Má»¥c tiÃªu, Äá»‘i tÆ°á»£ng).
+        2. CÆ¡ sá»Ÿ lÃ½ thuyáº¿t (CÃ¡c khÃ¡i niá»‡m chÃ­nh).
+        3. PhÆ°Æ¡ng phÃ¡p nghiÃªn cá»©u (MÃ´ hÃ¬nh, Thang Ä‘o).
+        4. Káº¿t quáº£ mong Ä‘á»£i & Káº¿t luáº­n.
         `;
   }
   if (outputType === GOAL_OPTIONS.MASTER_THESIS || outputType === GOAL_OPTIONS.PHD_DISSERTATION) {
     return `
-        CẤU TRÚC LUẬN VĂN / LUẬN ÁN (CHƯƠNG HỒI):
-        Chương 1: Tổng quan nghiên cứu (Giới thiệu, Tính cấp thiết, Gap).
-        Chương 2: Cơ sở lý thuyết & Mô hình nghiên cứu.
-        Chương 3: Phương pháp nghiên cứu.
-        Chương 4: Kết quả nghiên cứu & Thảo luận.
-        Chương 5: Kết luận & Hàm ý quản trị.
+        Cáº¤U TRÃšC LUáº¬N VÄ‚N / LUáº¬N ÃN (CHÆ¯Æ NG Há»’I):
+        ChÆ°Æ¡ng 1: Tá»•ng quan nghiÃªn cá»©u (Giá»›i thiá»‡u, TÃ­nh cáº¥p thiáº¿t, Gap).
+        ChÆ°Æ¡ng 2: CÆ¡ sá»Ÿ lÃ½ thuyáº¿t & MÃ´ hÃ¬nh nghiÃªn cá»©u.
+        ChÆ°Æ¡ng 3: PhÆ°Æ¡ng phÃ¡p nghiÃªn cá»©u.
+        ChÆ°Æ¡ng 4: Káº¿t quáº£ nghiÃªn cá»©u & Tháº£o luáº­n.
+        ChÆ°Æ¡ng 5: Káº¿t luáº­n & HÃ m Ã½ quáº£n trá»‹.
         `;
   }
   if (outputType === GOAL_OPTIONS.DOMESTIC_PAPER) {
     return `
-        CẤU TRÚC BÀI BÁO KHOA HỌC (IMRAD):
-        1. Introduction (Đặt vấn đề, Gap, Mục tiêu).
-        2. Literature Review & Hypothesis (Tổng quan & Giả thuyết).
-        3. Methodology (Phương pháp, Mẫu, Thang đo).
-        4. Results (Kết quả phân tích).
-        5. Discussion & Conclusion (Thảo luận, Đóng góp, Hạn chế).
+        Cáº¤U TRÃšC BÃ€I BÃO KHOA Há»ŒC (IMRAD):
+        1. Introduction (Äáº·t váº¥n Ä‘á», Gap, Má»¥c tiÃªu).
+        2. Literature Review & Hypothesis (Tá»•ng quan & Giáº£ thuyáº¿t).
+        3. Methodology (PhÆ°Æ¡ng phÃ¡p, Máº«u, Thang Ä‘o).
+        4. Results (Káº¿t quáº£ phÃ¢n tÃ­ch).
+        5. Discussion & Conclusion (Tháº£o luáº­n, ÄÃ³ng gÃ³p, Háº¡n cháº¿).
         `;
   }
   if (outputType === GOAL_OPTIONS.GRANT_PROPOSAL) {
     return `
-        CẤU TRÚC ĐỀ XUẤT NGHIÊN CỨU (GRANT PROPOSAL):
-        1. Executive Summary (Tóm tắt dự án).
-        2. Statement of Problem (Vấn đề nghiên cứu).
-        3. Objectives & Scope (Mục tiêu & Phạm vi).
-        4. Methodology (Phương pháp dự kiến).
-        5. Budget & Timeline (Ngân sách & Tiến độ).
+        Cáº¤U TRÃšC Äá»€ XUáº¤T NGHIÃŠN Cá»¨U (GRANT PROPOSAL):
+        1. Executive Summary (TÃ³m táº¯t dá»± Ã¡n).
+        2. Statement of Problem (Váº¥n Ä‘á» nghiÃªn cá»©u).
+        3. Objectives & Scope (Má»¥c tiÃªu & Pháº¡m vi).
+        4. Methodology (PhÆ°Æ¡ng phÃ¡p dá»± kiáº¿n).
+        5. Budget & Timeline (NgÃ¢n sÃ¡ch & Tiáº¿n Ä‘á»™).
         `;
   }
-  return "Cấu trúc IMRAD chuẩn mực.";
+  return "Cáº¥u trÃºc IMRAD chuáº©n má»±c.";
 };
 
 const getCriticPersona = (level: AcademicLevel) => {
   // ... (omitted) match existing
   switch (level) {
-    case 'UNDERGRAD': return "Giảng viên khó tính (Strict Instructor). Đòi hỏi tính Logic và Tuân thủ quy tắc.";
-    case 'MASTER': return "Hội đồng phản biện sắc sảo (Critical Council). Tấn công vào phương pháp luận và cơ sở lý thuyết.";
-    case 'PHD': return "Reviewer 2 (Top Journal). Cực kỳ tàn nhẫn và hoài nghi. Soi mói từng lỗ hổng nhỏ nhất về tính mới (Novelty).";
-    default: return "Nhà phản biện";
+    case 'UNDERGRAD': return "Giáº£ng viÃªn khÃ³ tÃ­nh (Strict Instructor). ÄÃ²i há»i tÃ­nh Logic vÃ  TuÃ¢n thá»§ quy táº¯c.";
+    case 'MASTER': return "Há»™i Ä‘á»“ng pháº£n biá»‡n sáº¯c sáº£o (Critical Council). Táº¥n cÃ´ng vÃ o phÆ°Æ¡ng phÃ¡p luáº­n vÃ  cÆ¡ sá»Ÿ lÃ½ thuyáº¿t.";
+    case 'PHD': return "Reviewer 2 (Top Journal). Cá»±c ká»³ tÃ n nháº«n vÃ  hoÃ i nghi. Soi mÃ³i tá»«ng lá»— há»•ng nhá» nháº¥t vá» tÃ­nh má»›i (Novelty).";
+    default: return "NhÃ  pháº£n biá»‡n";
   }
 };
 
 // --- BASE PROMPTS ---
 
 const TOPIC_WRITER_PROMPT = `
-NHIỆM VỤ: Đề xuất/tinh chỉnh Tên Đề Tài nghiên cứu.
+NHIá»†M Vá»¤: Äá» xuáº¥t/tinh chá»‰nh TÃªn Äá» TÃ i nghiÃªn cá»©u.
 
-VÍ DỤ MẪU (FEW-SHOT EXAMPLES):
+VÃ Dá»¤ MáºªU (FEW-SHOT EXAMPLES):
 
-VÍ DỤ 1: ĐỀ TÀI TỐT (9/10)
-Input: "Nghiên cứu ảnh hưởng của AI đến nhân viên"
-Output: "Tác động của trí tuệ nhân tạo (AI) đến hiệu suất làm việc và sự hài lòng công việc của nhân viên văn phòng tại Việt Nam: Vai trò điều tiết của nỗi lo mất việc làm"
-✅ Lý do tốt: Cụ thể (đối tượng, phạm vi), có biến cụ thể (hiệu suất, hài lòng), có tính mới (nỗi lo mất việc).
+VÃ Dá»¤ 1: Äá»€ TÃ€I Tá»T (9/10)
+Input: "NghiÃªn cá»©u áº£nh hÆ°á»Ÿng cá»§a AI Ä‘áº¿n nhÃ¢n viÃªn"
+Output: "TÃ¡c Ä‘á»™ng cá»§a trÃ­ tuá»‡ nhÃ¢n táº¡o (AI) Ä‘áº¿n hiá»‡u suáº¥t lÃ m viá»‡c vÃ  sá»± hÃ i lÃ²ng cÃ´ng viá»‡c cá»§a nhÃ¢n viÃªn vÄƒn phÃ²ng táº¡i Viá»‡t Nam: Vai trÃ² Ä‘iá»u tiáº¿t cá»§a ná»—i lo máº¥t viá»‡c lÃ m"
+âœ… LÃ½ do tá»‘t: Cá»¥ thá»ƒ (Ä‘á»‘i tÆ°á»£ng, pháº¡m vi), cÃ³ biáº¿n cá»¥ thá»ƒ (hiá»‡u suáº¥t, hÃ i lÃ²ng), cÃ³ tÃ­nh má»›i (ná»—i lo máº¥t viá»‡c).
 
-VÍ DỤ 2: ĐỀ TÀI YẾU (4/10)
-Input: "Nghiên cứu về chuyển đổi số"
-Output: "Nghiên cứu về chuyển đổi số trong doanh nghiệp"
-❌ Lý do yếu: Quá chung chung, không rõ biến nghiên cứu, không có bối cảnh cụ thể.
+VÃ Dá»¤ 2: Äá»€ TÃ€I Yáº¾U (4/10)
+Input: "NghiÃªn cá»©u vá» chuyá»ƒn Ä‘á»•i sá»‘"
+Output: "NghiÃªn cá»©u vá» chuyá»ƒn Ä‘á»•i sá»‘ trong doanh nghiá»‡p"
+âŒ LÃ½ do yáº¿u: QuÃ¡ chung chung, khÃ´ng rÃµ biáº¿n nghiÃªn cá»©u, khÃ´ng cÃ³ bá»‘i cáº£nh cá»¥ thá»ƒ.
 
-QUY TRÌNH:
-1. Phân tích input/phản biện
-2. Đề xuất:
-   - Lần đầu: 3 phương án (Sáng tạo | An toàn | Cân bằng)
-   - Sau phản biện: Cải thiện theo góp ý
-   - Vòng cuối: In đậm "CHỐT ĐỀ TÀI: [Tên đề tài]"
+QUY TRÃŒNH:
+1. PhÃ¢n tÃ­ch input/pháº£n biá»‡n
+2. Äá» xuáº¥t:
+   - Láº§n Ä‘áº§u: 3 phÆ°Æ¡ng Ã¡n (SÃ¡ng táº¡o | An toÃ n | CÃ¢n báº±ng)
+   - Sau pháº£n biá»‡n: Cáº£i thiá»‡n theo gÃ³p Ã½
+   - VÃ²ng cuá»‘i: In Ä‘áº­m "CHá»T Äá»€ TÃ€I: [TÃªn Ä‘á» tÃ i]"
 
-YÊU CẦU: Ngắn gọn, tập trung tính mới và cấp thiết.
+YÃŠU Cáº¦U: Ngáº¯n gá»n, táº­p trung tÃ­nh má»›i vÃ  cáº¥p thiáº¿t.
 `;
 
 const TOPIC_CRITIC_PROMPT = `
-PHẢN BIỆN ĐỀ TÀI - RUBRIC CHI TIẾT (BẮT BUỘC CHẤM ĐIỂM):
+PHáº¢N BIá»†N Äá»€ TÃ€I - RUBRIC CHI TIáº¾T (Báº®T BUá»˜C CHáº¤M ÄIá»‚M):
 
-1. TÍNH MỚI (NOVELTY) - 3 điểm:
-   - So với nghiên cứu trước đây?
-   - Có gap nghiên cứu rõ ràng không?
+1. TÃNH Má»šI (NOVELTY) - 3 Ä‘iá»ƒm:
+   - So vá»›i nghiÃªn cá»©u trÆ°á»›c Ä‘Ã¢y?
+   - CÃ³ gap nghiÃªn cá»©u rÃµ rÃ ng khÃ´ng?
 
-2. TÍNH KHẢ THI (FEASIBILITY) - 3 điểm:
-   - Dữ liệu có thể thu thập không?
-   - Phương pháp đo lường có sẵn không?
+2. TÃNH KHáº¢ THI (FEASIBILITY) - 3 Ä‘iá»ƒm:
+   - Dá»¯ liá»‡u cÃ³ thá»ƒ thu tháº­p khÃ´ng?
+   - PhÆ°Æ¡ng phÃ¡p Ä‘o lÆ°á»ng cÃ³ sáºµn khÃ´ng?
 
-3. TÍNH RÕ RÀNG (CLARITY) - 2 điểm:
-   - Tên đề tài có dễ hiểu?
-   - Các biến có được xác định rõ?
+3. TÃNH RÃ• RÃ€NG (CLARITY) - 2 Ä‘iá»ƒm:
+   - TÃªn Ä‘á» tÃ i cÃ³ dá»… hiá»ƒu?
+   - CÃ¡c biáº¿n cÃ³ Ä‘Æ°á»£c xÃ¡c Ä‘á»‹nh rÃµ?
 
-4. PHẠM VI (SCOPE) - 2 điểm:
-   - Không quá rộng cũng không quá hẹp?
-   - Phù hợp với trình độ (Undergrad/Master/PhD)?
+4. PHáº M VI (SCOPE) - 2 Ä‘iá»ƒm:
+   - KhÃ´ng quÃ¡ rá»™ng cÅ©ng khÃ´ng quÃ¡ háº¹p?
+   - PhÃ¹ há»£p vá»›i trÃ¬nh Ä‘á»™ (Undergrad/Master/PhD)?
 
-TỔNG ĐIỂM: .../10
+Tá»”NG ÄIá»‚M: .../10
 
-NẾU < 9 ĐIỂM:
-❌ KẾT LUẬN: KHÔNG DUYỆT (REJECT) - Yêu cầu sửa cụ thể.
+Náº¾U < 9 ÄIá»‚M:
+âŒ Káº¾T LUáº¬N: KHÃ”NG DUYá»†T (REJECT) - YÃªu cáº§u sá»­a cá»¥ thá»ƒ.
 
-KIỂM TRA TRÍCH DẪN (QUAN TRỌNG NHẤT):
-- Writer có bịa đặt nguồn không?
-- DOI có hoạt động không?
-- **TUYỆT ĐỐI KHÔNG TỰ BỊA DẪN CHỨNG GIẢ ĐỂ PHẢN BÁC.** Nếu bạn (Critic) đưa ra gợi ý nguồn, nó PHẢI CÓ THẬT.
+KIá»‚M TRA TRÃCH DáºªN (QUAN TRá»ŒNG NHáº¤T):
+- Writer cÃ³ bá»‹a Ä‘áº·t nguá»“n khÃ´ng?
+- DOI cÃ³ hoáº¡t Ä‘á»™ng khÃ´ng?
+- **TUYá»†T Äá»I KHÃ”NG Tá»° Bá»ŠA DáºªN CHá»¨NG GIáº¢ Äá»‚ PHáº¢N BÃC.** Náº¿u báº¡n (Critic) Ä‘Æ°a ra gá»£i Ã½ nguá»“n, nÃ³ PHáº¢I CÃ“ THáº¬T.
 
 OUTPUT FORM:
-📊 ĐIỂM SỐ: .../10
-❌ Lỗi chính: [Vấn đề]
-➡️ Đề xuất sửa: [Cách cụ thể]
-⚠️ Cảnh báo DOI: [Nếu phát hiện nghi vấn]
+ðŸ“Š ÄIá»‚M Sá»: .../10
+âŒ Lá»—i chÃ­nh: [Váº¥n Ä‘á»]
+âž¡ï¸ Äá» xuáº¥t sá»­a: [CÃ¡ch cá»¥ thá»ƒ]
+âš ï¸ Cáº£nh bÃ¡o DOI: [Náº¿u phÃ¡t hiá»‡n nghi váº¥n]
 `;
 
 const getModelWriterPrompt = (level: AcademicLevel) => `
-NHIỆM VỤ: Xây dựng Cơ sở lý thuyết và Mô hình nghiên cứu.
-TRÌNH ĐỘ YÊU CẦU: ${level}
+NHIá»†M Vá»¤: XÃ¢y dá»±ng CÆ¡ sá»Ÿ lÃ½ thuyáº¿t vÃ  MÃ´ hÃ¬nh nghiÃªn cá»©u.
+TRÃŒNH Äá»˜ YÃŠU Cáº¦U: ${level}
 ${getModelRequirements(level)}
 
-VÍ DỤ MẪU (FEW-SHOT EXAMPLES):
+VÃ Dá»¤ MáºªU (FEW-SHOT EXAMPLES):
 
-VÍ DỤ 1: GIẢI THÍCH LÝ THUYẾT TỐT (TAM)
-"Thuyết Chấp nhận Công nghệ (TAM) được phát triển bởi Davis (1989) nhằm giải thích ý định sử dụng công nghệ. Mô hình này phù hợp cho nghiên cứu về AI vì nó tập trung vào hai yếu tố cốt lõi: Nhận thức tính hữu ích (PU) và Nhận thức tính dễ sử dụng (PEOU). Các nghiên cứu trước đây (Venkatesh & Bala, 2008) đã chứng minh độ tin cậy cao của TAM trong bối cảnh công nghệ mới."
+VÃ Dá»¤ 1: GIáº¢I THÃCH LÃ THUYáº¾T Tá»T (TAM)
+"Thuyáº¿t Cháº¥p nháº­n CÃ´ng nghá»‡ (TAM) Ä‘Æ°á»£c phÃ¡t triá»ƒn bá»Ÿi Davis (1989) nháº±m giáº£i thÃ­ch Ã½ Ä‘á»‹nh sá»­ dá»¥ng cÃ´ng nghá»‡. MÃ´ hÃ¬nh nÃ y phÃ¹ há»£p cho nghiÃªn cá»©u vá» AI vÃ¬ nÃ³ táº­p trung vÃ o hai yáº¿u tá»‘ cá»‘t lÃµi: Nháº­n thá»©c tÃ­nh há»¯u Ã­ch (PU) vÃ  Nháº­n thá»©c tÃ­nh dá»… sá»­ dá»¥ng (PEOU). CÃ¡c nghiÃªn cá»©u trÆ°á»›c Ä‘Ã¢y (Venkatesh & Bala, 2008) Ä‘Ã£ chá»©ng minh Ä‘á»™ tin cáº­y cao cá»§a TAM trong bá»‘i cáº£nh cÃ´ng nghá»‡ má»›i."
 
-VÍ DỤ 2: GIẢ THUYẾT TỐT (H1)
-"H1: Nhận thức tính hữu ích (PU) có tác động tích cực cùng chiều đến Ý định sử dụng AI (IU).
-Biện luận: Theo Davis (1989), khi người dùng tin rằng hệ thống giúp cải thiện hiệu suất, họ sẽ có xu hướng sử dụng nó nhiều hơn. Trong bối cảnh AI, nếu nhân viên thấy AI giúp họ hoàn thành việc nhanh hơn, họ sẽ sẵn sàng chấp nhận nó (Nguyen et al., 2023)."
+VÃ Dá»¤ 2: GIáº¢ THUYáº¾T Tá»T (H1)
+"H1: Nháº­n thá»©c tÃ­nh há»¯u Ã­ch (PU) cÃ³ tÃ¡c Ä‘á»™ng tÃ­ch cá»±c cÃ¹ng chiá»u Ä‘áº¿n Ã Ä‘á»‹nh sá»­ dá»¥ng AI (IU).
+Biá»‡n luáº­n: Theo Davis (1989), khi ngÆ°á»i dÃ¹ng tin ráº±ng há»‡ thá»‘ng giÃºp cáº£i thiá»‡n hiá»‡u suáº¥t, há» sáº½ cÃ³ xu hÆ°á»›ng sá»­ dá»¥ng nÃ³ nhiá»u hÆ¡n. Trong bá»‘i cáº£nh AI, náº¿u nhÃ¢n viÃªn tháº¥y AI giÃºp há» hoÃ n thÃ nh viá»‡c nhanh hÆ¡n, há» sáº½ sáºµn sÃ ng cháº¥p nháº­n nÃ³ (Nguyen et al., 2023)."
 
-QUY TẮC "LIÊM CHÍNH KHOA HỌC" (BẮT BUỘC):
-- **KHÔNG ĐƯỢC BỊA DOI (Fake DOI).** Đây là lỗi nghiêm trọng nhất.
-- Nếu bạn không chắc chắn về một nguồn, hãy trích dẫn tên Tác giả + Năm (VD: Nguyen et al., 2023) và KHÔNG ghi DOI.
-- Chỉ ghi DOI nếu bạn chắc chắn nó tồn tại thật 100%.
+QUY Táº®C "LIÃŠM CHÃNH KHOA Há»ŒC" (Báº®T BUá»˜C):
+- **KHÃ”NG ÄÆ¯á»¢C Bá»ŠA DOI (Fake DOI).** ÄÃ¢y lÃ  lá»—i nghiÃªm trá»ng nháº¥t.
+- Náº¿u báº¡n khÃ´ng cháº¯c cháº¯n vá» má»™t nguá»“n, hÃ£y trÃ­ch dáº«n tÃªn TÃ¡c giáº£ + NÄƒm (VD: Nguyen et al., 2023) vÃ  KHÃ”NG ghi DOI.
+- Chá»‰ ghi DOI náº¿u báº¡n cháº¯c cháº¯n nÃ³ tá»“n táº¡i tháº­t 100%.
 
-QUY TRÌNH SUY NGHĨ (CHAIN-OF-THOUGHT):
-1. Phân tích đề tài: Xác định biến độc lập (IV), phụ thuộc (DV), trung gian (M), điều tiết (Mod).
-2. Chọn lý thuyết nền: Lý thuyết nào giải thích tốt nhất mối quan hệ này? (TAM, TPB, UTAUT, RBV...?)
-3. Xây dựng mô hình: Vẽ mối quan hệ (IV -> M -> DV).
-4. Biện luận giả thuyết: Dùng lý thuyết để giải thích tại sao biến A tác động biến B.
+QUY TRÃŒNH SUY NGHÄ¨ (CHAIN-OF-THOUGHT):
+1. PhÃ¢n tÃ­ch Ä‘á» tÃ i: XÃ¡c Ä‘á»‹nh biáº¿n Ä‘á»™c láº­p (IV), phá»¥ thuá»™c (DV), trung gian (M), Ä‘iá»u tiáº¿t (Mod).
+2. Chá»n lÃ½ thuyáº¿t ná»n: LÃ½ thuyáº¿t nÃ o giáº£i thÃ­ch tá»‘t nháº¥t má»‘i quan há»‡ nÃ y? (TAM, TPB, UTAUT, RBV...?)
+3. XÃ¢y dá»±ng mÃ´ hÃ¬nh: Váº½ má»‘i quan há»‡ (IV -> M -> DV).
+4. Biá»‡n luáº­n giáº£ thuyáº¿t: DÃ¹ng lÃ½ thuyáº¿t Ä‘á»ƒ giáº£i thÃ­ch táº¡i sao biáº¿n A tÃ¡c Ä‘á»™ng biáº¿n B.
 
-YÊU CẦU ĐẦU RA:
-1. Giải thích lý thuyết nền ngắn gọn.
-2. Danh sách biến và giả thuyết (H1, H2...).
-3. SƠ ĐỒ MERMAID (BẮT BUỘC):
+YÃŠU Cáº¦U Äáº¦U RA:
+1. Giáº£i thÃ­ch lÃ½ thuyáº¿t ná»n ngáº¯n gá»n.
+2. Danh sÃ¡ch biáº¿n vÃ  giáº£ thuyáº¿t (H1, H2...).
+3. SÆ  Äá»’ MERMAID (Báº®T BUá»˜C):
    
-   VÍ DỤ CHUẨN:
+   VÃ Dá»¤ CHUáº¨N:
    \`\`\`mermaid
    graph LR
-     A[Nhận thức Hữu ích] --> C[Ý định Sử dụng]
-     B[Dễ Sử dụng] --> C
-     C --> D[Hành vi Thực tế]
+     A[Nháº­n thá»©c Há»¯u Ã­ch] --> C[Ã Ä‘á»‹nh Sá»­ dá»¥ng]
+     B[Dá»… Sá»­ dá»¥ng] --> C
+     C --> D[HÃ nh vi Thá»±c táº¿]
    \`\`\`
    
-   QUY TẮC BẮT BUỘC:
-   - Dùng 'graph LR' hoặc 'graph TD'
-   - Node: [Tên ngắn gọn] (không dấu ngoặc kép)
-   - Mũi tên: --> (không nhãn phức tạp)
-   - Không xuống dòng trong node
-   - Không ký tự đặc biệt: (), {}, "", ''
+   QUY Táº®C Báº®T BUá»˜C:
+   - DÃ¹ng 'graph LR' hoáº·c 'graph TD'
+   - Node: [TÃªn ngáº¯n gá»n] (khÃ´ng dáº¥u ngoáº·c kÃ©p)
+   - MÅ©i tÃªn: --> (khÃ´ng nhÃ£n phá»©c táº¡p)
+   - KhÃ´ng xuá»‘ng dÃ²ng trong node
+   - KhÃ´ng kÃ½ tá»± Ä‘áº·c biá»‡t: (), {}, "", ''
    
-4. Trích dẫn nguồn (Citation) dạng giả định chuẩn APA.
+4. TrÃ­ch dáº«n nguá»“n (Citation) dáº¡ng giáº£ Ä‘á»‹nh chuáº©n APA.
 `;
 
 const getModelCriticPrompt = (level: AcademicLevel) => `
-PHẢN BIỆN MÔ HÌNH - RUBRIC CHI TIẾT (NGHIÊM KHẮC):
+PHáº¢N BIá»†N MÃ” HÃŒNH - RUBRIC CHI TIáº¾T (NGHIÃŠM KHáº®C):
 
-1. CƠ SỞ LÝ THUYẾT (THEORY) - 3 điểm:
-   - Lý thuyết nền có phù hợp không? (VD: Nghiên cứu hành vi dùng TAM/TPB là đúng, dùng RBV là sai)
-   - Có giải thích rõ ràng không?
+1. CÆ  Sá»ž LÃ THUYáº¾T (THEORY) - 3 Ä‘iá»ƒm:
+   - LÃ½ thuyáº¿t ná»n cÃ³ phÃ¹ há»£p khÃ´ng? (VD: NghiÃªn cá»©u hÃ nh vi dÃ¹ng TAM/TPB lÃ  Ä‘Ãºng, dÃ¹ng RBV lÃ  sai)
+   - CÃ³ giáº£i thÃ­ch rÃµ rÃ ng khÃ´ng?
 
-2. LOGIC MÔ HÌNH (MODEL LOGIC) - 3 điểm:
-   - Các mối quan hệ có hợp lý không?
-   - Có biến lạ xuất hiện không?
-   - Sơ đồ Mermaid có lỗi cú pháp không?
+2. LOGIC MÃ” HÃŒNH (MODEL LOGIC) - 3 Ä‘iá»ƒm:
+   - CÃ¡c má»‘i quan há»‡ cÃ³ há»£p lÃ½ khÃ´ng?
+   - CÃ³ biáº¿n láº¡ xuáº¥t hiá»‡n khÃ´ng?
+   - SÆ¡ Ä‘á»“ Mermaid cÃ³ lá»—i cÃº phÃ¡p khÃ´ng?
 
-3. GIẢ THUYẾT (HYPOTHESES) - 2 điểm:
-   - Biện luận có dựa trên lý thuyết không?
-   - Hướng tác động (+/-) có rõ ràng?
+3. GIáº¢ THUYáº¾T (HYPOTHESES) - 2 Ä‘iá»ƒm:
+   - Biá»‡n luáº­n cÃ³ dá»±a trÃªn lÃ½ thuyáº¿t khÃ´ng?
+   - HÆ°á»›ng tÃ¡c Ä‘á»™ng (+/-) cÃ³ rÃµ rÃ ng?
 
-4. LIÊM CHÍNH TRÍCH DẪN (CITATION) - 2 điểm:
-   - Có fake DOI không?
-   - Tác giả được trích dẫn có đúng lĩnh vực không?
+4. LIÃŠM CHÃNH TRÃCH DáºªN (CITATION) - 2 Ä‘iá»ƒm:
+   - CÃ³ fake DOI khÃ´ng?
+   - TÃ¡c giáº£ Ä‘Æ°á»£c trÃ­ch dáº«n cÃ³ Ä‘Ãºng lÄ©nh vá»±c khÃ´ng?
 
-TỔNG ĐIỂM: .../10
+Tá»”NG ÄIá»‚M: .../10
 
-NẾU < 9 ĐIỂM:
-❌ REJECT - Chỉ ra lỗi cụ thể.
+Náº¾U < 9 ÄIá»‚M:
+âŒ REJECT - Chá»‰ ra lá»—i cá»¥ thá»ƒ.
 
-LƯU Ý ĐẶC BIỆT:
-- Kiểm tra kỹ code Mermaid. Nếu code sai cú pháp -> Trừ 2 điểm ngay lập tức.
-- Kiểm tra DOI. Nếu Fake -> 0 điểm phần Citation.
+LÆ¯U Ã Äáº¶C BIá»†T:
+- Kiá»ƒm tra ká»¹ code Mermaid. Náº¿u code sai cÃº phÃ¡p -> Trá»« 2 Ä‘iá»ƒm ngay láº­p tá»©c.
+- Kiá»ƒm tra DOI. Náº¿u Fake -> 0 Ä‘iá»ƒm pháº§n Citation.
 
 OUTPUT FORM:
-📊 ĐIỂM SỐ: .../10
-❌ Lỗi chính: ...
-➡️ Đề xuất: ...
-⚠️ Cảnh báo DOI: ...
+ðŸ“Š ÄIá»‚M Sá»: .../10
+âŒ Lá»—i chÃ­nh: ...
+âž¡ï¸ Äá» xuáº¥t: ...
+âš ï¸ Cáº£nh bÃ¡o DOI: ...
 `;
 
 const getOutlineWriterPrompt = (outputType: string) => `
-NHIỆM VỤ: Lập Đề cương nghiên cứu (Research Proposal/Outline) PHIÊN BẢN CUỐI CÙNG HOÀN HẢO NHẤT.
+NHIá»†M Vá»¤: Láº­p Äá» cÆ°Æ¡ng nghiÃªn cá»©u (Research Proposal/Outline) PHIÃŠN Báº¢N CUá»I CÃ™NG HOÃ€N Háº¢O NHáº¤T.
 
-BỐI CẢNH: Bạn đã trải qua các vòng tranh biện và nhận phản hồi từ Critic. Nhiệm vụ bây giờ là TỔNG HỢP tất cả những điểm tốt nhất để tạo ra một bản đề cương hoàn chỉnh.
+Bá»I Cáº¢NH: Báº¡n Ä‘Ã£ tráº£i qua cÃ¡c vÃ²ng tranh biá»‡n vÃ  nháº­n pháº£n há»“i tá»« Critic. Nhiá»‡m vá»¥ bÃ¢y giá» lÃ  Tá»”NG Há»¢P táº¥t cáº£ nhá»¯ng Ä‘iá»ƒm tá»‘t nháº¥t Ä‘á»ƒ táº¡o ra má»™t báº£n Ä‘á» cÆ°Æ¡ng hoÃ n chá»‰nh.
 
-YÊU CẦU ĐẶC BIỆT VỀ FORMAT (QUAN TRỌNG):
-1. **KHÔNG** thêm bất kỳ lời dẫn nhập, kết luận, hay ghi chú cá nhân nào (ví dụ: "Dưới đây là đề cương...", "Tôi đã chỉnh sửa...").
-2. **CHỈ** xuất ra nội dung đề cương thuần túy.
-3. **FONT CHỮ & NGÔN NGỮ**: Dùng Tiếng Việt chuẩn mực học thuật. Tuyệt đối KHÔNG dùng ký tự lạ, font lỗi, hoặc bullet points không chuẩn. Dùng hệ thống đánh số 1, 1.1, 1.1.1.
-4. **MỨC ĐỘ CHI TIẾT**: Cực kỳ chi tiết. Mỗi mục phải có ít nhất 3-4 gạch đầu dòng diễn giải nội dung cần viết.
+YÃŠU Cáº¦U Äáº¶C BIá»†T Vá»€ FORMAT (QUAN TRá»ŒNG):
+1. **KHÃ”NG** thÃªm báº¥t ká»³ lá»i dáº«n nháº­p, káº¿t luáº­n, hay ghi chÃº cÃ¡ nhÃ¢n nÃ o (vÃ­ dá»¥: "DÆ°á»›i Ä‘Ã¢y lÃ  Ä‘á» cÆ°Æ¡ng...", "TÃ´i Ä‘Ã£ chá»‰nh sá»­a...").
+2. **CHá»ˆ** xuáº¥t ra ná»™i dung Ä‘á» cÆ°Æ¡ng thuáº§n tÃºy.
+3. **FONT CHá»® & NGÃ”N NGá»®**: DÃ¹ng Tiáº¿ng Viá»‡t chuáº©n má»±c há»c thuáº­t. Tuyá»‡t Ä‘á»‘i KHÃ”NG dÃ¹ng kÃ½ tá»± láº¡, font lá»—i, hoáº·c bullet points khÃ´ng chuáº©n. DÃ¹ng há»‡ thá»‘ng Ä‘Ã¡nh sá»‘ 1, 1.1, 1.1.1.
+4. **Má»¨C Äá»˜ CHI TIáº¾T**: Cá»±c ká»³ chi tiáº¿t. Má»—i má»¥c pháº£i cÃ³ Ã­t nháº¥t 3-4 gáº¡ch Ä‘áº§u dÃ²ng diá»…n giáº£i ná»™i dung cáº§n viáº¿t.
 
-CẤU TRÚC BẮT BUỘC (${outputType}):
+Cáº¤U TRÃšC Báº®T BUá»˜C (${outputType}):
 ${getOutlineStructure(outputType)}
 
-HÃY VIẾT NHƯ MỘT NHÀ NGHIÊN CỨU CHUYÊN NGHIỆP ĐANG NỘP ĐỀ CƯƠNG CHO HỘI ĐỒNG.
+HÃƒY VIáº¾T NHÆ¯ Má»˜T NHÃ€ NGHIÃŠN Cá»¨U CHUYÃŠN NGHIá»†P ÄANG Ná»˜P Äá»€ CÆ¯Æ NG CHO Há»˜I Äá»’NG.
 `;
 
 const OUTLINE_CRITIC_PROMPT = `
-PHẢN BIỆN ĐỀ CƯƠNG - RUBRIC CHI TIẾT (BẮT BUỘC CHẤM ĐIỂM):
+PHáº¢N BIá»†N Äá»€ CÆ¯Æ NG - RUBRIC CHI TIáº¾T (Báº®T BUá»˜C CHáº¤M ÄIá»‚M):
 
-1. LOGIC FLOW (3 điểm):
-   - Mạch lạc: Vấn đề -> Mục tiêu -> Phương pháp?
-   - Mục tiêu có đo lường được không?
-   - Kết cấu có hợp lý không?
+1. LOGIC FLOW (3 Ä‘iá»ƒm):
+   - Máº¡ch láº¡c: Váº¥n Ä‘á» -> Má»¥c tiÃªu -> PhÆ°Æ¡ng phÃ¡p?
+   - Má»¥c tiÃªu cÃ³ Ä‘o lÆ°á»ng Ä‘Æ°á»£c khÃ´ng?
+   - Káº¿t cáº¥u cÃ³ há»£p lÃ½ khÃ´ng?
 
-2. LITERATURE REVIEW (3 điểm):
-   - Số lượng citation đủ chưa (≥ 15)?
-   - Có bài từ top journals không?
-   - Có tổng hợp (synthesis) hay chỉ liệt kê?
-   - DOI/Nguồn có thật không? (Kiểm tra kỹ)
+2. LITERATURE REVIEW (3 Ä‘iá»ƒm):
+   - Sá»‘ lÆ°á»£ng citation Ä‘á»§ chÆ°a (â‰¥ 15)?
+   - CÃ³ bÃ i tá»« top journals khÃ´ng?
+   - CÃ³ tá»•ng há»£p (synthesis) hay chá»‰ liá»‡t kÃª?
+   - DOI/Nguá»“n cÃ³ tháº­t khÃ´ng? (Kiá»ƒm tra ká»¹)
 
-3. METHODOLOGY RIGOR (2 điểm):
-   - Thiết kế nghiên cứu rõ ràng?
-   - Phương pháp chọn mẫu hợp lý?
-   - Công cụ phân tích phù hợp?
+3. METHODOLOGY RIGOR (2 Ä‘iá»ƒm):
+   - Thiáº¿t káº¿ nghiÃªn cá»©u rÃµ rÃ ng?
+   - PhÆ°Æ¡ng phÃ¡p chá»n máº«u há»£p lÃ½?
+   - CÃ´ng cá»¥ phÃ¢n tÃ­ch phÃ¹ há»£p?
 
-4. FORMAT & PRESENTATION (2 điểm):
-   - Đánh số đúng (1, 1.1...)?
-   - Không lỗi chính tả/ngữ pháp?
-   - Văn phong học thuật?
+4. FORMAT & PRESENTATION (2 Ä‘iá»ƒm):
+   - ÄÃ¡nh sá»‘ Ä‘Ãºng (1, 1.1...)?
+   - KhÃ´ng lá»—i chÃ­nh táº£/ngá»¯ phÃ¡p?
+   - VÄƒn phong há»c thuáº­t?
 
-TỔNG ĐIỂM: .../10
+Tá»”NG ÄIá»‚M: .../10
 
-NẾU < 9 ĐIỂM:
-❌ REJECT - Yêu cầu sửa lỗi cụ thể.
+Náº¾U < 9 ÄIá»‚M:
+âŒ REJECT - YÃªu cáº§u sá»­a lá»—i cá»¥ thá»ƒ.
 
-LƯU Ý: 
-- Nếu phát hiện Fake DOI -> 0 điểm phần Lit Review -> REJECT ngay.
-- Nếu thiếu các section quan trọng -> REJECT.
+LÆ¯U Ã: 
+- Náº¿u phÃ¡t hiá»‡n Fake DOI -> 0 Ä‘iá»ƒm pháº§n Lit Review -> REJECT ngay.
+- Náº¿u thiáº¿u cÃ¡c section quan trá»ng -> REJECT.
 
 OUTPUT FORM:
-📊 ĐIỂM SỐ: .../10
+ðŸ“Š ÄIá»‚M Sá»: .../10
 - Logic: .../3
 - Lit Review: .../3
 - Method: .../2
 - Format: .../2
 
-❌ LỖI NGHIÊM TRỌNG:
+âŒ Lá»–I NGHIÃŠM TRá»ŒNG:
 ...
 
-➡️ YÊU CẦU SỬA:
+âž¡ï¸ YÃŠU Cáº¦U Sá»¬A:
 ...
 `;
 
 export function getSurveyPrompt(level: AcademicLevel): string {
   const surveyPromptText = `
-NHIỆM VỤ: Xây dựng Thang đo (Scale) và Bảng hỏi Khảo sát (Survey Questionnaire).
-TRÌNH ĐỘ: ${level}
+NHIá»†M Vá»¤: XÃ¢y dá»±ng Thang Ä‘o (Scale) vÃ  Báº£ng há»i Kháº£o sÃ¡t (Survey Questionnaire).
+TRÃŒNH Äá»˜: ${level}
 
-QUY TRÌNH:
-1. Dựa trên Mô hình nghiên cứu đã chốt (Biến độc lập, phụ thuộc, trung gian...).
-2. Tìm thang đo chuẩn (từ Paper gốc tiếng Anh).
-3. Dịch và điều chỉnh (Scale Adaptation) cho phù hợp bối cảnh nghiên cứu.
-4. Xây dựng Biến Kiểm soát (Demographics).
+QUY TRÃŒNH:
+1. Dá»±a trÃªn MÃ´ hÃ¬nh nghiÃªn cá»©u Ä‘Ã£ chá»‘t (Biáº¿n Ä‘á»™c láº­p, phá»¥ thuá»™c, trung gian...).
+2. TÃ¬m thang Ä‘o chuáº©n (tá»« Paper gá»‘c tiáº¿ng Anh).
+3. Dá»‹ch vÃ  Ä‘iá»u chá»‰nh (Scale Adaptation) cho phÃ¹ há»£p bá»‘i cáº£nh nghiÃªn cá»©u.
+4. XÃ¢y dá»±ng Biáº¿n Kiá»ƒm soÃ¡t (Demographics).
 
-QUY TẮC "LIÊM CHÍNH KHOA HỌC" (BẮT BUỘC):
-- Sử dụng thang đo chuẩn từ các bài báo gốc (Original Scale).
-- KHÔNG BỊA ĐẶT CÂU HỎI mà không có cơ sở lý thuyết.
-- Trích dẫn nguồn (Author, Year) cho mỗi nhóm thang đo.
+QUY Táº®C "LIÃŠM CHÃNH KHOA Há»ŒC" (Báº®T BUá»˜C):
+- Sá»­ dá»¥ng thang Ä‘o chuáº©n tá»« cÃ¡c bÃ i bÃ¡o gá»‘c (Original Scale).
+- KHÃ”NG Bá»ŠA Äáº¶T CÃ‚U Há»ŽI mÃ  khÃ´ng cÃ³ cÆ¡ sá»Ÿ lÃ½ thuyáº¿t.
+- TrÃ­ch dáº«n nguá»“n (Author, Year) cho má»—i nhÃ³m thang Ä‘o.
 
-VÍ DỤ MẪU:
-| Biến (Variable) | Mã (Code) | Câu hỏi (Items) | Nguồn gốc (Source) |
+VÃ Dá»¤ MáºªU:
+| Biáº¿n (Variable) | MÃ£ (Code) | CÃ¢u há»i (Items) | Nguá»“n gá»‘c (Source) |
 |---|---|---|---|
-| Nhận thức tính hữu ích | PU1 | Sử dụng AI giúp tôi hoàn thành công việc nhanh hơn. | Davis (1989) |
-| | PU2 | Sử dụng AI giúp nâng cao hiệu suất làm việc của tôi. | Davis (1989) |
-| Ý định sử dụng | IU1 | Tôi dự định sẽ sử dụng thường xuyên trong tương lai. | Venkatesh et al. (2003) |
+| Nháº­n thá»©c tÃ­nh há»¯u Ã­ch | PU1 | Sá»­ dá»¥ng AI giÃºp tÃ´i hoÃ n thÃ nh cÃ´ng viá»‡c nhanh hÆ¡n. | Davis (1989) |
+| | PU2 | Sá»­ dá»¥ng AI giÃºp nÃ¢ng cao hiá»‡u suáº¥t lÃ m viá»‡c cá»§a tÃ´i. | Davis (1989) |
+| Ã Ä‘á»‹nh sá»­ dá»¥ng | IU1 | TÃ´i dá»± Ä‘á»‹nh sáº½ sá»­ dá»¥ng thÆ°á»ng xuyÃªn trong tÆ°Æ¡ng lai. | Venkatesh et al. (2003) |
 
-YÊU CẦU OUTPUT (MARKDOWN TABLE):
-- Table 1: Các thang đo chính (Constructs & Items)
-- Table 2: Thông tin nhân khẩu học (Control Variables)
+YÃŠU Cáº¦U OUTPUT (MARKDOWN TABLE):
+- Table 1: CÃ¡c thang Ä‘o chÃ­nh (Constructs & Items)
+- Table 2: ThÃ´ng tin nhÃ¢n kháº©u há»c (Control Variables)
 
-SAU BẢNG LÀ PHẦN "PHƯƠNG ÁN THU THẬP DỮ LIỆU":
-- Phương pháp lấy mẫu (Sampling Method).
-- Kích thước mẫu (Sample Size) - giải thích công thức tính.
-- Đối tượng khảo sát (Target Population).
+SAU Báº¢NG LÃ€ PHáº¦N "PHÆ¯Æ NG ÃN THU THáº¬P Dá»® LIá»†U":
+- PhÆ°Æ¡ng phÃ¡p láº¥y máº«u (Sampling Method).
+- KÃ­ch thÆ°á»›c máº«u (Sample Size) - giáº£i thÃ­ch cÃ´ng thá»©c tÃ­nh.
+- Äá»‘i tÆ°á»£ng kháº£o sÃ¡t (Target Population).
 
-═══════════════════════════════════════════════════════════════
-📌 BIỂU ĐỒ MINH HỌA (SMART DATA CHART)
-═══════════════════════════════════════════════════════════════
-YÊU CẦU BẮT BUỘNG: Vẽ một biểu đồ cột (Bar Chart) minh họa kết quả dự kiến (hoặc dữ liệu thăm dò thử nghiệm) bằng Mermaid.
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+ðŸ“Œ BIá»‚U Äá»’ MINH Há»ŒA (SMART DATA CHART)
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+YÃŠU Cáº¦U Báº®T BUá»˜NG: Váº½ má»™t biá»ƒu Ä‘á»“ cá»™t (Bar Chart) minh há»a káº¿t quáº£ dá»± kiáº¿n (hoáº·c dá»¯ liá»‡u thÄƒm dÃ² thá»­ nghiá»‡m) báº±ng Mermaid.
 
-Lưu ý format:
+LÆ°u Ã½ format:
 \`\`\`mermaid
-pie title Kết quả khảo sát dự kiến
-    "Rất đồng ý" : 45
-    "Đồng ý" : 35
-    "Trung lập" : 10
-    "Không đồng ý" : 7
-    "Rất không đồng ý" : 3
+pie title Káº¿t quáº£ kháº£o sÃ¡t dá»± kiáº¿n
+    "Ráº¥t Ä‘á»“ng Ã½" : 45
+    "Äá»“ng Ã½" : 35
+    "Trung láº­p" : 10
+    "KhÃ´ng Ä‘á»“ng Ã½" : 7
+    "Ráº¥t khÃ´ng Ä‘á»“ng Ã½" : 3
 \`\`\`
-Hoặc dùng bar chart nếu phù hợp.
+Hoáº·c dÃ¹ng bar chart náº¿u phÃ¹ há»£p.
   `;
   return surveyPromptText;
 }
 
 const SURVEY_CRITIC_PROMPT = `
-PHẢN BIỆN BẢNG HỎI - RUBRIC CHI TIẾT:
+PHáº¢N BIá»†N Báº¢NG Há»ŽI - RUBRIC CHI TIáº¾T:
 
-  1. VALIDITY(HỢP LỆ) - 3 điểm:
-  - Thang đo có đo đúng biến không ? (Face Validity)
-  - Nguồn gốc có uy tín không ? (Construct Validity)
+  1. VALIDITY(Há»¢P Lá»†) - 3 Ä‘iá»ƒm:
+  - Thang Ä‘o cÃ³ Ä‘o Ä‘Ãºng biáº¿n khÃ´ng ? (Face Validity)
+  - Nguá»“n gá»‘c cÃ³ uy tÃ­n khÃ´ng ? (Construct Validity)
 
-  2. RELIABILITY(TIN CẬY) - 3 điểm:
-  - Câu hỏi có rõ ràng, dễ hiểu ?
-    - Có bị dẫn dắt(Leading question) không ?
-      - Số lượng items có đủ không(thường ≥ 3 items / biến) ?
+  2. RELIABILITY(TIN Cáº¬Y) - 3 Ä‘iá»ƒm:
+  - CÃ¢u há»i cÃ³ rÃµ rÃ ng, dá»… hiá»ƒu ?
+    - CÃ³ bá»‹ dáº«n dáº¯t(Leading question) khÃ´ng ?
+      - Sá»‘ lÆ°á»£ng items cÃ³ Ä‘á»§ khÃ´ng(thÆ°á»ng â‰¥ 3 items / biáº¿n) ?
 
-        3. FORMAT & ADAPTATION(2 điểm):
-  - Thang đo Likert(1 - 5 hoặc 1 - 7) có thống nhất ?
-    - Dịch có chuẩn không ?
+        3. FORMAT & ADAPTATION(2 Ä‘iá»ƒm):
+  - Thang Ä‘o Likert(1 - 5 hoáº·c 1 - 7) cÃ³ thá»‘ng nháº¥t ?
+    - Dá»‹ch cÃ³ chuáº©n khÃ´ng ?
 
-      4. DEMOGRAPHICS & SAMPLING(2 điểm):
-  - Các biến kiểm soát có phù hợp ?
-    - Kích thước mẫu có đủ lớn cho SEM / Regression ?
+      4. DEMOGRAPHICS & SAMPLING(2 Ä‘iá»ƒm):
+  - CÃ¡c biáº¿n kiá»ƒm soÃ¡t cÃ³ phÃ¹ há»£p ?
+    - KÃ­ch thÆ°á»›c máº«u cÃ³ Ä‘á»§ lá»›n cho SEM / Regression ?
 
-      TỔNG ĐIỂM: .../10
+      Tá»”NG ÄIá»‚M: .../10
 
-  NẾU < 9 ĐIỂM:
-❌ YÊU CẦU SỬA: Chỉ ra cụ thể item nào cần sửa / xóa / thêm.
+  Náº¾U < 9 ÄIá»‚M:
+âŒ YÃŠU Cáº¦U Sá»¬A: Chá»‰ ra cá»¥ thá»ƒ item nÃ o cáº§n sá»­a / xÃ³a / thÃªm.
 
     OUTPUT:
-📊 ĐIỂM SỐ: .../10
-❌ LỖI CỤ THỂ:
+ðŸ“Š ÄIá»‚M Sá»: .../10
+âŒ Lá»–I Cá»¤ THá»‚:
   1. ...
   2. ...
   `;
@@ -395,124 +396,124 @@ PHẢN BIỆN BẢNG HỎI - RUBRIC CHI TIẾT:
 // =============================================================================
 
 const STARTUP_TOPIC_WRITER_PROMPT = `
-NHIỆM VỤ: Đề xuất / tinh chỉnh Ý TƯỞNG KINH DOANH Khởi Nghiệp.
+NHIá»†M Vá»¤: Äá» xuáº¥t / tinh chá»‰nh Ã TÆ¯á»žNG KINH DOANH Khá»Ÿi Nghiá»‡p.
 
-VÍ DỤ MẪU(FEW - SHOT EXAMPLES):
+VÃ Dá»¤ MáºªU(FEW - SHOT EXAMPLES):
 
-VÍ DỤ 1: Ý TƯỞNG TỐT(9 / 10)
-  Input: "App giao đồ ăn cho dân văn phòng"
+VÃ Dá»¤ 1: Ã TÆ¯á»žNG Tá»T(9 / 10)
+  Input: "App giao Ä‘á»“ Äƒn cho dÃ¢n vÄƒn phÃ²ng"
   Output:
-🎯 VẤN ĐỀ(PROBLEM): Nhân viên văn phòng tại TP.HCM thường xuyên bỏ bữa trưa hoặc ăn đồ ăn nhanh thiếu dinh dưỡng do thiếu thời gian và lựa chọn healthy gần công ty.
-💡 GIẢI PHÁP(SOLUTION): Ứng dụng "HealthyBox" - đặt trước bữa trưa healthy từ các bếp địa phương, giao tận nơi đúng 12h.
-👤 KHÁCH HÀNG(TARGET): Nhân viên văn phòng 25 - 40 tuổi, thu nhập 15 - 30tr / tháng, quan tâm sức khỏe.
-⭐ ĐIỂM KHÁC BIỆT(USP): Đặt trước 1 tuần, menu theo chế độ ăn(Keto, Low - carb, Thuần chay), cam kết dưới 500 calo.
-💰 MÔ HÌNH DOANH THU: Commission 15 % mỗi đơn + Gói subscription tuần / tháng.
+ðŸŽ¯ Váº¤N Äá»€(PROBLEM): NhÃ¢n viÃªn vÄƒn phÃ²ng táº¡i TP.HCM thÆ°á»ng xuyÃªn bá» bá»¯a trÆ°a hoáº·c Äƒn Ä‘á»“ Äƒn nhanh thiáº¿u dinh dÆ°á»¡ng do thiáº¿u thá»i gian vÃ  lá»±a chá»n healthy gáº§n cÃ´ng ty.
+ðŸ’¡ GIáº¢I PHÃP(SOLUTION): á»¨ng dá»¥ng "HealthyBox" - Ä‘áº·t trÆ°á»›c bá»¯a trÆ°a healthy tá»« cÃ¡c báº¿p Ä‘á»‹a phÆ°Æ¡ng, giao táº­n nÆ¡i Ä‘Ãºng 12h.
+ðŸ‘¤ KHÃCH HÃ€NG(TARGET): NhÃ¢n viÃªn vÄƒn phÃ²ng 25 - 40 tuá»•i, thu nháº­p 15 - 30tr / thÃ¡ng, quan tÃ¢m sá»©c khá»e.
+â­ ÄIá»‚M KHÃC BIá»†T(USP): Äáº·t trÆ°á»›c 1 tuáº§n, menu theo cháº¿ Ä‘á»™ Äƒn(Keto, Low - carb, Thuáº§n chay), cam káº¿t dÆ°á»›i 500 calo.
+ðŸ’° MÃ” HÃŒNH DOANH THU: Commission 15 % má»—i Ä‘Æ¡n + GÃ³i subscription tuáº§n / thÃ¡ng.
 
-VÍ DỤ 2: Ý TƯỞNG YẾU(4 / 10)
-  Input: "Bán hàng online"
-  Output: "Mở shop bán đồ online"
-❌ Lý do yếu: Quá chung chung, không rõ vấn đề giải quyết, không có điểm khác biệt.
+VÃ Dá»¤ 2: Ã TÆ¯á»žNG Yáº¾U(4 / 10)
+  Input: "BÃ¡n hÃ ng online"
+  Output: "Má»Ÿ shop bÃ¡n Ä‘á»“ online"
+âŒ LÃ½ do yáº¿u: QuÃ¡ chung chung, khÃ´ng rÃµ váº¥n Ä‘á» giáº£i quyáº¿t, khÃ´ng cÃ³ Ä‘iá»ƒm khÃ¡c biá»‡t.
 
-QUY TRÌNH:
-  1. Phân tích input / phản biện
-  2. Đề xuất:
-  - Lần đầu: 3 phương án(Táo bạo | An toàn | Cân bằng)
-    - Sau phản biện: Cải thiện theo góp ý
-      - Vòng cuối: In đậm "CHỐT Ý TƯỞNG: [Mô tả ngắn gọn]"
+QUY TRÃŒNH:
+  1. PhÃ¢n tÃ­ch input / pháº£n biá»‡n
+  2. Äá» xuáº¥t:
+  - Láº§n Ä‘áº§u: 3 phÆ°Æ¡ng Ã¡n(TÃ¡o báº¡o | An toÃ n | CÃ¢n báº±ng)
+    - Sau pháº£n biá»‡n: Cáº£i thiá»‡n theo gÃ³p Ã½
+      - VÃ²ng cuá»‘i: In Ä‘áº­m "CHá»T Ã TÆ¯á»žNG: [MÃ´ táº£ ngáº¯n gá»n]"
 
-FORMAT OUTPUT BẮT BUỘC:
-🎯 VẤN ĐỀ(PROBLEM): [Khách hàng đang gặp vấn đề gì ?]
-💡 GIẢI PHÁP(SOLUTION): [Sản phẩm / dịch vụ của bạn giải quyết thế nào ?]
-👤 KHÁCH HÀNG(TARGET CUSTOMER): [Ai sẽ mua ? Mô tả chi tiết]
-⭐ ĐIỂM KHÁC BIỆT(USP): [Tại sao chọn bạn thay vì đối thủ ?]
-💰 MÔ HÌNH DOANH THU(REVENUE MODEL): [Kiếm tiền bằng cách nào ?]
+FORMAT OUTPUT Báº®T BUá»˜C:
+ðŸŽ¯ Váº¤N Äá»€(PROBLEM): [KhÃ¡ch hÃ ng Ä‘ang gáº·p váº¥n Ä‘á» gÃ¬ ?]
+ðŸ’¡ GIáº¢I PHÃP(SOLUTION): [Sáº£n pháº©m / dá»‹ch vá»¥ cá»§a báº¡n giáº£i quyáº¿t tháº¿ nÃ o ?]
+ðŸ‘¤ KHÃCH HÃ€NG(TARGET CUSTOMER): [Ai sáº½ mua ? MÃ´ táº£ chi tiáº¿t]
+â­ ÄIá»‚M KHÃC BIá»†T(USP): [Táº¡i sao chá»n báº¡n thay vÃ¬ Ä‘á»‘i thá»§ ?]
+ðŸ’° MÃ” HÃŒNH DOANH THU(REVENUE MODEL): [Kiáº¿m tiá»n báº±ng cÃ¡ch nÃ o ?]
 
-YÊU CẦU: Ngắn gọn, tập trung vào tính khả thi và thị trường.
+YÃŠU Cáº¦U: Ngáº¯n gá»n, táº­p trung vÃ o tÃ­nh kháº£ thi vÃ  thá»‹ trÆ°á»ng.
 `;
 
 const STARTUP_TOPIC_CRITIC_PROMPT = `
-PHẢN BIỆN Ý TƯỞNG KINH DOANH - RUBRIC CHI TIẾT(BẮT BUỘC CHẤM ĐIỂM):
+PHáº¢N BIá»†N Ã TÆ¯á»žNG KINH DOANH - RUBRIC CHI TIáº¾T(Báº®T BUá»˜C CHáº¤M ÄIá»‚M):
 
-  1. VẤN ĐỀ THẬT SỰ(PROBLEM - SOLUTION FIT) - 3 điểm:
-  - Đây có phải vấn đề thực sự không ? (Pain point rõ ràng ?)
-  - Khách hàng có sẵn sàng trả tiền để giải quyết ?
-    - Hiện tại họ đang giải quyết bằng cách nào ?
+  1. Váº¤N Äá»€ THáº¬T Sá»°(PROBLEM - SOLUTION FIT) - 3 Ä‘iá»ƒm:
+  - ÄÃ¢y cÃ³ pháº£i váº¥n Ä‘á» thá»±c sá»± khÃ´ng ? (Pain point rÃµ rÃ ng ?)
+  - KhÃ¡ch hÃ ng cÃ³ sáºµn sÃ ng tráº£ tiá»n Ä‘á»ƒ giáº£i quyáº¿t ?
+    - Hiá»‡n táº¡i há» Ä‘ang giáº£i quyáº¿t báº±ng cÃ¡ch nÃ o ?
 
-      2. QUY MÔ THỊ TRƯỜNG(MARKET SIZE) - 3 điểm:
-  - TAM(Total Addressable Market) có đủ lớn không ?
-    - Thị trường đang tăng hay giảm ?
-      - Có rào cản gia nhập không ?
+      2. QUY MÃ” THá»Š TRÆ¯á»œNG(MARKET SIZE) - 3 Ä‘iá»ƒm:
+  - TAM(Total Addressable Market) cÃ³ Ä‘á»§ lá»›n khÃ´ng ?
+    - Thá»‹ trÆ°á»ng Ä‘ang tÄƒng hay giáº£m ?
+      - CÃ³ rÃ o cáº£n gia nháº­p khÃ´ng ?
 
-        3. TÍNH KHẢ THI(FEASIBILITY) - 2 điểm:
-  - Founder có đủ năng lực thực hiện ?
-    - Chi phí khởi đầu có hợp lý ?
-      - Có thể MVP trong 3 tháng không ?
+        3. TÃNH KHáº¢ THI(FEASIBILITY) - 2 Ä‘iá»ƒm:
+  - Founder cÃ³ Ä‘á»§ nÄƒng lá»±c thá»±c hiá»‡n ?
+    - Chi phÃ­ khá»Ÿi Ä‘áº§u cÃ³ há»£p lÃ½ ?
+      - CÃ³ thá»ƒ MVP trong 3 thÃ¡ng khÃ´ng ?
 
-        4. LỢI THẾ CẠNH TRANH(COMPETITIVE ADVANTAGE) - 2 điểm:
-  - Điểm khác biệt có bền vững không ?
-    - Đối thủ có dễ dàng copy không ?
+        4. Lá»¢I THáº¾ Cáº NH TRANH(COMPETITIVE ADVANTAGE) - 2 Ä‘iá»ƒm:
+  - Äiá»ƒm khÃ¡c biá»‡t cÃ³ bá»n vá»¯ng khÃ´ng ?
+    - Äá»‘i thá»§ cÃ³ dá»… dÃ ng copy khÃ´ng ?
 
-      TỔNG ĐIỂM: .../10
+      Tá»”NG ÄIá»‚M: .../10
 
-  NẾU < 9 ĐIỂM:
-❌ KẾT LUẬN: CHƯA SẴN SÀNG - Yêu cầu pivot hoặc tinh chỉnh.
+  Náº¾U < 9 ÄIá»‚M:
+âŒ Káº¾T LUáº¬N: CHÆ¯A Sáº´N SÃ€NG - YÃªu cáº§u pivot hoáº·c tinh chá»‰nh.
 
 OUTPUT FORM:
-📊 ĐIỂM SỐ: .../10
-❌ Điểm yếu chính: [Vấn đề lớn nhất]
-➡️ Đề xuất pivot: [Cách điều chỉnh cụ thể]
-💡 Gợi ý: [Ý tưởng bổ sung nếu có]
+ðŸ“Š ÄIá»‚M Sá»: .../10
+âŒ Äiá»ƒm yáº¿u chÃ­nh: [Váº¥n Ä‘á» lá»›n nháº¥t]
+âž¡ï¸ Äá» xuáº¥t pivot: [CÃ¡ch Ä‘iá»u chá»‰nh cá»¥ thá»ƒ]
+ðŸ’¡ Gá»£i Ã½: [Ã tÆ°á»Ÿng bá»• sung náº¿u cÃ³]
     `;
 
 const STARTUP_MODEL_WRITER_PROMPT = `
-NHIỆM VỤ: Xây dựng Mô Hình Kinh Doanh(Business Model) theo LEAN CANVAS.
+NHIá»†M Vá»¤: XÃ¢y dá»±ng MÃ´ HÃ¬nh Kinh Doanh(Business Model) theo LEAN CANVAS.
 
-BỐI CẢNH: Dựa trên ý tưởng kinh doanh đã được phê duyệt, xây dựng mô hình kinh doanh chi tiết.
+Bá»I Cáº¢NH: Dá»±a trÃªn Ã½ tÆ°á»Ÿng kinh doanh Ä‘Ã£ Ä‘Æ°á»£c phÃª duyá»‡t, xÃ¢y dá»±ng mÃ´ hÃ¬nh kinh doanh chi tiáº¿t.
 
-CẤU TRÚC LEAN CANVAS(BẮT BUỘC 9 Ô):
+Cáº¤U TRÃšC LEAN CANVAS(Báº®T BUá»˜C 9 Ã”):
 
-┌─────────────────────┬─────────────────────┬─────────────────────┐
-│ 2. PROBLEM          │ 4. SOLUTION         │ 3. UNIQUE VALUE     │
-│ 3 vấn đề lớn nhất   │ 3 tính năng chính   │ PROPOSITION         │
-│                     │                     │ Tuyên bố giá trị    │
-├─────────────────────┼─────────────────────┼─────────────────────┤
-│ 8. KEY METRICS      │ 5. UNFAIR           │ 9. CHANNELS         │
-│ Chỉ số đo lường     │ ADVANTAGE           │ Kênh tiếp cận       │
-│ thành công          │ Lợi thế không thể   │ & Phương thức       │
-│                     │ copy                │                     │
-├─────────────────────┴─────────────────────┴─────────────────────┤
-│ 7. COST STRUCTURE                │ 6. REVENUE STREAMS            │
-│ Chi phí cố định & biến đổi       │ Các nguồn doanh thu           │
-├──────────────────────────────────┴───────────────────────────────┤
-│ 1. CUSTOMER SEGMENTS: Phân khúc khách hàng mục tiêu             │
-├─────────────────────────────────────────────────────────────────┤
-│ 10. UNIT ECONOMICS (CAC, LTV, Margin, Payback Period)           │
-└─────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ 2. PROBLEM          â”‚ 4. SOLUTION         â”‚ 3. UNIQUE VALUE     â”‚
+â”‚ 3 váº¥n Ä‘á» lá»›n nháº¥t   â”‚ 3 tÃ­nh nÄƒng chÃ­nh   â”‚ PROPOSITION         â”‚
+â”‚                     â”‚                     â”‚ TuyÃªn bá»‘ giÃ¡ trá»‹    â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ 8. KEY METRICS      â”‚ 5. UNFAIR           â”‚ 9. CHANNELS         â”‚
+â”‚ Chá»‰ sá»‘ Ä‘o lÆ°á»ng     â”‚ ADVANTAGE           â”‚ KÃªnh tiáº¿p cáº­n       â”‚
+â”‚ thÃ nh cÃ´ng          â”‚ Lá»£i tháº¿ khÃ´ng thá»ƒ   â”‚ & PhÆ°Æ¡ng thá»©c       â”‚
+â”‚                     â”‚ copy                â”‚                     â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ 7. COST STRUCTURE                â”‚ 6. REVENUE STREAMS            â”‚
+â”‚ Chi phÃ­ cá»‘ Ä‘á»‹nh & biáº¿n Ä‘á»•i       â”‚ CÃ¡c nguá»“n doanh thu           â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ 1. CUSTOMER SEGMENTS: PhÃ¢n khÃºc khÃ¡ch hÃ ng má»¥c tiÃªu             â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ 10. UNIT ECONOMICS (CAC, LTV, Margin, Payback Period)           â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 
-YÊU CẦU ĐẦU RA:
-  1. Điền đầy đủ 9 ô của Lean Canvas với nội dung chi tiết.
-2. SƠ ĐỒ MERMAID BẮT BUỘC:
+YÃŠU Cáº¦U Äáº¦U RA:
+  1. Äiá»n Ä‘áº§y Ä‘á»§ 9 Ã´ cá»§a Lean Canvas vá»›i ná»™i dung chi tiáº¿t.
+2. SÆ  Äá»’ MERMAID Báº®T BUá»˜C:
 
-VÍ DỤ CHUẨN:
+VÃ Dá»¤ CHUáº¨N:
   \`\`\`mermaid
 graph TD
-    subgraph Customer["👤 CUSTOMER"]
-        CS[Nhân viên văn phòng 25-40t]
+    subgraph Customer["ðŸ‘¤ CUSTOMER"]
+        CS[NhÃ¢n viÃªn vÄƒn phÃ²ng 25-40t]
     end
     
-    subgraph Problem["🎯 PROBLEM"]
-        P1[Thiếu thời gian nấu ăn]
-        P2[Đồ ăn văn phòng không healthy]
+    subgraph Problem["ðŸŽ¯ PROBLEM"]
+        P1[Thiáº¿u thá»i gian náº¥u Äƒn]
+        P2[Äá»“ Äƒn vÄƒn phÃ²ng khÃ´ng healthy]
     end
     
-    subgraph Solution["💡 SOLUTION"]
-        S1[App đặt trước bữa trưa]
-        S2[Menu theo chế độ ăn]
+    subgraph Solution["ðŸ’¡ SOLUTION"]
+        S1[App Ä‘áº·t trÆ°á»›c bá»¯a trÆ°a]
+        S2[Menu theo cháº¿ Ä‘á»™ Äƒn]
     end
     
-    subgraph Revenue["💰 REVENUE"]
+    subgraph Revenue["ðŸ’° REVENUE"]
         R1[Commission 15%]
-        R2[Subscription tuần/tháng]
+        R2[Subscription tuáº§n/thÃ¡ng]
     end
     
     CS --> P1 & P2
@@ -520,203 +521,203 @@ graph TD
     S1 & S2 --> R1 & R2
 \`\`\`
 
-QUY TẮC MERMAID:
-- Dùng 'graph TD' (Top-Down) hoặc 'graph LR' (Left-Right)
-- Subgraph để nhóm các thành phần
-- Node: [Tên ngắn gọn] (không dấu ngoặc kép bên trong)
-- Không ký tự đặc biệt: (), {}, "", ''
+QUY Táº®C MERMAID:
+- DÃ¹ng 'graph TD' (Top-Down) hoáº·c 'graph LR' (Left-Right)
+- Subgraph Ä‘á»ƒ nhÃ³m cÃ¡c thÃ nh pháº§n
+- Node: [TÃªn ngáº¯n gá»n] (khÃ´ng dáº¥u ngoáº·c kÃ©p bÃªn trong)
+- KhÃ´ng kÃ½ tá»± Ä‘áº·c biá»‡t: (), {}, "", ''
 
-3. Giải thích ngắn gọn cho mỗi ô (2-3 câu).
-4. PHÂN TÍCH UNIT ECONOMICS CHI TIẾT (BẮT BUỘC): Trình bày dạng bảng so sánh CAC vs LTV.
+3. Giáº£i thÃ­ch ngáº¯n gá»n cho má»—i Ã´ (2-3 cÃ¢u).
+4. PHÃ‚N TÃCH UNIT ECONOMICS CHI TIáº¾T (Báº®T BUá»˜C): TrÃ¬nh bÃ y dáº¡ng báº£ng so sÃ¡nh CAC vs LTV.
 `;
 
 const STARTUP_MODEL_CRITIC_PROMPT = `
-PHẢN BIỆN MÔ HÌNH KINH DOANH - RUBRIC CHI TIẾT (NGHIÊM KHẮC):
+PHáº¢N BIá»†N MÃ” HÃŒNH KINH DOANH - RUBRIC CHI TIáº¾T (NGHIÃŠM KHáº®C):
 
-1. PROBLEM-SOLUTION FIT (3 điểm):
-   - Giải pháp có thực sự giải quyết vấn đề nêu ra?
-   - 3 tính năng chính có đủ để giải quyết 3 vấn đề không?
+1. PROBLEM-SOLUTION FIT (3 Ä‘iá»ƒm):
+   - Giáº£i phÃ¡p cÃ³ thá»±c sá»± giáº£i quyáº¿t váº¥n Ä‘á» nÃªu ra?
+   - 3 tÃ­nh nÄƒng chÃ­nh cÃ³ Ä‘á»§ Ä‘á»ƒ giáº£i quyáº¿t 3 váº¥n Ä‘á» khÃ´ng?
 
-2. REVENUE MODEL (3 điểm):
-   - Mô hình doanh thu có rõ ràng không?
-   - Unit Economics có hợp lý? (CAC < LTV?)
-   - Có khả năng scale không?
+2. REVENUE MODEL (3 Ä‘iá»ƒm):
+   - MÃ´ hÃ¬nh doanh thu cÃ³ rÃµ rÃ ng khÃ´ng?
+   - Unit Economics cÃ³ há»£p lÃ½? (CAC < LTV?)
+   - CÃ³ kháº£ nÄƒng scale khÃ´ng?
 
-3. COMPETITIVE MOAT (2 điểm):
-   - "Unfair Advantage" có thực sự không thể copy?
-   - Có network effects hoặc switching costs không?
+3. COMPETITIVE MOAT (2 Ä‘iá»ƒm):
+   - "Unfair Advantage" cÃ³ thá»±c sá»± khÃ´ng thá»ƒ copy?
+   - CÃ³ network effects hoáº·c switching costs khÃ´ng?
 
-4. LEAN CANVAS COMPLETENESS (2 điểm):
-   - Đã điền đủ 9 ô chưa?
-   - Sơ đồ Mermaid có lỗi cú pháp không?
+4. LEAN CANVAS COMPLETENESS (2 Ä‘iá»ƒm):
+   - ÄÃ£ Ä‘iá»n Ä‘á»§ 9 Ã´ chÆ°a?
+   - SÆ¡ Ä‘á»“ Mermaid cÃ³ lá»—i cÃº phÃ¡p khÃ´ng?
 
-TỔNG ĐIỂM: .../10
+Tá»”NG ÄIá»‚M: .../10
 
-NẾU < 9 ĐIỂM:
-❌ REJECT - Chỉ ra lỗi cụ thể từng ô.
+Náº¾U < 9 ÄIá»‚M:
+âŒ REJECT - Chá»‰ ra lá»—i cá»¥ thá»ƒ tá»«ng Ã´.
 
-LƯU Ý ĐẶC BIỆT:
-- Kiểm tra kỹ code Mermaid. Nếu code sai cú pháp -> Trừ 2 điểm ngay.
-- Nếu Revenue Model mơ hồ -> Trừ 2 điểm.
+LÆ¯U Ã Äáº¶C BIá»†T:
+- Kiá»ƒm tra ká»¹ code Mermaid. Náº¿u code sai cÃº phÃ¡p -> Trá»« 2 Ä‘iá»ƒm ngay.
+- Náº¿u Revenue Model mÆ¡ há»“ -> Trá»« 2 Ä‘iá»ƒm.
 
 OUTPUT FORM:
-📊 ĐIỂM SỐ: .../10
-❌ Ô cần sửa: [Tên ô - Vấn đề]
-➡️ Đề xuất: [Cách cải thiện cụ thể]
+ðŸ“Š ÄIá»‚M Sá»: .../10
+âŒ Ã” cáº§n sá»­a: [TÃªn Ã´ - Váº¥n Ä‘á»]
+âž¡ï¸ Äá» xuáº¥t: [CÃ¡ch cáº£i thiá»‡n cá»¥ thá»ƒ]
 `;
 
 const STARTUP_OUTLINE_WRITER_PROMPT = `
-LẬP PITCH DECK (10 SLIDES) + FINANCIAL PLAN cho Nhà Đầu tư.
+Láº¬P PITCH DECK (10 SLIDES) + FINANCIAL PLAN cho NhÃ  Äáº§u tÆ°.
 
-QUAN TRỌNG NHẤT - XUẤT TRƯỚC:
-- SLIDE 6: Unit Economics (CAC, LTV, Payback) - QUYẾT ĐỊNH ĐẦU TƯ
-- SLIDE 9: Competitor Matrix (So sánh 3 đối thủ)
-- SLIDE 10: Exit Strategy & Ask (Chiến lược thoái vốn)
-- SLIDE 11: Financial Projections (Dự báo 3 năm - BẢNG MARKDOWN)
+QUAN TRá»ŒNG NHáº¤T - XUáº¤T TRÆ¯á»šC:
+- SLIDE 6: Unit Economics (CAC, LTV, Payback) - QUYáº¾T Äá»ŠNH Äáº¦U TÆ¯
+- SLIDE 9: Competitor Matrix (So sÃ¡nh 3 Ä‘á»‘i thá»§)
+- SLIDE 10: Exit Strategy & Ask (Chiáº¿n lÆ°á»£c thoÃ¡i vá»‘n)
+- SLIDE 11: Financial Projections (Dá»± bÃ¡o 3 nÄƒm - Báº¢NG MARKDOWN)
 
-PHẦN A: PITCH DECK (10 SLIDES)
+PHáº¦N A: PITCH DECK (10 SLIDES)
 
-📌 SLIDE 1: TITLE
-- Tên startup + Logo (mô tả)
-- Tagline (1 câu tóm tắt giá trị)
-- Thông tin liên hệ
+ðŸ“Œ SLIDE 1: TITLE
+- TÃªn startup + Logo (mÃ´ táº£)
+- Tagline (1 cÃ¢u tÃ³m táº¯t giÃ¡ trá»‹)
+- ThÃ´ng tin liÃªn há»‡
 
-📌 SLIDE 2: PROBLEM
-- 3 vấn đề chính khách hàng đang gặp
-- Số liệu/thống kê chứng minh vấn đề lớn
-- Quote từ khách hàng tiềm năng (nếu có)
+ðŸ“Œ SLIDE 2: PROBLEM
+- 3 váº¥n Ä‘á» chÃ­nh khÃ¡ch hÃ ng Ä‘ang gáº·p
+- Sá»‘ liá»‡u/thá»‘ng kÃª chá»©ng minh váº¥n Ä‘á» lá»›n
+- Quote tá»« khÃ¡ch hÃ ng tiá»m nÄƒng (náº¿u cÃ³)
 
-📌 SLIDE 3: SOLUTION
-- Mô tả sản phẩm/dịch vụ
-- Demo/Screenshots (mô tả giao diện)
-- Tính năng chính (3-5 features)
+ðŸ“Œ SLIDE 3: SOLUTION
+- MÃ´ táº£ sáº£n pháº©m/dá»‹ch vá»¥
+- Demo/Screenshots (mÃ´ táº£ giao diá»‡n)
+- TÃ­nh nÄƒng chÃ­nh (3-5 features)
 
-📌 SLIDE 4: MARKET SIZE
+ðŸ“Œ SLIDE 4: MARKET SIZE
 - TAM (Total Addressable Market)
 - SAM (Serviceable Addressable Market)
 - SOM (Serviceable Obtainable Market)
-- Nguồn: Báo cáo ngành, thống kê
+- Nguá»“n: BÃ¡o cÃ¡o ngÃ nh, thá»‘ng kÃª
 
-📌 SLIDE 5: PRODUCT/DEMO
-- Chi tiết sản phẩm
-- User flow chính
-- Screenshots/Mockups (mô tả)
+ðŸ“Œ SLIDE 5: PRODUCT/DEMO
+- Chi tiáº¿t sáº£n pháº©m
+- User flow chÃ­nh
+- Screenshots/Mockups (mÃ´ táº£)
 
-📌 SLIDE 6: BUSINESS MODEL & UNIT ECONOMICS
-- Cách kiếm tiền (Revenue streams)
-- Chiến lược giá (Pricing strategy)
-- Bảng Unit Economics:
-| Metric | Giá trị | Giải thích |
+ðŸ“Œ SLIDE 6: BUSINESS MODEL & UNIT ECONOMICS
+- CÃ¡ch kiáº¿m tiá»n (Revenue streams)
+- Chiáº¿n lÆ°á»£c giÃ¡ (Pricing strategy)
+- Báº£ng Unit Economics:
+| Metric | GiÃ¡ trá»‹ | Giáº£i thÃ­ch |
 |--------|---------|------------|
-| CAC | ... | Chi phí marketing/sales có 1 khách |
-| LTV | ... | Doanh thu trọn đời khách hàng mang lại |
-| LTV/CAC | ... | Tỷ lệ sức khỏe doanh nghiệp (Mục tiêu >3) |
-| Payback | ... | Thời gian hoàn vốn mỗi khách hàng |
+| CAC | ... | Chi phÃ­ marketing/sales cÃ³ 1 khÃ¡ch |
+| LTV | ... | Doanh thu trá»n Ä‘á»i khÃ¡ch hÃ ng mang láº¡i |
+| LTV/CAC | ... | Tá»· lá»‡ sá»©c khá»e doanh nghiá»‡p (Má»¥c tiÃªu >3) |
+| Payback | ... | Thá»i gian hoÃ n vá»‘n má»—i khÃ¡ch hÃ ng |
 
-📌 SLIDE 7: TRACTION
-- Số liệu đạt được (Users, Revenue, Growth)
-- Milestones đã hoàn thành
-- Testimonials (nếu có)
+ðŸ“Œ SLIDE 7: TRACTION
+- Sá»‘ liá»‡u Ä‘áº¡t Ä‘Æ°á»£c (Users, Revenue, Growth)
+- Milestones Ä‘Ã£ hoÃ n thÃ nh
+- Testimonials (náº¿u cÃ³)
 
-📌 SLIDE 8: TEAM
+ðŸ“Œ SLIDE 8: TEAM
 - Founders + Background
-- Advisors (nếu có)
-- Tại sao team này sẽ thành công?
+- Advisors (náº¿u cÃ³)
+- Táº¡i sao team nÃ y sáº½ thÃ nh cÃ´ng?
 
-📌 SLIDE 9: COMPETITION MATRIX (Ma trận Cạnh tranh)
-- Bảng so sánh trực tiếp với 3 đối thủ chính:
-| Tính năng / Đặc điểm | Giải pháp của bạn | Đối thủ A | Đối thủ B | Đối thủ C |
+ðŸ“Œ SLIDE 9: COMPETITION MATRIX (Ma tráº­n Cáº¡nh tranh)
+- Báº£ng so sÃ¡nh trá»±c tiáº¿p vá»›i 3 Ä‘á»‘i thá»§ chÃ­nh:
+| TÃ­nh nÄƒng / Äáº·c Ä‘iá»ƒm | Giáº£i phÃ¡p cá»§a báº¡n | Äá»‘i thá»§ A | Äá»‘i thá»§ B | Äá»‘i thá»§ C |
 |----------------------|-------------------|-----------|-----------|-----------|
-| Giá | ... | ... | ... | ... |
-| Tính năng chính A | ✅ | ❌ | ✅ | ❌ |
-| Tính năng chính B | ✅ | ✅ | ❌ | ❌ |
-| Điểm khác biệt lớn nhất | [USP] | [Weakness] | [Weakness] | [Weakness] |
-- Phân tích rào cản gia nhập (Barriers to entry).
+| GiÃ¡ | ... | ... | ... | ... |
+| TÃ­nh nÄƒng chÃ­nh A | âœ… | âŒ | âœ… | âŒ |
+| TÃ­nh nÄƒng chÃ­nh B | âœ… | âœ… | âŒ | âŒ |
+| Äiá»ƒm khÃ¡c biá»‡t lá»›n nháº¥t | [USP] | [Weakness] | [Weakness] | [Weakness] |
+- PhÃ¢n tÃ­ch rÃ o cáº£n gia nháº­p (Barriers to entry).
 
-📌 SLIDE 10: EXIT STRATEGY & ASK
-- Chiến lược thoái vốn (Exit Strategy): IPO, M&A (đối thủ/đối tác tiềm năng mua lại)
-- Thời gian dự kiến thoái vốn (Exit Timeline): [VD: 5-7 năm]
-- Số tiền cần gọi (Investment Ask)
-- Mục đích sử dụng vốn (Use of funds)
-- Milestones sau khi nhận vốn
-- Thông tin liên hệ
+ðŸ“Œ SLIDE 10: EXIT STRATEGY & ASK
+- Chiáº¿n lÆ°á»£c thoÃ¡i vá»‘n (Exit Strategy): IPO, M&A (Ä‘á»‘i thá»§/Ä‘á»‘i tÃ¡c tiá»m nÄƒng mua láº¡i)
+- Thá»i gian dá»± kiáº¿n thoÃ¡i vá»‘n (Exit Timeline): [VD: 5-7 nÄƒm]
+- Sá»‘ tiá»n cáº§n gá»i (Investment Ask)
+- Má»¥c Ä‘Ã­ch sá»­ dá»¥ng vá»‘n (Use of funds)
+- Milestones sau khi nháº­n vá»‘n
+- ThÃ´ng tin liÃªn há»‡
 
-PHẦN B: FINANCIAL PLAN (BẮT BUỘC BẢNG MARKDOWN)
+PHáº¦N B: FINANCIAL PLAN (Báº®T BUá»˜C Báº¢NG MARKDOWN)
 
-📌 SLIDE 11: FINANCIAL PROJECTIONS (Dự báo Tài chính)
+ðŸ“Œ SLIDE 11: FINANCIAL PROJECTIONS (Dá»± bÃ¡o TÃ i chÃ­nh)
 
-11.1 DỰ BÁO TÀI CHÍNH 3 NĂM (BẮT BUỘC FORMAT NÀY):
-| Năm | Doanh thu | Chi phí | Lợi nhuận | Tăng trưởng |
+11.1 Dá»° BÃO TÃ€I CHÃNH 3 NÄ‚M (Báº®T BUá»˜C FORMAT NÃ€Y):
+| NÄƒm | Doanh thu | Chi phÃ­ | Lá»£i nhuáº­n | TÄƒng trÆ°á»Ÿng |
 |-----|-----------|---------|-----------|-------------|
-| Năm 1 (Y1) | ... | ... | ... | - |
-| Năm 2 (Y2) | ... | ... | ... | ...% |
-| Năm 3 (Y3) | ... | ... | ... | ...% |
+| NÄƒm 1 (Y1) | ... | ... | ... | - |
+| NÄƒm 2 (Y2) | ... | ... | ... | ...% |
+| NÄƒm 3 (Y3) | ... | ... | ... | ...% |
 
-11.2 CƠ CẤU CHI PHÍ (Cost Structure):
-- Chi phí cố định: Văn phòng, Lương core team, Phần mềm...
-- Chi phí biến đổi: Marketing, Server, Commission...
-- Chi phí một lần: Phát triển MVP, Thiết kế, Pháp lý...
+11.2 CÆ  Cáº¤U CHI PHÃ (Cost Structure):
+- Chi phÃ­ cá»‘ Ä‘á»‹nh: VÄƒn phÃ²ng, LÆ°Æ¡ng core team, Pháº§n má»m...
+- Chi phÃ­ biáº¿n Ä‘á»•i: Marketing, Server, Commission...
+- Chi phÃ­ má»™t láº§n: PhÃ¡t triá»ƒn MVP, Thiáº¿t káº¿, PhÃ¡p lÃ½...
 
 11.3 UNIT ECONOMICS:
-- CAC (Customer Acquisition Cost): Chi phí có 1 khách hàng
-- LTV (Lifetime Value): Giá trị vòng đời khách hàng
-- LTV/CAC Ratio: Phải > 3x để bền vững
-- Payback Period: Thời gian hoàn vốn mỗi khách
+- CAC (Customer Acquisition Cost): Chi phÃ­ cÃ³ 1 khÃ¡ch hÃ ng
+- LTV (Lifetime Value): GiÃ¡ trá»‹ vÃ²ng Ä‘á»i khÃ¡ch hÃ ng
+- LTV/CAC Ratio: Pháº£i > 3x Ä‘á»ƒ bá»n vá»¯ng
+- Payback Period: Thá»i gian hoÃ n vá»‘n má»—i khÃ¡ch
 
-11.4 BREAK-EVEN ANALYSIS (Phân tích Điểm hòa vốn):
-- Doanh thu hòa vốn (Break-even Revenue): $...
-- Số khách hàng cần đạt để hòa vốn (Break-even Units): ... khách
-- Thời điểm hòa vốn dự kiến: Tháng thứ ... kể từ khi ra mắt
-- Runway (Thời gian sống sót với số vốn hiện tại): ... tháng
+11.4 BREAK-EVEN ANALYSIS (PhÃ¢n tÃ­ch Äiá»ƒm hÃ²a vá»‘n):
+- Doanh thu hÃ²a vá»‘n (Break-even Revenue): $...
+- Sá»‘ khÃ¡ch hÃ ng cáº§n Ä‘áº¡t Ä‘á»ƒ hÃ²a vá»‘n (Break-even Units): ... khÃ¡ch
+- Thá»i Ä‘iá»ƒm hÃ²a vá»‘n dá»± kiáº¿n: ThÃ¡ng thá»© ... ká»ƒ tá»« khi ra máº¯t
+- Runway (Thá»i gian sá»‘ng sÃ³t vá»›i sá»‘ vá»‘n hiá»‡n táº¡i): ... thÃ¡ng
 
-📌 SLIDE 12: FUNDING & USE OF FUNDS (Vốn & Sử dụng vốn)
+ðŸ“Œ SLIDE 12: FUNDING & USE OF FUNDS (Vá»‘n & Sá»­ dá»¥ng vá»‘n)
 
-12.1 LỊCH SỬ GỌI VỐN (nếu có):
-| Vòng | Thời gian | Số tiền | Nhà đầu tư | Valuation |
+12.1 Lá»ŠCH Sá»¬ Gá»ŒI Vá»N (náº¿u cÃ³):
+| VÃ²ng | Thá»i gian | Sá»‘ tiá»n | NhÃ  Ä‘áº§u tÆ° | Valuation |
 |------|-----------|---------|------------|-----------|
 
-12.2 VỐN CẦN GỌI LẦN NÀY:
-- Số tiền: [X VND / USD]
-- Valuation kỳ vọng: [Pre-money / Post-money]
-- Loại hình: Equity / Convertible Note / SAFE
+12.2 Vá»N Cáº¦N Gá»ŒI Láº¦N NÃ€Y:
+- Sá»‘ tiá»n: [X VND / USD]
+- Valuation ká»³ vá»ng: [Pre-money / Post-money]
+- Loáº¡i hÃ¬nh: Equity / Convertible Note / SAFE
 
-12.3 SỬ DỤNG VỐN (Use of Funds):
-| Hạng mục | % | Số tiền | Chi tiết |
+12.3 Sá»¬ Dá»¤NG Vá»N (Use of Funds):
+| Háº¡ng má»¥c | % | Sá»‘ tiá»n | Chi tiáº¿t |
 |----------|---|---------|----------|
-| Product Development | 40% | ... | Thuê dev, server, tools |
+| Product Development | 40% | ... | ThuÃª dev, server, tools |
 | Marketing & Sales | 30% | ... | Paid ads, content, events |
-| Operations | 20% | ... | Văn phòng, pháp lý, HR |
-| Reserve | 10% | ... | Dự phòng chi phí |
+| Operations | 20% | ... | VÄƒn phÃ²ng, phÃ¡p lÃ½, HR |
+| Reserve | 10% | ... | Dá»± phÃ²ng chi phÃ­ |
 
-LƯU Ý: Các phần GTM Strategy (Slide 13-15) sẽ được xử lý chi tiết ở Bước GTM riêng.
+LÆ¯U Ã: CÃ¡c pháº§n GTM Strategy (Slide 13-15) sáº½ Ä‘Æ°á»£c xá»­ lÃ½ chi tiáº¿t á»Ÿ BÆ°á»›c GTM riÃªng.
 
-📌 SLIDE 13: GO-TO-MARKET STRATEGY (Chiến lược ra thị trường)
+ðŸ“Œ SLIDE 13: GO-TO-MARKET STRATEGY (Chiáº¿n lÆ°á»£c ra thá»‹ trÆ°á»ng)
 
-13.1 GIAI ĐOẠN LAUNCHING (3 tháng đầu):
+13.1 GIAI ÄOáº N LAUNCHING (3 thÃ¡ng Ä‘áº§u):
 
-📅 THÁNG 1 - PRE-LAUNCH:
-- Xây dựng landing page + waitlist
+ðŸ“… THÃNG 1 - PRE-LAUNCH:
+- XÃ¢y dá»±ng landing page + waitlist
 - Content marketing (Blog, Social)
 - Influencer seeding (5-10 KOLs)
-- PR: Bài viết trên báo công nghệ/khởi nghiệp
-- Target: 1,000 email đăng ký
+- PR: BÃ i viáº¿t trÃªn bÃ¡o cÃ´ng nghá»‡/khá»Ÿi nghiá»‡p
+- Target: 1,000 email Ä‘Äƒng kÃ½
 
-📅 THÁNG 2 - SOFT LAUNCH:
-- Beta testing với 100 early adopters
-- Thu thập feedback, fix bugs
-- Case studies từ beta users
+ðŸ“… THÃNG 2 - SOFT LAUNCH:
+- Beta testing vá»›i 100 early adopters
+- Thu tháº­p feedback, fix bugs
+- Case studies tá»« beta users
 - Referral program cho early users
 - Target: 500 active users
 
-📅 THÁNG 3 - HARD LAUNCH:
+ðŸ“… THÃNG 3 - HARD LAUNCH:
 - Official launch event (online/offline)
 - Paid advertising (Facebook, Google, TikTok)
-- PR campaign lớn
+- PR campaign lá»›n
 - Partnership announcements
 - Target: 2,000 paying customers
 
-13.2 KÊNH MARKETING (Channels):
-| Kênh | Ngân sách | CAC dự kiến | Mục tiêu |
+13.2 KÃŠNH MARKETING (Channels):
+| KÃªnh | NgÃ¢n sÃ¡ch | CAC dá»± kiáº¿n | Má»¥c tiÃªu |
 |------|-----------|-------------|----------|
 | Facebook/Instagram Ads | 30% | X VND | Awareness + Acquisition |
 | Google Ads | 20% | Y VND | Intent-based acquisition |
@@ -725,247 +726,247 @@ LƯU Ý: Các phần GTM Strategy (Slide 13-15) sẽ được xử lý chi tiế
 | Referral Program | 10% | V VND | Viral growth |
 | Events/Partnerships | 5% | U VND | B2B leads |
 
-📌 SLIDE 14: MARKETING TIMELINE (Chi tiết theo tuần)
+ðŸ“Œ SLIDE 14: MARKETING TIMELINE (Chi tiáº¿t theo tuáº§n)
 
-| Tuần | Hoạt động | KPI | Ngân sách | Owner |
+| Tuáº§n | Hoáº¡t Ä‘á»™ng | KPI | NgÃ¢n sÃ¡ch | Owner |
 |------|-----------|-----|-----------|-------|
 | W1-2 | Landing page + Waitlist | 500 signups | 5M | Product |
-| W3-4 | Content seeding (10 bài) | 10K views | 3M | Marketing |
-| W5-6 | KOL outreach (10 người) | 5 confirmed | 10M | BD |
+| W3-4 | Content seeding (10 bÃ i) | 10K views | 3M | Marketing |
+| W5-6 | KOL outreach (10 ngÆ°á»i) | 5 confirmed | 10M | BD |
 | W7-8 | Beta launch + Feedback | 100 users | 2M | Product |
-| W9-10 | PR articles (5 báo) | 50K reach | 5M | PR |
+| W9-10 | PR articles (5 bÃ¡o) | 50K reach | 5M | PR |
 | W11-12 | Hard launch + Paid ads | 2K customers | 30M | Marketing |
 
-📌 SLIDE 15: KEY METRICS & MILESTONES
+ðŸ“Œ SLIDE 15: KEY METRICS & MILESTONES
 
 15.1 NORTH STAR METRIC:
-- Metric chính để đo thành công: [VD: Monthly Active Users, Revenue, etc.]
+- Metric chÃ­nh Ä‘á»ƒ Ä‘o thÃ nh cÃ´ng: [VD: Monthly Active Users, Revenue, etc.]
 
-| Series A Ready | M12 | 10K users, 500M revenue | ⚪ |
+| Series A Ready | M12 | 10K users, 500M revenue | âšª |
 
-📌 SLIDE 16: FINANCIAL PROJECTION (Dự phóng Tài chính)
-- Biểu đồ doanh thu 12 tháng.
-- Ước tính CAPEX và OPEX.
+ðŸ“Œ SLIDE 16: FINANCIAL PROJECTION (Dá»± phÃ³ng TÃ i chÃ­nh)
+- Biá»ƒu Ä‘á»“ doanh thu 12 thÃ¡ng.
+- Æ¯á»›c tÃ­nh CAPEX vÃ  OPEX.
 
-16.1 FINANCIAL CHART (Biểu đồ Tài chính)
-- **YÊU CẦU BẮT BUỘNG**: Vẽ một biểu đồ doanh thu (Revenue Projection) bằng Mermaid code block (dạng xy-chart hoặc bar-chart).
+16.1 FINANCIAL CHART (Biá»ƒu Ä‘á»“ TÃ i chÃ­nh)
+- **YÃŠU Cáº¦U Báº®T BUá»˜NG**: Váº½ má»™t biá»ƒu Ä‘á»“ doanh thu (Revenue Projection) báº±ng Mermaid code block (dáº¡ng xy-chart hoáº·c bar-chart).
 
-YÊU CẦU ĐẶC BIỆT VỀ FORMAT:
-1. **KHÔNG** thêm bất kỳ lời dẫn nhập nào.
-2. **CHỈ** xuất ra nội dung thuần túy.
-3. Mỗi phần phải có bảng và bullet points chi tiết.
-4. Sử dụng emoji và formatting rõ ràng.
-5. Số liệu phải realistic và có logic.
+YÃŠU Cáº¦U Äáº¶C BIá»†T Vá»€ FORMAT:
+1. **KHÃ”NG** thÃªm báº¥t ká»³ lá»i dáº«n nháº­p nÃ o.
+2. **CHá»ˆ** xuáº¥t ra ná»™i dung thuáº§n tÃºy.
+3. Má»—i pháº§n pháº£i cÃ³ báº£ng vÃ  bullet points chi tiáº¿t.
+4. Sá»­ dá»¥ng emoji vÃ  formatting rÃµ rÃ ng.
+5. Sá»‘ liá»‡u pháº£i realistic vÃ  cÃ³ logic.
 
-HÃY VIẾT NHƯ MỘT FOUNDER ĐANG CHUẨN BỊ GỌI VỐN SERIES A.
+HÃƒY VIáº¾T NHÆ¯ Má»˜T FOUNDER ÄANG CHUáº¨N Bá»Š Gá»ŒI Vá»N SERIES A.
 `;
 
 const STARTUP_GTM_WRITER_PROMPT = `
-NHIỆM VỤ: Xây dựng Chiến lược Ra Mắt và Marketing (Go-To-Market & Launch Strategy).
+NHIá»†M Vá»¤: XÃ¢y dá»±ng Chiáº¿n lÆ°á»£c Ra Máº¯t vÃ  Marketing (Go-To-Market & Launch Strategy).
 
-BỐI CẢNH: Dựa trên Ý tưởng, Lean Canvas và Pitch Deck đã được phê duyệt, hãy xây dựng một kế hoạch thực thi cực kỳ chi tiết để đưa sản phẩm ra thị trường.
+Bá»I Cáº¢NH: Dá»±a trÃªn Ã tÆ°á»Ÿng, Lean Canvas vÃ  Pitch Deck Ä‘Ã£ Ä‘Æ°á»£c phÃª duyá»‡t, hÃ£y xÃ¢y dá»±ng má»™t káº¿ hoáº¡ch thá»±c thi cá»±c ká»³ chi tiáº¿t Ä‘á»ƒ Ä‘Æ°a sáº£n pháº©m ra thá»‹ trÆ°á»ng.
 
-YÊU CẦU CHI TIẾT (4 PHẦN CHÍNH):
+YÃŠU Cáº¦U CHI TIáº¾T (4 PHáº¦N CHÃNH):
 
-📌 PHẦN 1: CHIẾN LƯỢC NỘI DUNG (CONTENT STRATEGY)
-- Content Pillars (3-5 chủ đề chính để thu hút khách hàng).
-- Kênh chủ đạo (TikTok, Facebook, LinkedIn, Instagram...).
-- Tần suất đăng bài & Loại hình nội dung (Video ngắn, Blog, Infographic).
-- Ví dụ 3 mẫu Headline thu hút (Hook).
+ðŸ“Œ PHáº¦N 1: CHIáº¾N LÆ¯á»¢C Ná»˜I DUNG (CONTENT STRATEGY)
+- Content Pillars (3-5 chá»§ Ä‘á» chÃ­nh Ä‘á»ƒ thu hÃºt khÃ¡ch hÃ ng).
+- KÃªnh chá»§ Ä‘áº¡o (TikTok, Facebook, LinkedIn, Instagram...).
+- Táº§n suáº¥t Ä‘Äƒng bÃ i & Loáº¡i hÃ¬nh ná»™i dung (Video ngáº¯n, Blog, Infographic).
+- VÃ­ dá»¥ 3 máº«u Headline thu hÃºt (Hook).
 
-📌 PHẦN 2: LỘ TRÌNH RA MẮT (LAUNCH ROADMAP - 90 NGÀY)
-- Giai đoạn 1: Pre-launch (Build waitlist, seeding).
-- Giai đoạn 2: Soft launch (Beta test, thu thập feedback).
-- Giai đoạn 3: Hard launch (Vùng nổ truyền thông, ads).
-- KPIs cụ thể cho từng giai đoạn.
+ðŸ“Œ PHáº¦N 2: Lá»˜ TRÃŒNH RA Máº®T (LAUNCH ROADMAP - 90 NGÃ€Y)
+- Giai Ä‘oáº¡n 1: Pre-launch (Build waitlist, seeding).
+- Giai Ä‘oáº¡n 2: Soft launch (Beta test, thu tháº­p feedback).
+- Giai Ä‘oáº¡n 3: Hard launch (VÃ¹ng ná»• truyá»n thÃ´ng, ads).
+- KPIs cá»¥ thá»ƒ cho tá»«ng giai Ä‘oáº¡n.
 
-📌 PHẦN 3: CHIẾN LƯỢC KOL/INFLUENCER (INFLUENCER STRATEGY)
-- Tiêu chí chọn KOL (Nano, Micro hay Macro).
-- Danh sách 5-10 KOLs tiềm năng (mô tả đặc điểm).
-- Chiến dịch hợp tác (Review, Challenge, Livestream).
+ðŸ“Œ PHáº¦N 3: CHIáº¾N LÆ¯á»¢C KOL/INFLUENCER (INFLUENCER STRATEGY)
+- TiÃªu chÃ­ chá»n KOL (Nano, Micro hay Macro).
+- Danh sÃ¡ch 5-10 KOLs tiá»m nÄƒng (mÃ´ táº£ Ä‘áº·c Ä‘iá»ƒm).
+- Chiáº¿n dá»‹ch há»£p tÃ¡c (Review, Challenge, Livestream).
 
-📌 PHẦN 4: NGÂN SÁCH & QUẢN TRỊ (BUDGET & OPS)
-- Phân bổ ngân sách chi tiết (Ads, Creative, KOL).
-- Các chỉ số cần theo dõi (CAC, ROAS, Engagement Rate).
-- Kế hoạch dự phòng nếu không đạt mục tiêu.
+ðŸ“Œ PHáº¦N 4: NGÃ‚N SÃCH & QUáº¢N TRá»Š (BUDGET & OPS)
+- PhÃ¢n bá»• ngÃ¢n sÃ¡ch chi tiáº¿t (Ads, Creative, KOL).
+- CÃ¡c chá»‰ sá»‘ cáº§n theo dÃµi (CAC, ROAS, Engagement Rate).
+- Káº¿ hoáº¡ch dá»± phÃ²ng náº¿u khÃ´ng Ä‘áº¡t má»¥c tiÃªu.
 
-YÊU CẦU ĐẦU RA:
-- Sử dụng bảng (Markdown Table) để trình bày lộ trình và ngân sách.
-- Sử dụng Bullet points để mô tả chi tiết các hoạt động.
-- Văn phong năng động, thực chiến nhưng vẫn chuyên nghiệp.
+YÃŠU Cáº¦U Äáº¦U RA:
+- Sá»­ dá»¥ng báº£ng (Markdown Table) Ä‘á»ƒ trÃ¬nh bÃ y lá»™ trÃ¬nh vÃ  ngÃ¢n sÃ¡ch.
+- Sá»­ dá»¥ng Bullet points Ä‘á»ƒ mÃ´ táº£ chi tiáº¿t cÃ¡c hoáº¡t Ä‘á»™ng.
+- VÄƒn phong nÄƒng Ä‘á»™ng, thá»±c chiáº¿n nhÆ°ng váº«n chuyÃªn nghiá»‡p.
 `;
 
 const STARTUP_GTM_CRITIC_PROMPT = `
-PHẢN BIỆN CHIẾN LƯỢC GTM - RUBRIC CHI TIẾT (KHẮT KHE):
+PHáº¢N BIá»†N CHIáº¾N LÆ¯á»¢C GTM - RUBRIC CHI TIáº¾T (KHáº®T KHE):
 
-1. TÍNH KHẢ THI (FEASIBILITY) - 3 điểm:
-   - Ngân sách có phù hợp với quy mô startup không?
-   - Kênh tiếp cận có đúng nơi khách hàng mục tiêu hiện diện không?
-   - Lộ trình 90 ngày có quá tham vọng hay quá chậm không?
+1. TÃNH KHáº¢ THI (FEASIBILITY) - 3 Ä‘iá»ƒm:
+   - NgÃ¢n sÃ¡ch cÃ³ phÃ¹ há»£p vá»›i quy mÃ´ startup khÃ´ng?
+   - KÃªnh tiáº¿p cáº­n cÃ³ Ä‘Ãºng nÆ¡i khÃ¡ch hÃ ng má»¥c tiÃªu hiá»‡n diá»‡n khÃ´ng?
+   - Lá»™ trÃ¬nh 90 ngÃ y cÃ³ quÃ¡ tham vá»ng hay quÃ¡ cháº­m khÃ´ng?
 
-2. TÍNH SÁNG TẠO & THU HÚT (CREATIVITY) - 3 điểm:
-   - Hook/Headline có đủ hấp dẫn để viral không?
-   - Chiến lược KOL có đặc sắc không hay chỉ là thuê đơn thuần?
+2. TÃNH SÃNG Táº O & THU HÃšT (CREATIVITY) - 3 Ä‘iá»ƒm:
+   - Hook/Headline cÃ³ Ä‘á»§ háº¥p dáº«n Ä‘á»ƒ viral khÃ´ng?
+   - Chiáº¿n lÆ°á»£c KOL cÃ³ Ä‘áº·c sáº¯c khÃ´ng hay chá»‰ lÃ  thuÃª Ä‘Æ¡n thuáº§n?
 
-3. SỰ THỐNG NHẤT (COHESION) - 2 điểm:
-   - Chiến lược GTM có nhất quán với giá trị cốt lõi (USP) của sản phẩm không?
+3. Sá»° THá»NG NHáº¤T (COHESION) - 2 Ä‘iá»ƒm:
+   - Chiáº¿n lÆ°á»£c GTM cÃ³ nháº¥t quÃ¡n vá»›i giÃ¡ trá»‹ cá»‘t lÃµi (USP) cá»§a sáº£n pháº©m khÃ´ng?
 
-4. ĐO LƯỜNG (MEASURABILITY) - 2 điểm:
-   - Các KPIs có rõ ràng và có thể đo lường được không?
+4. ÄO LÆ¯á»œNG (MEASURABILITY) - 2 Ä‘iá»ƒm:
+   - CÃ¡c KPIs cÃ³ rÃµ rÃ ng vÃ  cÃ³ thá»ƒ Ä‘o lÆ°á»ng Ä‘Æ°á»£c khÃ´ng?
 
-TỔNG ĐIỂM: .../10
+Tá»”NG ÄIá»‚M: .../10
 
-NẾU < 9 ĐIỂM:
-❌ REJECT - Chỉ ra lỗ hổng trong chiến lược thực thi.
+Náº¾U < 9 ÄIá»‚M:
+âŒ REJECT - Chá»‰ ra lá»— há»•ng trong chiáº¿n lÆ°á»£c thá»±c thi.
 
 OUTPUT FORM:
-📊 ĐIỂM SỐ: .../10
-❌ Điểm yếu chí mạng: [Vấn đề]
-➡️ Đề xuất thực chiến: [Cách sửa cụ thể]
+ðŸ“Š ÄIá»‚M Sá»: .../10
+âŒ Äiá»ƒm yáº¿u chÃ­ máº¡ng: [Váº¥n Ä‘á»]
+âž¡ï¸ Äá» xuáº¥t thá»±c chiáº¿n: [CÃ¡ch sá»­a cá»¥ thá»ƒ]
 `;
 
 const STARTUP_OUTLINE_CRITIC_PROMPT = `
-PHẢN BIỆN PITCH DECK - RUBRIC CHI TIẾT (BẮT BUỘC CHẤM ĐIỂM):
+PHáº¢N BIá»†N PITCH DECK - RUBRIC CHI TIáº¾T (Báº®T BUá»˜C CHáº¤M ÄIá»‚M):
 
-1. STORY & FLOW (3 điểm):
-   - Mạch truyện có hấp dẫn không?
-   - Từ Problem -> Solution -> Ask có logic không?
-   - Có "hook" ngay từ slide đầu không?
+1. STORY & FLOW (3 Ä‘iá»ƒm):
+   - Máº¡ch truyá»‡n cÃ³ háº¥p dáº«n khÃ´ng?
+   - Tá»« Problem -> Solution -> Ask cÃ³ logic khÃ´ng?
+   - CÃ³ "hook" ngay tá»« slide Ä‘áº§u khÃ´ng?
 
-2. DATA & TRACTION (3 điểm):
-   - Số liệu thị trường có nguồn không?
-   - Traction có ấn tượng không?
-   - Unit Economics có hợp lý không?
+2. DATA & TRACTION (3 Ä‘iá»ƒm):
+   - Sá»‘ liá»‡u thá»‹ trÆ°á»ng cÃ³ nguá»“n khÃ´ng?
+   - Traction cÃ³ áº¥n tÆ°á»£ng khÃ´ng?
+   - Unit Economics cÃ³ há»£p lÃ½ khÃ´ng?
 
-3. TEAM & CREDIBILITY (2 điểm):
-   - Team có đủ năng lực không?
-   - Có unfair advantage từ background không?
+3. TEAM & CREDIBILITY (2 Ä‘iá»ƒm):
+   - Team cÃ³ Ä‘á»§ nÄƒng lá»±c khÃ´ng?
+   - CÃ³ unfair advantage tá»« background khÃ´ng?
 
-4. ASK & EXIT STRATEGY (2 điểm):
-   - Số tiền xin có hợp lý với milestones?
-   - Exit strategy có thực tế không? (Có đối thủ nào đủ lớn để mua lại không?)
-   - Break-even analysis có dựa trên dữ liệu tài chính ở Slide 11 không?
+4. ASK & EXIT STRATEGY (2 Ä‘iá»ƒm):
+   - Sá»‘ tiá»n xin cÃ³ há»£p lÃ½ vá»›i milestones?
+   - Exit strategy cÃ³ thá»±c táº¿ khÃ´ng? (CÃ³ Ä‘á»‘i thá»§ nÃ o Ä‘á»§ lá»›n Ä‘á»ƒ mua láº¡i khÃ´ng?)
+   - Break-even analysis cÃ³ dá»±a trÃªn dá»¯ liá»‡u tÃ i chÃ­nh á»Ÿ Slide 11 khÃ´ng?
 
-TỔNG ĐIỂM: .../10
+Tá»”NG ÄIá»‚M: .../10
 
-NẾU < 9 ĐIỂM:
-❌ REJECT - Yêu cầu sửa slide cụ thể.
+Náº¾U < 9 ÄIá»‚M:
+âŒ REJECT - YÃªu cáº§u sá»­a slide cá»¥ thá»ƒ.
 
-LƯU Ý:
-- Nếu thiếu slide nào trong 10 slides -> Trừ 1 điểm/slide.
-- Nếu không có số liệu Market Size -> Trừ 2 điểm.
+LÆ¯U Ã:
+- Náº¿u thiáº¿u slide nÃ o trong 10 slides -> Trá»« 1 Ä‘iá»ƒm/slide.
+- Náº¿u khÃ´ng cÃ³ sá»‘ liá»‡u Market Size -> Trá»« 2 Ä‘iá»ƒm.
 
 OUTPUT FORM:
-📊 ĐIỂM SỐ: .../10
+ðŸ“Š ÄIá»‚M Sá»: .../10
 - Story: .../3
 - Data: .../3
 - Team: .../2
 - Ask: .../2
 
-❌ SLIDES CẦN SỬA:
+âŒ SLIDES Cáº¦N Sá»¬A:
 ...
 
-➡️ YÊU CẦU CẢI THIỆN:
+âž¡ï¸ YÃŠU Cáº¦U Cáº¢I THIá»†N:
 ...
 `;
 
 const STARTUP_SURVEY_WRITER_PROMPT = `
-NHIỆM VỤ: Thiết kế Bảng Khảo Sát CUSTOMER DISCOVERY (Khám Phá Khách Hàng).
+NHIá»†M Vá»¤: Thiáº¿t káº¿ Báº£ng Kháº£o SÃ¡t CUSTOMER DISCOVERY (KhÃ¡m PhÃ¡ KhÃ¡ch HÃ ng).
 
-BỐI CẢNH: Dựa trên Ý tưởng và Lean Canvas đã xây dựng, thiết kế bảng khảo sát để validate giả định với khách hàng thực tế.
+Bá»I Cáº¢NH: Dá»±a trÃªn Ã tÆ°á»Ÿng vÃ  Lean Canvas Ä‘Ã£ xÃ¢y dá»±ng, thiáº¿t káº¿ báº£ng kháº£o sÃ¡t Ä‘á»ƒ validate giáº£ Ä‘á»‹nh vá»›i khÃ¡ch hÃ ng thá»±c táº¿.
 
-PHƯƠNG PHÁP: THE MOM TEST (BẮT BUỘNG)
-- KHÔNG hỏi ý kiến -> Hỏi về HÀNH VI trong quá khứ
-- KHÔNG dẫn dắt câu trả lời -> Để khách hàng tự nói
-- KHÔNG pitch sản phẩm -> Chỉ lắng nghe vấn đề
+PHÆ¯Æ NG PHÃP: THE MOM TEST (Báº®T BUá»˜NG)
+- KHÃ”NG há»i Ã½ kiáº¿n -> Há»i vá» HÃ€NH VI trong quÃ¡ khá»©
+- KHÃ”NG dáº«n dáº¯t cÃ¢u tráº£ lá»i -> Äá»ƒ khÃ¡ch hÃ ng tá»± nÃ³i
+- KHÃ”NG pitch sáº£n pháº©m -> Chá»‰ láº¯ng nghe váº¥n Ä‘á»
 
-CẤU TRÚC BẢNG KHẢO SÁT:
+Cáº¤U TRÃšC Báº¢NG KHáº¢O SÃT:
 
-📌 PHẦN 1: NHÂN KHẨU HỌC (DEMOGRAPHICS)
-- Độ tuổi, Giới tính, Nghề nghiệp
-- Thu nhập (nếu relevant)
-- Khu vực sinh sống/làm việc
+ðŸ“Œ PHáº¦N 1: NHÃ‚N KHáº¨U Há»ŒC (DEMOGRAPHICS)
+- Äá»™ tuá»•i, Giá»›i tÃ­nh, Nghá» nghiá»‡p
+- Thu nháº­p (náº¿u relevant)
+- Khu vá»±c sinh sá»‘ng/lÃ m viá»‡c
 
-📌 PHẦN 2: XÁC NHẬN VẤN ĐỀ (PROBLEM VALIDATION)
-VÍ DỤ CÂU HỎI TỐT (Mom Test):
-- "Lần cuối bạn gặp vấn đề [X] là khi nào?"
-- "Bạn đã làm gì để giải quyết?"
-- "Điều gì khiến bạn khó chịu nhất về [Y]?"
+ðŸ“Œ PHáº¦N 2: XÃC NHáº¬N Váº¤N Äá»€ (PROBLEM VALIDATION)
+VÃ Dá»¤ CÃ‚U Há»ŽI Tá»T (Mom Test):
+- "Láº§n cuá»‘i báº¡n gáº·p váº¥n Ä‘á» [X] lÃ  khi nÃ o?"
+- "Báº¡n Ä‘Ã£ lÃ m gÃ¬ Ä‘á»ƒ giáº£i quyáº¿t?"
+- "Äiá»u gÃ¬ khiáº¿n báº¡n khÃ³ chá»‹u nháº¥t vá» [Y]?"
 
-VÍ DỤ CÂU HỎI TỆ (TRÁNH):
-- "Bạn có thấy [sản phẩm của tôi] hữu ích không?" ❌
-- "Bạn có muốn dùng app này không?" ❌
+VÃ Dá»¤ CÃ‚U Há»ŽI Tá»† (TRÃNH):
+- "Báº¡n cÃ³ tháº¥y [sáº£n pháº©m cá»§a tÃ´i] há»¯u Ã­ch khÃ´ng?" âŒ
+- "Báº¡n cÃ³ muá»‘n dÃ¹ng app nÃ y khÃ´ng?" âŒ
 
-📌 PHẦN 3: GIẢI PHÁP HIỆN TẠI (CURRENT SOLUTIONS)
-- Hiện tại bạn đang dùng gì để giải quyết vấn đề này?
-- Chi phí bạn đang bỏ ra là bao nhiêu?
-- Điểm gì khiến bạn không hài lòng với giải pháp hiện tại?
+ðŸ“Œ PHáº¦N 3: GIáº¢I PHÃP HIá»†N Táº I (CURRENT SOLUTIONS)
+- Hiá»‡n táº¡i báº¡n Ä‘ang dÃ¹ng gÃ¬ Ä‘á»ƒ giáº£i quyáº¿t váº¥n Ä‘á» nÃ y?
+- Chi phÃ­ báº¡n Ä‘ang bá» ra lÃ  bao nhiÃªu?
+- Äiá»ƒm gÃ¬ khiáº¿n báº¡n khÃ´ng hÃ i lÃ²ng vá»›i giáº£i phÃ¡p hiá»‡n táº¡i?
 
-📌 PHẦN 4: SẴN SÀNG CHI TRẢ (WILLINGNESS TO PAY)
-- "Nếu có giải pháp giải quyết [vấn đề], bạn sẵn sàng chi bao nhiêu?"
-- Tần suất sử dụng dự kiến
-- Yếu tố quyết định mua hàng
+ðŸ“Œ PHáº¦N 4: Sáº´N SÃ€NG CHI TRáº¢ (WILLINGNESS TO PAY)
+- "Náº¿u cÃ³ giáº£i phÃ¡p giáº£i quyáº¿t [váº¥n Ä‘á»], báº¡n sáºµn sÃ ng chi bao nhiÃªu?"
+- Táº§n suáº¥t sá»­ dá»¥ng dá»± kiáº¿n
+- Yáº¿u tá»‘ quyáº¿t Ä‘á»‹nh mua hÃ ng
 
-📌 PHẦN 5: ƯU TIÊN TÍNH NĂNG (FEATURE PRIORITIZATION)
-- Liệt kê 5-7 tính năng tiềm năng
-- Yêu cầu xếp hạng theo mức độ quan trọng (1-5)
-- Hỏi thêm tính năng nào còn thiếu
+ðŸ“Œ PHáº¦N 5: Æ¯U TIÃŠN TÃNH NÄ‚NG (FEATURE PRIORITIZATION)
+- Liá»‡t kÃª 5-7 tÃ­nh nÄƒng tiá»m nÄƒng
+- YÃªu cáº§u xáº¿p háº¡ng theo má»©c Ä‘á»™ quan trá»ng (1-5)
+- Há»i thÃªm tÃ­nh nÄƒng nÃ o cÃ²n thiáº¿u
 
-YÊU CẦU OUTPUT (MARKDOWN TABLE):
+YÃŠU Cáº¦U OUTPUT (MARKDOWN TABLE):
 
-| Phần | Câu hỏi | Loại | Mục đích |
+| Pháº§n | CÃ¢u há»i | Loáº¡i | Má»¥c Ä‘Ã­ch |
 |------|---------|------|----------|
-| 1 | Bạn thuộc độ tuổi nào? | Multiple Choice | Demographics |
-| 2 | Lần cuối bạn bỏ bữa trưa là khi nào? | Open-ended | Problem Validation |
+| 1 | Báº¡n thuá»™c Ä‘á»™ tuá»•i nÃ o? | Multiple Choice | Demographics |
+| 2 | Láº§n cuá»‘i báº¡n bá» bá»¯a trÆ°a lÃ  khi nÃ o? | Open-ended | Problem Validation |
 | ... | ... | ... | ... |
 
-PHƯƠNG ÁN THU THẬP DỮ LIỆU:
-1. Phỏng vấn sâu (In-depth Interview): 10-20 người, 30-45 phút/người
-2. Khảo sát online (Google Forms): 100-200 responses
-3. Landing Page Test: Đo lường conversion rate
+PHÆ¯Æ NG ÃN THU THáº¬P Dá»® LIá»†U:
+1. Phá»ng váº¥n sÃ¢u (In-depth Interview): 10-20 ngÆ°á»i, 30-45 phÃºt/ngÆ°á»i
+2. Kháº£o sÃ¡t online (Google Forms): 100-200 responses
+3. Landing Page Test: Äo lÆ°á»ng conversion rate
 
 SAMPLE SIZE & VALIDATION:
-- Minimum: 30 responses để có statistical significance
+- Minimum: 30 responses Ä‘á»ƒ cÃ³ statistical significance
 - Target: 100+ responses cho quantitative insights
 `;
 
 const STARTUP_SURVEY_CRITIC_PROMPT = `
-PHẢN BIỆN BẢNG KHẢO SÁT CUSTOMER DISCOVERY - RUBRIC CHI TIẾT:
+PHáº¢N BIá»†N Báº¢NG KHáº¢O SÃT CUSTOMER DISCOVERY - RUBRIC CHI TIáº¾T:
 
-1. MOM TEST COMPLIANCE (3 điểm):
-   - Câu hỏi có tránh dẫn dắt không?
-   - Có hỏi về hành vi quá khứ thay vì ý kiến?
-   - Có tránh pitch sản phẩm trong câu hỏi?
+1. MOM TEST COMPLIANCE (3 Ä‘iá»ƒm):
+   - CÃ¢u há»i cÃ³ trÃ¡nh dáº«n dáº¯t khÃ´ng?
+   - CÃ³ há»i vá» hÃ nh vi quÃ¡ khá»© thay vÃ¬ Ã½ kiáº¿n?
+   - CÃ³ trÃ¡nh pitch sáº£n pháº©m trong cÃ¢u há»i?
 
-2. PROBLEM VALIDATION DEPTH (3 điểm):
-   - Câu hỏi có đào sâu vào pain points?
-   - Có hỏi về giải pháp hiện tại?
-   - Có đo lường frequency/severity của vấn đề?
+2. PROBLEM VALIDATION DEPTH (3 Ä‘iá»ƒm):
+   - CÃ¢u há»i cÃ³ Ä‘Ã o sÃ¢u vÃ o pain points?
+   - CÃ³ há»i vá» giáº£i phÃ¡p hiá»‡n táº¡i?
+   - CÃ³ Ä‘o lÆ°á»ng frequency/severity cá»§a váº¥n Ä‘á»?
 
-3. WILLINGNESS TO PAY (2 điểm):
-   - Có câu hỏi về ngân sách không?
-   - Có đo conversion intent không?
+3. WILLINGNESS TO PAY (2 Ä‘iá»ƒm):
+   - CÃ³ cÃ¢u há»i vá» ngÃ¢n sÃ¡ch khÃ´ng?
+   - CÃ³ Ä‘o conversion intent khÃ´ng?
 
-4. FORMAT & STRUCTURE (2 điểm):
-   - Bảng hỏi có đủ các phần cần thiết?
-   - Số lượng câu hỏi có hợp lý? (15-25 câu)
+4. FORMAT & STRUCTURE (2 Ä‘iá»ƒm):
+   - Báº£ng há»i cÃ³ Ä‘á»§ cÃ¡c pháº§n cáº§n thiáº¿t?
+   - Sá»‘ lÆ°á»£ng cÃ¢u há»i cÃ³ há»£p lÃ½? (15-25 cÃ¢u)
 
-TỔNG ĐIỂM: .../10
+Tá»”NG ÄIá»‚M: .../10
 
-NẾU < 9 ĐIỂM:
-❌ YÊU CẦU SỬA: Chỉ ra cụ thể câu hỏi nào cần sửa/xóa/thêm.
+Náº¾U < 9 ÄIá»‚M:
+âŒ YÃŠU Cáº¦U Sá»¬A: Chá»‰ ra cá»¥ thá»ƒ cÃ¢u há»i nÃ o cáº§n sá»­a/xÃ³a/thÃªm.
 
-LƯU Ý ĐẶC BIỆT:
-- Nếu có câu hỏi dẫn dắt (leading question) -> Trừ 1 điểm/câu
-- Nếu thiếu phần Willingness to Pay -> Trừ 2 điểm
+LÆ¯U Ã Äáº¶C BIá»†T:
+- Náº¿u cÃ³ cÃ¢u há»i dáº«n dáº¯t (leading question) -> Trá»« 1 Ä‘iá»ƒm/cÃ¢u
+- Náº¿u thiáº¿u pháº§n Willingness to Pay -> Trá»« 2 Ä‘iá»ƒm
 
 OUTPUT:
-📊 ĐIỂM SỐ: .../10
-❌ CÂU HỎI CẦN SỬA:
-1. Câu X: [Vấn đề] -> [Gợi ý sửa]
+ðŸ“Š ÄIá»‚M Sá»: .../10
+âŒ CÃ‚U Há»ŽI Cáº¦N Sá»¬A:
+1. CÃ¢u X: [Váº¥n Ä‘á»] -> [Gá»£i Ã½ sá»­a]
 2. ...
 
-➡️ CÂU HỎI NÊN THÊM:
+âž¡ï¸ CÃ‚U Há»ŽI NÃŠN THÃŠM:
 ...
 `;
 
@@ -985,8 +986,8 @@ export class AgentSession {
 
   constructor(
     public topic: string,
-    public goal: string = "Nghiên cứu khoa học",
-    public audience: string = "Chuyên gia/Nhà nghiên cứu",
+    public goal: string = "NghiÃªn cá»©u khoa há»c",
+    public audience: string = "ChuyÃªn gia/NhÃ  nghiÃªn cá»©u",
     public level: AcademicLevel = "MASTER",
     public language: 'vi' | 'en' = 'vi',
     public projectType: ProjectType = 'RESEARCH', // NEW: Support startup projects
@@ -1045,17 +1046,17 @@ export class AgentSession {
     }
 
     const summaryPrompt = `
-Bạn là trợ lý tóm tắt hội thoại. Hãy tóm tắt các ĐIỂM ĐÃ CHỐT sau từ cuộc hội thoại:
+Báº¡n lÃ  trá»£ lÃ½ tÃ³m táº¯t há»™i thoáº¡i. HÃ£y tÃ³m táº¯t cÃ¡c ÄIá»‚M ÄÃƒ CHá»T sau tá»« cuá»™c há»™i thoáº¡i:
 
-Đề tài: ${this.topic}
-Loại dự án: ${this.projectType}
+Äá» tÃ i: ${this.topic}
+Loáº¡i dá»± Ã¡n: ${this.projectType}
 
-${this.finalizedTopic ? `✅ Ý tưởng/Đề tài đã chốt: ${this.finalizedTopic}` : ''}
-${this.finalizedModel ? `✅ Mô hình đã chốt: ${this.finalizedModel.substring(0, 500)}...` : ''}
-${this.finalizedOutline ? `✅ Đề cương đã chốt: ${this.finalizedOutline.substring(0, 500)}...` : ''}
-${this.finalizedGTM ? `✅ GTM đã chốt: ${this.finalizedGTM.substring(0, 500)}...` : ''}
+${this.finalizedTopic ? `âœ… Ã tÆ°á»Ÿng/Äá» tÃ i Ä‘Ã£ chá»‘t: ${this.finalizedTopic}` : ''}
+${this.finalizedModel ? `âœ… MÃ´ hÃ¬nh Ä‘Ã£ chá»‘t: ${this.finalizedModel.substring(0, 500)}...` : ''}
+${this.finalizedOutline ? `âœ… Äá» cÆ°Æ¡ng Ä‘Ã£ chá»‘t: ${this.finalizedOutline.substring(0, 500)}...` : ''}
+${this.finalizedGTM ? `âœ… GTM Ä‘Ã£ chá»‘t: ${this.finalizedGTM.substring(0, 500)}...` : ''}
 
-YÊU CẦU: Tóm tắt trong 5-7 bullet points ngắn gọn. Tập trung vào các quyết định quan trọng và hướng đi đã thống nhất.
+YÃŠU Cáº¦U: TÃ³m táº¯t trong 5-7 bullet points ngáº¯n gá»n. Táº­p trung vÃ o cÃ¡c quyáº¿t Ä‘á»‹nh quan trá»ng vÃ  hÆ°á»›ng Ä‘i Ä‘Ã£ thá»‘ng nháº¥t.
     `;
 
     try {
@@ -1107,7 +1108,7 @@ YÊU CẦU: Tóm tắt trong 5-7 bullet points ngắn gọn. Tập trung vào c�
       if (!response.ok) {
         const errorMsg = data.error || 'Unknown error';
 
-        console.error(`🚨 Gemini Proxy Error:`, {
+        console.error(`ðŸš¨ Gemini Proxy Error:`, {
           model: currentModel,
           status: response.status,
           message: errorMsg,
@@ -1120,24 +1121,24 @@ YÊU CẦU: Tóm tắt trong 5-7 bullet points ngắn gọn. Tập trung vào c�
           // If still on primary model and has retries, retry with delay
           if (retries > 0 && !useFallback) {
             const waitTime = 10000 * (4 - retries); // 10s, 20s, 30s
-            console.warn(`⚠️ Rate Limit on ${currentModel}. Retrying in ${waitTime / 1000}s... (${retries} retries left)`);
+            console.warn(`âš ï¸ Rate Limit on ${currentModel}. Retrying in ${waitTime / 1000}s... (${retries} retries left)`);
             await new Promise(resolve => setTimeout(resolve, waitTime));
             return this.callGeminiAPI(model, prompt, customKey, retries - 1, false);
           }
 
           // If primary exhausted, try fallback model
           if (!useFallback) {
-            console.warn(`🔄 Switching to fallback model: ${AgentSession.FALLBACK_MODEL}`);
+            console.warn(`ðŸ”„ Switching to fallback model: ${AgentSession.FALLBACK_MODEL}`);
             return this.callGeminiAPI(model, prompt, customKey, 2, true);
           }
 
           // Both models failed
-          throw new Error(`Cả hai model đều hết quota. Vui lòng thử lại sau hoặc dùng API Key riêng.`);
+          throw new Error(`Cáº£ hai model Ä‘á»u háº¿t quota. Vui lÃ²ng thá»­ láº¡i sau hoáº·c dÃ¹ng API Key riÃªng.`);
         }
 
         // Unauthorized (need login)
         if (response.status === 401) {
-          throw new Error(`Vui lòng đăng nhập để sử dụng tính năng AI.`);
+          throw new Error(`Vui lÃ²ng Ä‘Äƒng nháº­p Ä‘á»ƒ sá»­ dá»¥ng tÃ­nh nÄƒng AI.`);
         }
 
         // Other errors
@@ -1145,10 +1146,10 @@ YÊU CẦU: Tóm tắt trong 5-7 bullet points ngắn gọn. Tập trung vào c�
       }
 
       if (useFallback) {
-        console.log(`✅ Fallback model ${currentModel} succeeded!`);
+        console.log(`âœ… Fallback model ${currentModel} succeeded!`);
       }
 
-      return data.text || "Lỗi: Không có phản hồi từ AI.";
+      return data.text || "Lá»—i: KhÃ´ng cÃ³ pháº£n há»“i tá»« AI.";
 
     } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
       // Network errors -> Retry
@@ -1165,7 +1166,7 @@ YÊU CẦU: Tóm tắt trong 5-7 bullet points ngắn gọn. Tập trung vào c�
     try {
       const finalKey = this.writerKey;
       if (!finalKey) {
-        return "⚠️ CHƯA CẤU HÌNH API KEY: Vui lòng vào Cài đặt (⚙️) để nhập API Key của bạn. Hệ thống không còn dùng key mặc định.";
+        return "âš ï¸ CHÆ¯A Cáº¤U HÃŒNH API KEY: Vui lÃ²ng vÃ o CÃ i Ä‘áº·t (âš™ï¸) Ä‘á»ƒ nháº­p API Key cá»§a báº¡n. Há»‡ thá»‘ng khÃ´ng cÃ²n dÃ¹ng key máº·c Ä‘á»‹nh.";
       }
 
       let sysPrompt = "";
@@ -1173,7 +1174,7 @@ YÊU CẦU: Tóm tắt trong 5-7 bullet points ngắn gọn. Tập trung vào c�
 
       // Add context summary if available (for long conversations)
       if (this.contextSummary) {
-        contextAddition += `\n\n📌 TÓM TẮT CÁC ĐIỂM ĐÃ CHỐT:\n${this.contextSummary}\n\n`;
+        contextAddition += `\n\nðŸ“Œ TÃ“M Táº®T CÃC ÄIá»‚M ÄÃƒ CHá»T:\n${this.contextSummary}\n\n`;
       }
 
       // Choose prompts based on project type
@@ -1186,25 +1187,25 @@ YÊU CẦU: Tóm tắt trong 5-7 bullet points ngắn gọn. Tập trung vào c�
           case '2_MODEL':
             sysPrompt = STARTUP_MODEL_WRITER_PROMPT;
             if (this.finalizedTopic) {
-              contextAddition = `\n\nÝ TƯỞNG KINH DOANH ĐÃ PHÊ DUYỆT:\n"${this.finalizedTopic}"`;
+              contextAddition = `\n\nÃ TÆ¯á»žNG KINH DOANH ÄÃƒ PHÃŠ DUYá»†T:\n"${this.finalizedTopic}"`;
             }
             break;
           case '3_OUTLINE':
             sysPrompt = STARTUP_OUTLINE_WRITER_PROMPT;
             if (this.finalizedTopic) {
-              contextAddition += `\n\nÝ TƯỞNG KINH DOANH:\n"${this.finalizedTopic}"`;
+              contextAddition += `\n\nÃ TÆ¯á»žNG KINH DOANH:\n"${this.finalizedTopic}"`;
             }
             if (this.finalizedModel) {
-              contextAddition += `\n\nLEAN CANVAS ĐÃ PHÊ DUYỆT:\n${this.finalizedModel.substring(0, 1500)}...`;
+              contextAddition += `\n\nLEAN CANVAS ÄÃƒ PHÃŠ DUYá»†T:\n${this.finalizedModel.substring(0, 1500)}...`;
             }
             if (this.finalizedModelChart) {
-              contextAddition += `\n\nSƠ ĐỒ BUSINESS MODEL:\n\`\`\`mermaid\n${this.finalizedModelChart}\n\`\`\``;
+              contextAddition += `\n\nSÆ  Äá»’ BUSINESS MODEL:\n\`\`\`mermaid\n${this.finalizedModelChart}\n\`\`\``;
             }
             break;
           case '5_GTM':
             sysPrompt = STARTUP_GTM_WRITER_PROMPT;
             if (this.finalizedTopic) {
-              contextAddition += `\n\nÝ TƯỞNG: "${this.finalizedTopic}"`;
+              contextAddition += `\n\nÃ TÆ¯á»žNG: "${this.finalizedTopic}"`;
             }
             if (this.finalizedModel) {
               contextAddition += `\n\nLEAN CANVAS: ${this.finalizedModel.substring(0, 500)}...`;
@@ -1216,7 +1217,7 @@ YÊU CẦU: Tóm tắt trong 5-7 bullet points ngắn gọn. Tập trung vào c�
           case '4_SURVEY':
             sysPrompt = STARTUP_SURVEY_WRITER_PROMPT;
             if (this.finalizedTopic) {
-              contextAddition += `\n\nÝ TƯỞNG: "${this.finalizedTopic}"`;
+              contextAddition += `\n\nÃ TÆ¯á»žNG: "${this.finalizedTopic}"`;
             }
             if (this.finalizedModel) {
               contextAddition += `\n\nLEAN CANVAS: ${this.finalizedModel.substring(0, 500)}...`;
@@ -1225,7 +1226,7 @@ YÊU CẦU: Tóm tắt trong 5-7 bullet points ngắn gọn. Tập trung vào c�
               contextAddition += `\n\nPITCH DECK: ${this.finalizedOutline.substring(0, 500)}...`;
             }
             if (this.finalizedGTM) {
-              contextAddition += `\n\nCHIẾN LƯỢC GTM: ${this.finalizedGTM.substring(0, 500)}...`;
+              contextAddition += `\n\nCHIáº¾N LÆ¯á»¢C GTM: ${this.finalizedGTM.substring(0, 500)}...`;
             }
             break;
         }
@@ -1238,48 +1239,57 @@ YÊU CẦU: Tóm tắt trong 5-7 bullet points ngắn gọn. Tập trung vào c�
           case '2_MODEL':
             sysPrompt = getModelWriterPrompt(this.level);
             if (this.finalizedTopic) {
-              contextAddition = `\n\nĐỀ TÀI ĐÃ ĐƯỢC PHÊ DUYỆT (sử dụng làm nền tảng):\n"${this.finalizedTopic}"`;
+              contextAddition = `\n\nÄá»€ TÃ€I ÄÃƒ ÄÆ¯á»¢C PHÃŠ DUYá»†T (sá»­ dá»¥ng lÃ m ná»n táº£ng):\n"${this.finalizedTopic}"`;
             }
             break;
           case '3_OUTLINE':
             sysPrompt = getOutlineWriterPrompt(this.goal);
             if (this.finalizedTopic) {
-              contextAddition += `\n\nĐỀ TÀI ĐÃ PHÊ DUYỆT:\n"${this.finalizedTopic}"`;
+              contextAddition += `\n\nÄá»€ TÃ€I ÄÃƒ PHÃŠ DUYá»†T:\n"${this.finalizedTopic}"`;
             }
             if (this.finalizedModel) {
-              contextAddition += `\n\nMÔ HÌNH LÝ THUYẾT ĐÃ PHÊ DUYỆT:\n${this.finalizedModel.substring(0, 1000)}...`;
+              contextAddition += `\n\nMÃ” HÃŒNH LÃ THUYáº¾T ÄÃƒ PHÃŠ DUYá»†T:\n${this.finalizedModel.substring(0, 1000)}...`;
             }
             if (this.finalizedModelChart) {
-              contextAddition += `\n\nSƠ ĐỒ MÔ HÌNH:\n\`\`\`mermaid\n${this.finalizedModelChart}\n\`\`\``;
+              contextAddition += `\n\nSÆ  Äá»’ MÃ” HÃŒNH:\n\`\`\`mermaid\n${this.finalizedModelChart}\n\`\`\``;
             }
+            break;
+          case '2_ARCH':
+            sysPrompt = SOFTWARE_ARCH_WRITER_PROMPT;
+            if (this.finalizedTopic) contextAddition = `\n\nĐỀ TÀI: "${this.finalizedTopic}"`;
+            break;
+          case '4_BENCHMARK':
+            sysPrompt = SOFTWARE_BENCHMARK_WRITER_PROMPT;
+            if (this.finalizedTopic) contextAddition += `\n\nĐỀ TÀI: "${this.finalizedTopic}"`;
+            if (this.finalizedModel) contextAddition += `\n\nKIẾN TRÚC: ${this.finalizedModel.substring(0, 500)}...`;
             break;
           case '4_SURVEY':
             sysPrompt = getSurveyPrompt(this.level);
             if (this.finalizedTopic) {
-              contextAddition += `\n\nĐỀ TÀI: "${this.finalizedTopic}"`;
+              contextAddition += `\n\nÄá»€ TÃ€I: "${this.finalizedTopic}"`;
             }
             if (this.finalizedModel) {
-              contextAddition += `\n\nMÔ HÌNH: ${this.finalizedModel.substring(0, 500)}...`;
+              contextAddition += `\n\nMÃ” HÃŒNH: ${this.finalizedModel.substring(0, 500)}...`;
             }
             if (this.finalizedOutline) {
-              contextAddition += `\n\nĐỀ CƯƠNG (trích đoạn): ${this.finalizedOutline.substring(0, 500)}...`;
+              contextAddition += `\n\nÄá»€ CÆ¯Æ NG (trÃ­ch Ä‘oáº¡n): ${this.finalizedOutline.substring(0, 500)}...`;
             }
             break;
         }
       }
 
-      const context = `CHỦ ĐỀ GỐC: ${this.topic}\nLOẠI HÌNH (OUTPUT): ${this.goal}\nĐỐI TƯỢNG: ${this.audience}\nTRÌNH ĐỘ: ${this.level}\nNGÔN NGỮ ĐẦU RA (OUTPUT LANGUAGE): ${this.language === 'en' ? 'ENGLISH (100%)' : 'VIETNAMESE (100%)'}${contextAddition}`;
+      const context = `CHá»¦ Äá»€ Gá»C: ${this.topic}\nLOáº I HÃŒNH (OUTPUT): ${this.goal}\nÄá»I TÆ¯á»¢NG: ${this.audience}\nTRÃŒNH Äá»˜: ${this.level}\nNGÃ”N NGá»® Äáº¦U RA (OUTPUT LANGUAGE): ${this.language === 'en' ? 'ENGLISH (100%)' : 'VIETNAMESE (100%)'}${contextAddition}`;
 
       const prompt = previousCriticFeedback
-        ? `${context}\n\nPHẢN HỒI CỦA CRITIC (Vòng trước): ${previousCriticFeedback}\n\n${sysPrompt}\nHãy cải thiện/viết tiếp dựa trên phản hồi này.`
-        : `${context}\n\n${sysPrompt}\nHãy bắt đầu thực hiện nhiệm vụ cho giai đoạn này.`;
+        ? `${context}\n\nPHáº¢N Há»’I Cá»¦A CRITIC (VÃ²ng trÆ°á»›c): ${previousCriticFeedback}\n\n${sysPrompt}\nHÃ£y cáº£i thiá»‡n/viáº¿t tiáº¿p dá»±a trÃªn pháº£n há»“i nÃ y.`
+        : `${context}\n\n${sysPrompt}\nHÃ£y báº¯t Ä‘áº§u thá»±c hiá»‡n nhiá»‡m vá»¥ cho giai Ä‘oáº¡n nÃ y.`;
 
       // Use Preferred Model
       return await this.callGeminiAPI('gemini-3-flash-preview', prompt, finalKey);
 
     } catch (error: any) {
       console.error("Gemini Writer Error:", error);
-      return `Lỗi AI: ${error.message || error}`;
+      return `Lá»—i AI: ${error.message || error}`;
     }
   }
 
@@ -1288,7 +1298,7 @@ YÊU CẦU: Tóm tắt trong 5-7 bullet points ngắn gọn. Tập trung vào c�
     const geminiKey = this.criticKey || this.writerKey;
 
     if (!geminiKey) {
-      return "⚠️ CHƯA CẤU HÌNH API KEY: Vui lòng vào Cài đặt (⚙️) để nhập API Key.";
+      return "âš ï¸ CHÆ¯A Cáº¤U HÃŒNH API KEY: Vui lÃ²ng vÃ o CÃ i Ä‘áº·t (âš™ï¸) Ä‘á»ƒ nháº­p API Key.";
     }
     try {
       let sysPrompt = "";
@@ -1308,16 +1318,18 @@ YÊU CẦU: Tóm tắt trong 5-7 bullet points ngắn gọn. Tập trung vào c�
           case '2_MODEL': sysPrompt = getModelCriticPrompt(this.level); break;
           case '3_OUTLINE': sysPrompt = OUTLINE_CRITIC_PROMPT; break;
           case '4_SURVEY': sysPrompt = SURVEY_CRITIC_PROMPT; break;
+          case '2_ARCH': sysPrompt = SOFTWARE_ARCH_CRITIC_PROMPT; break;
+          case '4_BENCHMARK': sysPrompt = "Bạn là Reviewer chuyên về Empirical Software Engineering. Hãy đánh giá phương pháp kiểm thử và benchmark vừa đề xuất."; break;
         }
       }
 
-      const prompt = `${sysPrompt}\n\nBÀI LÀM CỦA WRITER:\n${writerDraft}\n\nHãy đóng vai trò Critic và đưa ra nhận xét chi tiết, khắt khe.`;
+      const prompt = `${sysPrompt}\n\nBÃ€I LÃ€M Cá»¦A WRITER:\n${writerDraft}\n\nHÃ£y Ä‘Ã³ng vai trÃ² Critic vÃ  Ä‘Æ°a ra nháº­n xÃ©t chi tiáº¿t, kháº¯t khe.`;
 
       // Use Preferred Model
       return await this.callGeminiAPI('gemini-3-flash-preview', prompt, geminiKey);
 
     } catch (error) {
-      return `Lỗi Critic (Quota/Network): ${error}`;
+      return `Lá»—i Critic (Quota/Network): ${error}`;
     }
   }
 }
