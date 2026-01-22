@@ -989,8 +989,8 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
           useFallback
         });
 
-        // Handle Rate Limit (429)
-        if (response.status === 429) {
+        // Handle Rate Limit (429) or Server Overload (503)
+        if (response.status === 429 || response.status === 503) {
           // If still on primary model and has retries, retry with delay
           if (retries > 0 && !useFallback) {
             const waitTime = 10000 * (4 - retries); // 10s, 20s, 30s
