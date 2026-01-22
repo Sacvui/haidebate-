@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { Sparkles, HelpCircle, LogOut, Settings, Lock, CheckCircle, ArrowRight, Mail, BookOpen, FolderOpen } from "lucide-react";
+import Link from "next/link";
 import { AcademicLevel, ProjectType } from "@/lib/agents";
 import { SavedProject, createNewProject, saveProject, getProject } from "@/lib/projectStorage";
 import { LevelGuidelines } from "@/components/LevelGuidelines";
@@ -313,6 +314,16 @@ export default function Home() {
                     <FolderOpen className="w-4 h-4" />
                     <span className="hidden md:inline">Dự án</span>
                   </button>
+
+                  {/* Guide Link */}
+                  <Link
+                    href="/guide"
+                    className="flex items-center gap-2 px-2 md:px-3 py-1.5 bg-slate-50 text-slate-700 hover:bg-slate-100 rounded-lg font-medium text-xs md:text-sm transition-colors border border-slate-200"
+                    title="Hướng dẫn sử dụng đầy đủ"
+                  >
+                    <BookOpen className="w-4 h-4" />
+                    <span className="hidden md:inline">Hướng dẫn</span>
+                  </Link>
 
                   <div className="h-6 w-px bg-slate-200 mx-1"></div>
 
