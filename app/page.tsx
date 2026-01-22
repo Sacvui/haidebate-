@@ -20,6 +20,7 @@ import Cookies from "js-cookie";
 import { LoadingH } from "@/components/LoadingH";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ProjectManager } from "@/components/ProjectManager";
+import { UserMenu } from "@/components/UserMenu";
 
 // Lazy load heavy components
 const DebateManager = dynamic(() => import("@/components/DebateManager").then(mod => mod.DebateManager), {
@@ -337,22 +338,13 @@ export default function Home() {
 
                   <div className="h-6 w-px bg-slate-200 mx-1"></div>
 
-                  <div className="text-xs text-slate-500 hidden md:flex items-center gap-1">
-                    <span className="font-bold text-slate-700">{user.points || 0} pts</span>
-                    <span className="mx-1">•</span>
-                    {user.name || (user.email ? user.email.split('@')[0] : 'Người dùng')}
-                  </div>
-
-                  <button onClick={() => setShowSettings(true)} className="p-2 text-slate-400 hover:text-slate-700 transition-colors" title="Cài đặt API Key">
-                    <Settings size={18} />
-                  </button>
-                  <button onClick={() => setShowGuide(true)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Hướng dẫn lấy Key">
-                    <HelpCircle size={18} />
-                  </button>
-
-                  <button onClick={handleLogout} className="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Đăng xuất">
-                    <LogOut size={18} />
-                  </button>
+                  {/* New User Menu Dropdown */}
+                  <UserMenu
+                    user={user}
+                    onLogout={handleLogout}
+                    onOpenSettings={() => setShowSettings(true)}
+                    onOpenGuide={() => setShowGuide(true)}
+                  />
                 </div>
               </div>
             </header>
