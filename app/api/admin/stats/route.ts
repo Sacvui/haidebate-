@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
         // For now, we fallback to a safe env var or reject if not set
         const adminEmail = process.env.ADMIN_EMAIL;
 
-        if (!session?.user?.email || (adminEmail && session.user.email !== adminEmail)) {
+        if (!session?.user?.email || (adminEmail && session.user.email.toLowerCase() !== adminEmail.toLowerCase())) {
             return NextResponse.json({ error: 'Unauthorized: Admin access only' }, { status: 403 });
         }
 
