@@ -15,8 +15,8 @@ export interface Citation {
 export function extractCitations(content: string): Citation[] {
     const citations: Citation[] = [];
 
-    // Extract DOIs (format: 10.xxxx/xxxxx)
-    const doiRegex = /10\.\d{4,9}\/[^\s\]]+/g;
+    // Extract DOIs (format: 10.xxxx/xxxxx) - excludes trailing punctuation
+    const doiRegex = /10\.\d{4,9}\/[-._;()/:A-Z0-9]+(?=[^.,;:)\]\s]|$)/gi;
     let match;
 
     while ((match = doiRegex.exec(content)) !== null) {

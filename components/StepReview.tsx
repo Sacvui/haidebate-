@@ -23,10 +23,13 @@ interface StepReviewProps {
 const getStepName = (step: WorkflowStep): string => {
     switch (step) {
         case '1_TOPIC': return 'Bước 1: TOPIC (Thẩm định đề tài)';
-        case '2_MODEL': return 'Bước 2: MODEL (Xây dựng mô hình)';
-        case '3_OUTLINE': return 'Bước 3: OUTLINE (Hoàn thiện đề cương)';
-        case '4_SURVEY': return 'Bước 4: SURVEY (Xây dựng thang đo)';
-        case '5_GTM': return 'Bước 5: GTM (Kế hoạch triển khai)';
+        case '1_LIT_REVIEW': return 'Bước 2: LIT REVIEW (Tổng quan tài liệu)';
+        case '2_MODEL': return 'Bước 3: MODEL (Xây dựng mô hình)';
+        case '2_ARCH': return 'Bước 3: ARCHITECTURE (Kiến trúc hệ thống)';
+        case '3_OUTLINE': return 'Bước 4: OUTLINE (Hoàn thiện đề cương)';
+        case '4_SURVEY': return 'Bước 5: METHODOLOGY (Phương pháp nghiên cứu)';
+        case '4_BENCHMARK': return 'Bước 5: BENCHMARK (Kiểm thử hệ thống)';
+        case '5_GTM': return 'Bước 6: GTM (Kế hoạch triển khai)';
         default: return 'Bước không xác định';
     }
 };
