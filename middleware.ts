@@ -17,5 +17,6 @@ export default auth((req) => {
 })
 
 export const config = {
-    matcher: ['/api/admin/:path*']
+    // matcher: ['/api/admin/:path*']
+    matcher: [] // Disable middleware to prevent Edge Runtime crash due to ioredis/bcrypt in auth lib
 }
