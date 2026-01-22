@@ -316,25 +316,18 @@ export default function Home() {
                     <span className="hidden md:inline">Dự án</span>
                   </button>
 
-                  {/* Guide Link */}
-                  <Link
-                    href="/guide"
-                    className="flex items-center gap-2 px-2 md:px-3 py-1.5 bg-slate-50 text-slate-700 hover:bg-slate-100 rounded-lg font-medium text-xs md:text-sm transition-colors border border-slate-200"
-                    title="Hướng dẫn sử dụng đầy đủ"
+                  {/* Key Button (Quick Access) */}
+                  <button
+                    onClick={() => setShowSettings(true)}
+                    className={`flex items-center gap-2 px-2 md:px-3 py-1.5 rounded-lg font-bold text-xs md:text-sm transition-all border shadow-sm ${!apiKey
+                        ? "bg-red-50 text-red-600 border-red-200 hover:bg-red-100 animate-pulse"
+                        : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+                      }`}
+                    title={!apiKey ? "Chưa có API Key - Bấm để nhập" : "Cài đặt API Key"}
                   >
-                    <BookOpen className="w-4 h-4" />
-                    <span className="hidden md:inline">Hướng dẫn</span>
-                  </Link>
-
-                  {/* About Link */}
-                  <Link
-                    href="/about"
-                    className="flex items-center gap-2 px-2 md:px-3 py-1.5 bg-slate-50 text-slate-700 hover:bg-slate-100 rounded-lg font-medium text-xs md:text-sm transition-colors border border-slate-200"
-                    title="Về chúng tôi"
-                  >
-                    <Sparkles className="w-4 h-4 text-purple-500" />
-                    <span className="hidden md:inline">Giới thiệu</span>
-                  </Link>
+                    <Settings size={16} className={!apiKey ? "text-red-500" : "text-slate-500"} />
+                    <span className="hidden md:inline">{!apiKey ? "Nhập Key" : "Cài đặt"}</span>
+                  </button>
 
                   <div className="h-6 w-px bg-slate-200 mx-1"></div>
 

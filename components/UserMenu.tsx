@@ -86,20 +86,30 @@ export const UserMenu = ({ user, onLogout, onOpenSettings, onOpenGuide }: UserMe
 
                         {/* Menu Items */}
                         <div className="p-2 space-y-1">
+                            <a
+                                href="/about"
+                                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors text-left"
+                            >
+                                <Sparkles size={18} className="text-purple-500" />
+                                Giới thiệu
+                            </a>
+
+                            <a
+                                href="/guide"
+                                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors text-left"
+                            >
+                                <HelpCircle size={18} className="text-blue-500" />
+                                Hướng dẫn sử dụng
+                            </a>
+
+                            <div className="h-px bg-slate-100 mx-2 my-1"></div>
+
                             <button
                                 onClick={() => { setIsOpen(false); onOpenSettings(); }}
                                 className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors text-left"
                             >
                                 <Settings size={18} className="text-slate-400" />
                                 Cài đặt API Key
-                            </button>
-
-                            <button
-                                onClick={() => { setIsOpen(false); onOpenGuide(); }}
-                                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors text-left"
-                            >
-                                <HelpCircle size={18} className="text-slate-400" />
-                                Hướng dẫn lấy Key
                             </button>
                         </div>
 
