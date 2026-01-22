@@ -220,7 +220,7 @@ export function ExportManager({
                                 Đề cương PDF
                             </h3>
                             <p className="text-sm text-slate-600 mb-4">
-                                File PDF để in ấn hoặc gửi email. Định dạng cố định, không chỉnh sửa được.
+                                File PDF để in ấn hoặc gửi email. (Có thể mất vài giây để tải font tiếng Việt).
                             </p>
                             <button
                                 onClick={() => handleExport('pdf')}

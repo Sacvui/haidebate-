@@ -228,14 +228,32 @@ export async function exportOutlineToPDF(
 ): Promise<Blob> {
     const doc = new jsPDF();
 
-    // Note: jsPDF has limited Vietnamese font support
-    // For production, you'd need to embed a Vietnamese font
+    // 1. Load Unicode Font (Roboto Regular) - Vietnamese Support
+    try {
+        const fontUrl = 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Regular.ttf';
+        const fontResponse = await fetch(fontUrl);
+
+        if (fontResponse.ok) {
+            const fontBuffer = await fontResponse.arrayBuffer();
+            const fontBase64 = arrayBufferToBase64(fontBuffer);
+
+            // Add font to VFS and register it
+            doc.addFileToVFS('Roboto-Regular.ttf', fontBase64);
+            doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
+            doc.setFont('Roboto'); // Activate font
+        } else {
+            console.warn("Failed to load Vietnamese font, fallback to default.");
+        }
+    } catch (e) {
+        console.warn("Error loading font:", e);
+    }
 
     let yPos = 20;
 
     // Title
     doc.setFontSize(16);
-    doc.text('DE CUONG NGHIEN CUU CHI TIET', 105, yPos, { align: 'center' });
+    // doc.setFont('Roboto', 'bold'); // jsPDF basic font management is tricky with styles unless added
+    doc.text('DE CUONG NGHIEN CUU CHI TIET', 105, yPos, { align: 'center' }); // Keep ascii title slightly safe or use localized if font loaded
     yPos += 10;
 
     doc.setFontSize(14);
@@ -270,6 +288,16 @@ export async function exportOutlineToPDF(
     doc.text(outlineLines, 20, yPos);
 
     return doc.output('blob');
+}
+
+// Helper: Convert ArrayBuffer to Base64
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++)
+        binary += String.fromCharCode(bytes[i]);
+    return window.btoa(binary);
 }
 
 // Export survey ra Excel
