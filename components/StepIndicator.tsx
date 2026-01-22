@@ -11,10 +11,11 @@ interface StepIndicatorProps {
 
 const RESEARCH_STEPS = [
     { id: 1, label: "Tên Đề Tài (Topic)" },
-    { id: 2, label: "Mô Hình (Research Model)" },
-    { id: 3, label: "Đề Cương (Outline)" },
-    { id: 4, label: "Khảo Sát (Survey)" },
-    { id: 5, label: "Export Files" }
+    { id: 2, label: "Lit Review" },
+    { id: 3, label: "Mô Hình (Model)" },
+    { id: 4, label: "Đề Cương (Outline)" },
+    { id: 5, label: "Phương pháp (Method)" },
+    { id: 6, label: "Export Files" }
 ];
 
 const STARTUP_STEPS = [
