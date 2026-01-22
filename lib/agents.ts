@@ -859,8 +859,8 @@ export class AgentSession {
 
   constructor(
     public topic: string,
-    public goal: string = "NghiÃªn cá»©u khoa há»c",
-    public audience: string = "ChuyÃªn gia/NhÃ  nghiÃªn cá»©u",
+    public goal: string = "Nghiên cứu khoa học",
+    public audience: string = "Chuyên gia/Nhà nghiên cứu",
     public level: AcademicLevel = "MASTER",
     public language: 'vi' | 'en' = 'vi',
     public projectType: ProjectType = 'RESEARCH', // NEW: Support startup projects
@@ -919,17 +919,17 @@ export class AgentSession {
     }
 
     const summaryPrompt = `
-  Báº¡n lÃ  trá»£ lÃ½ tÃ³m táº¯t há»™i thoáº¡i.Hãy tÃ³m táº¯t cÃ¡c ÄIá»‚M ÄÃƒ CHá»T sau tá»« cuá»™c há»™i thoáº¡i:
+  Bạn là trợ lý tóm tắt hội thoại. Hãy tóm tắt các ĐIỂM ĐÃ CHỐT sau từ cuộc hội thoại:
 
-  Äá» tÃ i: ${this.topic}
-  Loáº¡i dá»± Ã¡n: ${this.projectType}
+  Đề tài: ${this.topic}
+  Loại dự án: ${this.projectType}
 
-${this.finalizedTopic ? `âœ… Ã tÆ°á»Ÿng/Äá» tÃ i Ä‘Ã£ chá»‘t: ${this.finalizedTopic}` : ''}
-${this.finalizedModel ? `âœ… MÃ´ hÃ¬nh Ä‘Ã£ chá»‘t: ${this.finalizedModel.substring(0, 500)}...` : ''}
-${this.finalizedOutline ? `âœ… Äá» cÆ°Æ¡ng Ä‘Ã£ chá»‘t: ${this.finalizedOutline.substring(0, 500)}...` : ''}
-${this.finalizedGTM ? `âœ… GTM Ä‘Ã£ chá»‘t: ${this.finalizedGTM.substring(0, 500)}...` : ''}
+${this.finalizedTopic ? `✅ Ý tưởng/Đề tài đã chốt: ${this.finalizedTopic}` : ''}
+${this.finalizedModel ? `✅ Mô hình đã chốt: ${this.finalizedModel.substring(0, 500)}...` : ''}
+${this.finalizedOutline ? `✅ Đề cương đã chốt: ${this.finalizedOutline.substring(0, 500)}...` : ''}
+${this.finalizedGTM ? `✅ GTM đã chốt: ${this.finalizedGTM.substring(0, 500)}...` : ''}
 
-YÃŠU Cáº¦U: TÃ³m táº¯t trong 5 - 7 bullet points ngáº¯n gá»n.Táº­p trung vÃ o cÃ¡c quyáº¿t Ä‘á»‹nh quan trá»ng vÃ  hÆ°á»›ng Ä‘i Ä‘Ã£ thá»‘ng nháº¥t.
+YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào các quyết định quan trọng và hướng đi đã thống nhất.
     `;
 
     try {
@@ -1145,19 +1145,19 @@ YÃŠU Cáº¦U: TÃ³m táº¯t trong 5 - 7 bullet points ngáº¯n gá»n.T�
           case '4_SURVEY':
             sysPrompt = getSurveyPrompt(this.level);
             if (this.finalizedTopic) {
-              contextAddition += `\n\nÄá»€ TÃ€I: "${this.finalizedTopic}"`;
+              contextAddition += `\n\nĐỀ TÀI: "${this.finalizedTopic}"`;
             }
             if (this.finalizedModel) {
               contextAddition += `\n\nMÔ HÌNH: ${this.finalizedModel.substring(0, 500)}...`;
             }
             if (this.finalizedOutline) {
-              contextAddition += `\n\nÄá»€ CÆ¯Æ NG (trÃ­ch Ä‘oáº¡n): ${this.finalizedOutline.substring(0, 500)}...`;
+              contextAddition += `\n\nĐỀ CƯƠNG (trích đoạn): ${this.finalizedOutline.substring(0, 500)}...`;
             }
             break;
         }
       }
 
-      const context = `CHá»¦ Äá»€ Gá»C: ${this.topic}\nLOáº I HÃŒNH (OUTPUT): ${this.goal}\nÄá»I TÆ¯á»¢NG: ${this.audience}\nTRÃŒNH Äá»˜: ${this.level}\nNGÃ”N NGá»® Äáº¦U RA (OUTPUT LANGUAGE): ${this.language === 'en' ? 'ENGLISH (100%)' : 'VIETNAMESE (100%)'}${contextAddition}`;
+      const context = `CHỦ ĐỀ GỐC: ${this.topic}\nLOẠI HÌNH (OUTPUT): ${this.goal}\nĐỐI TƯỢNG: ${this.audience}\nTRÌNH ĐỘ: ${this.level}\nNGÔN NGỮ ĐẦU RA (OUTPUT LANGUAGE): ${this.language === 'en' ? 'ENGLISH (100%)' : 'VIETNAMESE (100%)'}${contextAddition}`;
 
       const prompt = previousCriticFeedback
         ? `${context}\n\nPHẢN HỒI CỦA CRITIC (Vòng trước): ${previousCriticFeedback}\n\n${sysPrompt}\nHãy cải thiện/viết tiếp dựa trên phản hồi này.`
@@ -1168,7 +1168,7 @@ YÃŠU Cáº¦U: TÃ³m táº¯t trong 5 - 7 bullet points ngáº¯n gá»n.T�
 
     } catch (error: any) {
       console.error("Gemini Writer Error:", error);
-      return `Lá»—i AI: ${error.message || error}`;
+      return `Lỗi AI: ${error.message || error}`;
     }
   }
 
@@ -1177,7 +1177,7 @@ YÃŠU Cáº¦U: TÃ³m táº¯t trong 5 - 7 bullet points ngáº¯n gá»n.T�
     const geminiKey = this.criticKey || this.writerKey;
 
     if (!geminiKey) {
-      return "âš ï¸ CHÆ¯A Cáº¤U HÃŒNH API KEY: Vui lòng vÃ o Cài đặt (âš™ï¸) Ä‘á»ƒ nhập API Key.";
+      return "⚠️ CHƯA CẤU HÌNH API KEY: Vui lòng vào Cài đặt (⚙️) để nhập API Key.";
     }
     try {
       let sysPrompt = "";
@@ -1203,7 +1203,7 @@ YÃŠU Cáº¦U: TÃ³m táº¯t trong 5 - 7 bullet points ngáº¯n gá»n.T�
         }
       }
 
-      const prompt = `${sysPrompt}\n\nBÃ€I LÃ€M CỦA WRITER:\n${writerDraft}\n\nHãy Ä‘Ã³ng vai trÃ² Critic vÃ  Ä‘Æ°a ra nháº­n xÃ©t chi tiáº¿t, kháº¯t khe.`;
+      const prompt = `${sysPrompt}\n\nBÀI LÀM CỦA WRITER:\n${writerDraft}\n\nHãy đóng vai trò Critic và đưa ra nhận xét chi tiết, khắt khe.`;
 
       // Use Preferred Model
       return await this.callGeminiAPI('gemini-3-flash-preview', prompt, geminiKey);
