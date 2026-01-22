@@ -197,8 +197,8 @@ export default function Home() {
       {!user && (
         <div className="flex h-screen w-full">
           {/* LEFT COLUMN: LOGIN */}
-          <div className="w-full md:w-[480px] bg-white border-r border-slate-200 p-8 flex flex-col justify-center relative z-20 shadow-2xl">
-            <div className="mb-8">
+          <div className="w-full md:w-[480px] bg-white border-r border-slate-200 p-6 flex flex-col justify-center relative z-20 shadow-2xl">
+            <div className="mb-4">
               <div className="w-16 h-16 mb-4 shadow-lg shadow-blue-500/20 rounded-2xl overflow-hidden">
                 <img src="/favicon.ico" alt="Hải Debate Logo" className="w-full h-full object-cover" />
               </div>
@@ -215,7 +215,7 @@ export default function Home() {
             </div>
 
             {/* Login Form */}
-            <div className="space-y-6">
+            <div className="space-y-4">
 
               {/* Referral Input */}
               <div className="relative">
@@ -254,7 +254,7 @@ export default function Home() {
             </div>
 
             {/* Impact Stats */}
-            <div className="mt-8 w-full">
+            <div className="mt-4 w-full">
               <ImpactStats />
             </div>
           </div>
