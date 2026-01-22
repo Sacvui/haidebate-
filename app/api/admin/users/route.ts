@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from "@/lib/auth";
-import { getAllUsers } from "@/lib/kv";
+import { getAllUsers, kv } from "@/lib/kv";
 
 const ALLOWED_ADMIN_EMAIL = "foreverlove3004@gmail.com";
 
@@ -18,8 +18,21 @@ export async function GET(req: NextRequest) {
             const users = await getAllUsers(100);
 
             // Check if KV is actually working
-            if (!users) {
-                return NextResponse.json({ error: "KV returned null/undefined", debug: "Check Redis connection" }, { status: 500 });
+            // If empty, try a test write/read to confirm connection
+            if (users.length === 0) {
+                try {
+                    await kv.set('system:health_check', 'ok');
+                    const check = await kv.get('system:health_check');
+                    if (check !== 'ok') {
+                        throw new Error("KV Read/Write failed");
+                    }
+                } catch (connErr: any) {
+                    return NextResponse.json({
+                        error: "Database Connection Failed",
+                        debug: "Could not write to KV/Redis. Check env vars.",
+                        details: connErr.message
+                    }, { status: 500 });
+                }
             }
 
             return NextResponse.json({ users });

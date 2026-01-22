@@ -236,20 +236,29 @@ export async function deductPoints(userId: string, amount: number, reason: strin
 // ============================================
 
 export async function getAllUsers(limit = 100): Promise<User[]> {
-    const total = await getTotalUsers();
-    const users: User[] = [];
-
-    for (let i = 0; i < Math.min(total, limit); i++) {
-        // This is simplified - in production, use cursor-based pagination
+    try {
         const keys = await kv.keys('user:*');
-        for (const key of keys.slice(0, limit)) {
+        if (!keys || keys.length === 0) return [];
+
+        // Prioritize: recent keys or all keys? 
+        // keys() order is not guaranteed. 
+        // We take up to 'limit' keys.
+        const targetKeys = keys.slice(0, limit);
+
+        const users: User[] = [];
+        for (const key of targetKeys) {
             const user = await kv.get<User>(key);
             if (user) users.push(user);
         }
-        break;
-    }
 
-    return users;
+        // Sort by createdAt descending (newest first)
+        users.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+        return users;
+    } catch (e) {
+        console.error("getAllUsers failed:", e);
+        return [];
+    }
 }
 
 export async function getUserStats() {
