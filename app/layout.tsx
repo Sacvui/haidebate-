@@ -38,6 +38,7 @@ export const metadata: Metadata = {
 
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { NextAuthProvider } from "@/components/auth/NextAuthProvider";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 export default function RootLayout({
   children,
@@ -45,13 +46,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} antialiased font-sans`} // Use Inter variable and safe defaults
+        className={`${inter.variable} antialiased font-sans`}
       >
         <NextAuthProvider>
           <AuthProvider>
-            {children}
+            <ThemeProvider>
+              {children}
+            </ThemeProvider>
           </AuthProvider>
         </NextAuthProvider>
         <Toaster position="top-right" richColors closeButton />

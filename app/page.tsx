@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-import { Sparkles, HelpCircle, LogOut, Settings, Lock, CheckCircle, ArrowRight, Mail, BookOpen, FolderOpen } from "lucide-react";
+import { Sparkles, HelpCircle, LogOut, Settings, Lock, CheckCircle, ArrowRight, Mail, BookOpen, FolderOpen, Moon, Sun } from "lucide-react";
+import { useTheme } from "@/components/ThemeProvider";
 import Link from "next/link";
 import { AcademicLevel, ProjectType } from "@/lib/agents";
 import { SavedProject, createNewProject, saveProject, getProject } from "@/lib/projectStorage";
@@ -21,6 +22,7 @@ import { LoadingH } from "@/components/LoadingH";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ProjectManager } from "@/components/ProjectManager";
 import { UserMenu } from "@/components/UserMenu";
+import { MobileMenu } from "@/components/MobileMenu";
 
 // Lazy load heavy components
 const DebateManager = dynamic(() => import("@/components/DebateManager").then(mod => mod.DebateManager), {
@@ -53,6 +55,7 @@ export default function Home() {
 
   // Auth Hook
   const { user, login, logout, isLoading } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [formData, setFormData] = useState<ResearchFormData | null>(null);
   const [referralCode, setReferralCode] = useState("");
   const [isMounted, setIsMounted] = useState(false);
@@ -185,10 +188,10 @@ export default function Home() {
     }
   }
 
-  if (isLoading) return <div className="flex h-screen items-center justify-center bg-slate-50"><LoadingH /></div>;
+  if (isLoading) return <div className="flex h-screen items-center justify-center bg-background"><LoadingH /></div>;
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 font-sans overflow-x-hidden flex flex-col">
+    <main className="min-h-screen bg-background text-foreground font-sans overflow-x-hidden flex flex-col">
       <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
       <GuideModal isOpen={showGuide} onClose={() => setShowGuide(false)} />
       <LevelGuidelines isOpen={showGuidelines} onClose={() => setShowGuidelines(false)} onSelectLevel={() => { }} />
@@ -199,19 +202,19 @@ export default function Home() {
       {!user && (
         <div className="flex h-screen w-full">
           {/* LEFT COLUMN: LOGIN */}
-          <div className="w-full md:w-[480px] bg-white border-r border-slate-200 p-6 flex flex-col justify-center relative z-20 shadow-2xl">
+          <div className="w-full md:w-[480px] bg-card border-r border-border p-6 flex flex-col justify-center relative z-20 shadow-2xl">
             <div className="mb-4">
               <div className="w-16 h-16 mb-4 shadow-lg shadow-blue-500/20 rounded-2xl overflow-hidden">
                 <img src="/favicon.ico" alt="Hải Debate Logo" className="w-full h-full object-cover" />
               </div>
               <a href="/" className="block group">
-                <h1 className="text-3xl font-extrabold text-slate-900 leading-tight mb-2 group-hover:opacity-80 transition-opacity">
+                <h1 className="text-3xl font-extrabold text-foreground leading-tight mb-2 group-hover:opacity-80 transition-opacity">
                   Hải Debate <br />
-                  <span className="text-blue-600">Research Assistant</span>
+                  <span className="text-accent">Research Assistant</span>
                 </h1>
               </a>
-              <p className="text-slate-500">
-                <Sparkles className="inline-block w-4 h-4 mr-1 text-blue-500" />
+              <p className="text-muted-foreground">
+                <Sparkles className="inline-block w-4 h-4 mr-1 text-accent" />
                 <i>"Để nghiên cứu thực sự là một cuộc rong chơi nhiều hoa thơm cỏ lạ."</i>
               </p>
             </div>
@@ -221,13 +224,13 @@ export default function Home() {
 
               {/* Referral Input */}
               <div className="relative">
-                <label className="block text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">Thư tiến cử số (Nếu có)</label>
+                <label className="block text-xs font-bold text-muted-foreground mb-1 uppercase tracking-wider">Thư tiến cử số (Nếu có)</label>
                 <input
                   type="text"
                   placeholder="Nhập Số trên thư tiến cử..."
                   value={referralCode}
                   onChange={handleManualReferral}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all font-mono text-center tracking-widest text-slate-700 font-bold"
+                  className="w-full px-4 py-3 bg-muted border border-border rounded-xl focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition-all font-mono text-center tracking-widest text-foreground font-bold"
                 />
               </div>
 
@@ -235,7 +238,7 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={(e) => { e.preventDefault(); void signIn("google", { callbackUrl: "/" }); }}
-                  className="flex items-center justify-center gap-2 py-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 active:scale-95 transition-all text-slate-700 font-bold text-sm shadow-sm"
+                  className="flex items-center justify-center gap-2 py-3 bg-card border border-border rounded-xl hover:bg-muted active:scale-95 transition-all text-foreground font-bold text-sm shadow-sm"
                 >
                   <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="Google" />
                   Google
@@ -243,14 +246,21 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={(e) => { e.preventDefault(); void signIn("orcid", { callbackUrl: "/" }); }}
-                  className="flex items-center justify-center gap-2 py-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 active:scale-95 transition-all text-slate-700 font-bold text-sm shadow-sm"
+                  className="flex items-center justify-center gap-2 py-3 bg-card border border-border rounded-xl hover:bg-muted active:scale-95 transition-all text-foreground font-bold text-sm shadow-sm"
                 >
                   <img src="https://upload.wikimedia.org/wikipedia/commons/0/06/ORCID_iD.svg" className="w-5 h-5" alt="ORCID" />
                   ORCID
                 </button>
               </div>
 
-              <p className="text-xs text-center text-slate-400">
+              {/* Theme Toggle */}
+              <div className="flex justify-center">
+                <button onClick={toggleTheme} className="p-2 rounded-lg bg-muted hover:bg-border transition-colors" title="Chuyển giao diện">
+                  {theme === 'dark' ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
+                </button>
+              </div>
+
+              <p className="text-xs text-center text-muted-foreground">
                 Điểm danh hàng ngày và kết nạp đồng môn để nhận bí kíp võ công
               </p>
             </div>
@@ -262,7 +272,7 @@ export default function Home() {
           </div>
 
           {/* RIGHT COLUMN: PREVIEW */}
-          <div className="hidden md:flex flex-1 bg-slate-50 items-center justify-center p-12 relative overflow-hidden">
+          <div className="hidden md:flex flex-1 bg-background items-center justify-center p-12 relative overflow-hidden">
             {/* Background elements */}
             <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none"></div>
             <div className="absolute -top-20 -right-20 w-96 h-96 bg-blue-400/20 rounded-full blur-3xl animate-pulse"></div>
@@ -283,7 +293,7 @@ export default function Home() {
         user && (
           <>
             {/* Header */}
-            <header className="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-slate-200 z-50 animate-in slide-in-from-top-4 duration-500">
+            <header className="fixed top-0 w-full bg-header-bg backdrop-blur-md border-b border-border z-50 animate-in slide-in-from-top-4 duration-500">
               <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
                 <div
                   className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
@@ -296,40 +306,44 @@ export default function Home() {
                     Hải Debate
                   </h1>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="hidden md:flex items-center gap-3">
                   {/* Share Button (Points) */}
                   <button
                     onClick={() => setShowShare(true)}
-                    className="flex items-center gap-2 px-2 md:px-3 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 rounded-lg font-medium text-xs md:text-sm transition-colors border border-green-200"
+                    className="flex items-center gap-2 px-3 py-1.5 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-lg font-medium text-sm transition-colors border border-green-200 dark:border-green-800"
                   >
                     <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    <span className="hidden md:inline">Nhận Điểm</span>
-                    <span className="md:hidden">Điểm</span>
+                    Nhận Điểm
                   </button>
 
                   {/* Projects Button */}
                   <button
                     onClick={() => setShowProjects(true)}
-                    className="flex items-center gap-2 px-2 md:px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg font-medium text-xs md:text-sm transition-colors border border-blue-200"
+                    className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg font-medium text-sm transition-colors border border-blue-200 dark:border-blue-800"
                   >
                     <FolderOpen className="w-4 h-4" />
-                    <span className="hidden md:inline">Dự án</span>
+                    Dự án
                   </button>
 
                   {/* Key Button (Quick Access) */}
                   <button
                     onClick={() => setShowSettings(true)}
-                    className={`flex items-center gap-2 px-2 md:px-3 py-1.5 rounded-lg font-bold text-xs md:text-sm transition-all border shadow-sm ${!apiKey
-                        ? "bg-red-50 text-red-600 border-red-200 hover:bg-red-100 animate-pulse"
-                        : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg font-bold text-sm transition-all border shadow-sm ${!apiKey
+                      ? "bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/50 animate-pulse"
+                      : "bg-muted text-foreground border-border hover:bg-border"
                       }`}
                     title={!apiKey ? "Chưa có API Key - Bấm để nhập" : "Cài đặt API Key"}
                   >
-                    <Settings size={16} className={!apiKey ? "text-red-500" : "text-slate-500"} />
-                    <span className="hidden md:inline">{!apiKey ? "Nhập Key" : "Cài đặt"}</span>
+                    <Settings size={16} className={!apiKey ? "text-red-500" : "text-muted-foreground"} />
+                    {!apiKey ? "Nhập Key" : "Cài đặt"}
                   </button>
 
-                  <div className="h-6 w-px bg-slate-200 mx-1"></div>
+                  {/* Theme Toggle */}
+                  <button onClick={toggleTheme} className="p-1.5 rounded-lg bg-muted hover:bg-border transition-colors" title="Chuyển giao diện">
+                    {theme === 'dark' ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-muted-foreground" />}
+                  </button>
+
+                  <div className="h-6 w-px bg-border mx-1"></div>
 
                   {/* New User Menu Dropdown */}
                   <UserMenu
@@ -339,6 +353,17 @@ export default function Home() {
                     onOpenGuide={() => setShowGuide(true)}
                   />
                 </div>
+
+                {/* Mobile Hamburger Menu */}
+                <MobileMenu
+                  user={user}
+                  apiKey={apiKey}
+                  onToggleProjects={() => setShowProjects(true)}
+                  onToggleSettings={() => setShowSettings(true)}
+                  onToggleGuide={() => setShowGuide(true)}
+                  onToggleShare={() => setShowShare(true)}
+                  onLogout={handleLogout}
+                />
               </div>
             </header>
 
@@ -383,8 +408,8 @@ export default function Home() {
               )}
             </div>
             {/* Footer */}
-            <footer className="py-8 text-center text-slate-400 text-sm border-t border-slate-100 mt-auto bg-slate-50">
-              <p>© 2026 Hải Debate. Powered by <span className="font-bold text-slate-600">Sidewalk Professor Hải Rong Chơi</span>.</p>
+            <footer className="py-8 text-center text-muted-foreground text-sm border-t border-border mt-auto bg-background">
+              <p>© 2026 Hải Debate. Powered by <span className="font-bold text-foreground">Sidewalk Professor Hải Rong Chơi</span>.</p>
             </footer>
           </>
         )

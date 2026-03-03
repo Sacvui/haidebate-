@@ -60,11 +60,8 @@ export const config = {
                 try {
                     const dbUser = await getUserByEmail(session.user.email);
                     if (dbUser) {
-                        // @ts-ignore
                         session.user.id = dbUser.id;
-                        // @ts-ignore
                         session.user.points = dbUser.points;
-                        // @ts-ignore
                         session.user.referralCode = dbUser.referralCode;
                     }
                 } catch (e) {
