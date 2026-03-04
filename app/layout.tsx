@@ -20,11 +20,6 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://debate.ncskit.org'),
   title: "Hai Debate: The art of 'clapping back' Reviewer #2",
   description: "Công cụ hỗ trợ viết luận văn và nghiên cứu khoa học chuyên sâu với AI Phản biện. Được phát triển bởi Dr. Hai Show & Hải Rong Chơi.",
-  icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon.ico',
-    apple: '/og-image.jpg', // Using OG image as a placeholder for apple touch icon if we don't have a specific one
-  },
   openGraph: {
     title: "Hai Debate: The art of 'clapping back' Reviewer #2",
     description: "Công cụ hỗ trợ viết luận văn và nghiên cứu khoa học chuyên sâu với AI Phản biện.",
