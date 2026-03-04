@@ -128,3 +128,122 @@ body {
 .dark ::-webkit-scrollbar-thumb {
   background: var(--border);
 }
+
+/* ==========================================================
+   DARK MODE: HeroDemo paper card
+   ========================================================== */
+.dark .font-serif {
+  color: var(--foreground) !important;
+}
+
+.dark .font-serif .bg-white {
+  background-color: var(--card) !important;
+}
+
+.dark .font-serif .text-slate-900,
+.dark .font-serif .text-slate-700,
+.dark .font-serif .text-slate-600,
+.dark .font-serif .text-slate-500 {
+  color: var(--card-foreground) !important;
+}
+
+.dark .font-serif .bg-slate-50 {
+  background-color: rgba(30, 41, 59, 0.5) !important;
+}
+
+/* Bottom fog for HeroDemo */
+.dark .bg-gradient-to-t.from-white {
+  --tw-gradient-from: var(--card) !important;
+}
+
+/* ==========================================================
+   DARK MODE: ImpactStats
+   ========================================================== */
+.dark [class*="bg-white/60"] {
+  background-color: rgba(30, 41, 59, 0.6) !important;
+}
+
+.dark [class*="border-white/50"] {
+  border-color: var(--border) !important;
+}
+
+/* ==========================================================
+   DARK MODE: Gray text contrast fix
+   ========================================================== */
+.dark .text-gray-900,
+.dark .text-gray-800 {
+  color: var(--foreground) !important;
+}
+
+.dark .text-gray-700,
+.dark .text-gray-600 {
+  color: var(--card-foreground) !important;
+}
+
+.dark .text-gray-500,
+.dark .text-gray-400 {
+  color: var(--muted-foreground) !important;
+}
+
+/* ==========================================================
+   DARK MODE: DebateManager specific
+   ========================================================== */
+.dark .bg-purple-50 {
+  background-color: rgba(88, 28, 135, 0.15) !important;
+}
+
+.dark .bg-purple-100 {
+  background-color: rgba(88, 28, 135, 0.2) !important;
+}
+
+.dark .border-purple-100 {
+  border-color: rgba(88, 28, 135, 0.3) !important;
+}
+
+.dark .bg-blue-100 {
+  background-color: rgba(37, 99, 235, 0.15) !important;
+}
+
+.dark .bg-green-500 {
+  background-color: #16a34a !important;
+}
+
+/* Prose in dark mode */
+.dark .prose {
+  color: var(--foreground) !important;
+}
+
+.dark .prose-slate {
+  --tw-prose-body: var(--foreground);
+  --tw-prose-headings: var(--foreground);
+}
+
+.dark .prose th {
+  background-color: var(--muted) !important;
+}
+
+/* ==========================================================
+   MOBILE RESPONSIVE: Stack landing page columns
+   ========================================================== */
+@media (max-width: 767px) {
+
+  /* Override the flex h-screen for mobile guest landing */
+  .flex.h-screen.w-full {
+    flex-direction: column !important;
+    height: auto !important;
+    min-height: 100vh;
+  }
+
+  /* Left panel takes full width on mobile */
+  .flex.h-screen.w-full>div:first-child {
+    width: 100% !important;
+    min-height: auto !important;
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+  }
+
+  /* Hide HeroDemo on mobile to keep page clean */
+  .flex.h-screen.w-full>div:last-child {
+    display: none !important;
+  }
+}

@@ -106,7 +106,8 @@ export function DebateManager({
                 } finally {
                     setIsInitialized(true);
                 }
-            }
+            };
+            loadData();
         } else {
             // New session tracking (fire and forget)
             if (!isInitialized) {
@@ -287,7 +288,6 @@ export function DebateManager({
     };
 
     const handleFinalize = async (userFinal: string, note?: string) => {
-        if (!userId || !sessionId) return;
         try {
             if (currentStep === '1_TOPIC') session.setFinalizedTopic(userFinal);
             else if (currentStep === '2_MODEL') session.setFinalizedModel(userFinal, variableChart);
@@ -415,7 +415,7 @@ export function DebateManager({
                         <div className="flex gap-2">
                             {currentStep !== '1_TOPIC' && <button onClick={handlePreviousStep} className="bg-slate-100 px-4 py-2 rounded-lg">Quay lại</button>}
                             <button onClick={() => setShowReview(true)} className="bg-white border px-4 py-2 rounded-lg">Chỉnh sửa</button>
-                            {currentStep === (projectType === 'STARTUP' ? '4_SURVEY' : '4_SURVEY') ? (
+                            {(currentStep === '4_SURVEY' || currentStep === '4_BENCHMARK') ? (
                                 <button onClick={() => setShowExport(true)} className="bg-indigo-600 text-white px-6 py-2 rounded-lg">Export</button>
                             ) : (
                                 <button onClick={handleNextStep} className="bg-green-600 text-white px-6 py-2 rounded-lg">Tiếp theo</button>
