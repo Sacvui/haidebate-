@@ -14,6 +14,7 @@ import {
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ExportTemplateSelector, ExportTemplate } from './ExportTemplateSelector';
+import { toast } from 'sonner';
 
 interface ExportManagerProps {
     topic: string;
@@ -100,7 +101,7 @@ export function ExportManager({
             }
 
             // Show user-friendly error
-            alert(`❌ Lỗi khi export ${type.toUpperCase()}:\n\n${errorMessage}\n\nVui lòng thử lại hoặc liên hệ hỗ trợ nếu lỗi vẫn tiếp diễn.`);
+            toast.error(`❌ Lỗi khi xuất ${type.toUpperCase()}: ${errorMessage}. Vui lòng thử lại.`);
         } finally {
             setExporting(null);
         }

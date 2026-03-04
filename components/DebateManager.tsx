@@ -3,8 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-
-
+import { toast } from "sonner";
 import { Play, Bot, User, CheckCircle, ArrowRight, ArrowLeft, FileText, Download, Share2, Home } from 'lucide-react';
 import { AgentSession, WorkflowStep, AcademicLevel, ProjectType, AgentMessage } from '@/lib/agents';
 import { StepIndicator } from './StepIndicator';
@@ -281,6 +280,7 @@ export function DebateManager({
             setShowReview(true);
         } catch (error) {
             console.error("Error in debate:", error);
+            toast.error("Hệ thống gặp lỗi kết nối với AI. Vui lòng kiểm tra lại API Key hoặc thử lại sau!");
             addMessage('critic', "Hệ thống gặp lỗi kết nối. Đang thử lại...");
         } finally {
             setIsProcessing(false);
@@ -298,6 +298,7 @@ export function DebateManager({
             handleNextStep();
         } catch (error) {
             console.error('Finalize error:', error);
+            toast.error("Lưu kết quả thất bại. Vui lòng thử lại!");
         }
     };
 

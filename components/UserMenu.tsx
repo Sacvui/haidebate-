@@ -17,9 +17,11 @@ interface UserMenuProps {
     onLogout: () => void;
     onOpenSettings: () => void;
     onOpenGuide: () => void;
+    onOpenProjects?: () => void;
+    onOpenShare?: () => void;
 }
 
-export const UserMenu = ({ user, onLogout, onOpenSettings, onOpenGuide }: UserMenuProps) => {
+export const UserMenu = ({ user, onLogout, onOpenSettings, onOpenGuide, onOpenProjects, onOpenShare }: UserMenuProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -73,7 +75,7 @@ export const UserMenu = ({ user, onLogout, onOpenSettings, onOpenGuide }: UserMe
                         </div>
 
                         {/* Points Badge */}
-                        <div className="p-3">
+                        <div className="p-3 pb-1">
                             <div className="bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 p-3 rounded-lg border border-green-100 flex items-center justify-between">
                                 <span className="text-xs font-bold flex items-center gap-1">
                                     <Sparkles size={14} className="text-green-500" /> Điểm tích lũy
@@ -82,10 +84,29 @@ export const UserMenu = ({ user, onLogout, onOpenSettings, onOpenGuide }: UserMe
                             </div>
                         </div>
 
-                        <div className="h-px bg-slate-100 mx-3"></div>
-
                         {/* Menu Items */}
                         <div className="p-2 space-y-1">
+                            {onOpenShare && (
+                                <button
+                                    onClick={() => { setIsOpen(false); onOpenShare(); }}
+                                    className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors text-left"
+                                >
+                                    <Sparkles size={18} className="text-green-500" />
+                                    Nhận Thêm Điểm
+                                </button>
+                            )}
+
+                            {onOpenProjects && (
+                                <button
+                                    onClick={() => { setIsOpen(false); onOpenProjects(); }}
+                                    className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors text-left"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" /></svg>
+                                    Quản lý Dự án
+                                </button>
+                            )}
+
+                            <div className="h-px bg-slate-100 mx-2 my-1"></div>
                             <a
                                 href="/about"
                                 className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors text-left"

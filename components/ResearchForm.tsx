@@ -23,13 +23,17 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
     const [projectType, setProjectType] = useState<ProjectType>('RESEARCH');
     const [paperType, setPaperType] = useState<string>('quant');
     const [showGuide, setShowGuide] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        if (isSubmitting) return;
+
         if (topic.trim()) {
-            if (topic.trim()) {
-                onStart({ topic, level, goal, audience, language, projectType, paperType });
-            }
+            setIsSubmitting(true);
+            onStart({ topic, level, goal, audience, language, projectType, paperType });
+            // Reset after a delay in case the parent doesn't unmount immediately
+            setTimeout(() => setIsSubmitting(false), 2000);
         }
     };
 
@@ -247,9 +251,17 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
 
                 <button
                     type="submit"
-                    className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 transform hover:-translate-y-0.5 transition-all text-lg"
+                    disabled={isSubmitting || isPreview}
+                    className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 transform hover:-translate-y-0.5 transition-all text-lg disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
                 >
-                    Bắt đầu quy trình nghiên cứu
+                    {isSubmitting ? (
+                        <span className="flex items-center justify-center gap-2">
+                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            Vui lòng chờ...
+                        </span>
+                    ) : (
+                        "Bắt đầu quy trình nghiên cứu"
+                    )}
                 </button>
             </form>
         </div>

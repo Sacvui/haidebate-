@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Share2, CheckCircle, AlertCircle } from 'lucide-react';
+import { X, Share2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface ShareModalProps {
     isOpen: boolean;
@@ -15,7 +16,6 @@ interface ShareModalProps {
 export function ShareModal({ isOpen, onClose, userId, user, onSuccess }: ShareModalProps) {
     const [url, setUrl] = useState('');
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
     const [copied, setCopied] = useState(false);
 
     if (!isOpen) return null;
@@ -32,7 +32,6 @@ export function ShareModal({ isOpen, onClose, userId, user, onSuccess }: ShareMo
         // ... (existing logic)
         e.preventDefault();
         setLoading(true);
-        setMessage(null);
 
         try {
             const res = await fetch('/api/verify-share', {
@@ -45,15 +44,14 @@ export function ShareModal({ isOpen, onClose, userId, user, onSuccess }: ShareMo
 
             if (!res.ok) throw new Error(data.error);
 
-            setMessage({ type: 'success', text: data.message });
+            toast.success(data.message);
             setTimeout(() => {
                 onSuccess();
                 onClose();
                 setUrl('');
-                setMessage(null);
             }, 2000);
         } catch (err: any) {
-            setMessage({ type: 'error', text: err.message });
+            toast.error(err.message || 'Lỗi gửi yêu cầu');
         } finally {
             setLoading(false);
         }
@@ -127,12 +125,6 @@ export function ShareModal({ isOpen, onClose, userId, user, onSuccess }: ShareMo
                                     </button>
                                 </div>
                             </form>
-                            {message && (
-                                <div className={`mt-3 p-2 rounded text-xs flex items-center gap-1 ${message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                                    {message.type === 'success' ? <CheckCircle size={12} /> : <AlertCircle size={12} />}
-                                    {message.text}
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>

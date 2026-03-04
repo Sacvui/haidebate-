@@ -192,7 +192,11 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-background text-foreground font-sans overflow-x-hidden flex flex-col">
-      <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
+      <SettingsModal isOpen={showSettings} onClose={() => {
+        setShowSettings(false);
+        const savedKey = localStorage.getItem("gemini_api_key");
+        if (savedKey) setApiKey(savedKey);
+      }} />
       <GuideModal isOpen={showGuide} onClose={() => setShowGuide(false)} />
       <LevelGuidelines isOpen={showGuidelines} onClose={() => setShowGuidelines(false)} onSelectLevel={() => { }} />
       {/* SignupModal removed */}
@@ -307,36 +311,17 @@ export default function Home() {
                   </h1>
                 </div>
                 <div className="hidden md:flex items-center gap-3">
-                  {/* Share Button (Points) */}
-                  <button
-                    onClick={() => setShowShare(true)}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-lg font-medium text-sm transition-colors border border-green-200 dark:border-green-800"
-                  >
-                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    Nhận Điểm
-                  </button>
-
-                  {/* Projects Button */}
-                  <button
-                    onClick={() => setShowProjects(true)}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg font-medium text-sm transition-colors border border-blue-200 dark:border-blue-800"
-                  >
-                    <FolderOpen className="w-4 h-4" />
-                    Dự án
-                  </button>
-
-                  {/* Key Button (Quick Access) */}
-                  <button
-                    onClick={() => setShowSettings(true)}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg font-bold text-sm transition-all border shadow-sm ${!apiKey
-                      ? "bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/50 animate-pulse"
-                      : "bg-muted text-foreground border-border hover:bg-border"
-                      }`}
-                    title={!apiKey ? "Chưa có API Key - Bấm để nhập" : "Cài đặt API Key"}
-                  >
-                    <Settings size={16} className={!apiKey ? "text-red-500" : "text-muted-foreground"} />
-                    {!apiKey ? "Nhập Key" : "Cài đặt"}
-                  </button>
+                  {/* Key Button (Only show if no API key) */}
+                  {!apiKey && (
+                    <button
+                      onClick={() => setShowSettings(true)}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg font-bold text-sm transition-all border shadow-sm bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/50 animate-pulse"
+                      title="Chưa có API Key - Bấm để nhập"
+                    >
+                      <Settings size={16} className="text-red-500" />
+                      Nhập Key
+                    </button>
+                  )}
 
                   {/* Theme Toggle */}
                   <button onClick={toggleTheme} className="p-1.5 rounded-lg bg-muted hover:bg-border transition-colors" title="Chuyển giao diện">
@@ -345,12 +330,14 @@ export default function Home() {
 
                   <div className="h-6 w-px bg-border mx-1"></div>
 
-                  {/* New User Menu Dropdown */}
+                  {/* User Menu Dropdown (Now contains Projects, Share, Settings) */}
                   <UserMenu
                     user={user}
                     onLogout={handleLogout}
                     onOpenSettings={() => setShowSettings(true)}
                     onOpenGuide={() => setShowGuide(true)}
+                    onOpenProjects={() => setShowProjects(true)}
+                    onOpenShare={() => setShowShare(true)}
                   />
                 </div>
 

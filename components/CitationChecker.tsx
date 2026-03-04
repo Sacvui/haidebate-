@@ -5,6 +5,7 @@ import { CheckCircle, XCircle, AlertTriangle, ExternalLink, Loader2 } from 'luci
 import { extractDOIs } from '@/lib/citationUtils';
 import { verifyAllDOIs, verifyByQuery, getVerificationSummary, type DOIVerificationResult } from '@/lib/doiVerifier';
 import { Search } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface CitationCheckerProps {
     content: string;
@@ -40,7 +41,7 @@ export function CitationChecker({ content, onVerificationComplete }: CitationChe
             onVerificationComplete?.(verified);
         } catch (error) {
             console.error('Verification error:', error);
-            alert('Lỗi khi verify citations. Vui lòng thử lại.');
+            toast.error('Lỗi khi verify citations. Vui lòng thử lại.');
         } finally {
             setVerifying(false);
         }
@@ -55,7 +56,7 @@ export function CitationChecker({ content, onVerificationComplete }: CitationChe
             setResults(prev => [result, ...prev]);
             setManualQuery("");
         } catch (error) {
-            alert('Lỗi khi tìm kiếm. Vui lòng thử lại.');
+            toast.error('Lỗi khi tìm kiếm. Vui lòng thử lại.');
         } finally {
             setManualVerifying(false);
         }
