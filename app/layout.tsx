@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google"; // Switch to Inter for better Vietnamese support
+import { Inter, Lora } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/react";
@@ -10,8 +10,14 @@ const inter = Inter({
   display: 'swap',
 });
 
+const lora = Lora({
+  variable: "--font-lora",
+  subsets: ["latin", "vietnamese"],
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
-  metadataBase: new URL('https://haidebate-ocsd.vercel.app'),
+  metadataBase: new URL('https://debate.ncskit.org'),
   title: "Hai Debate: The art of 'clapping back' Reviewer #2",
   description: "Công cụ hỗ trợ viết luận văn và nghiên cứu khoa học chuyên sâu với AI Phản biện. Được phát triển bởi Dr. Hai Show & Hải Rong Chơi.",
   icons: {
@@ -22,7 +28,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Hai Debate: The art of 'clapping back' Reviewer #2",
     description: "Công cụ hỗ trợ viết luận văn và nghiên cứu khoa học chuyên sâu với AI Phản biện.",
-    url: 'https://haidebate-ocsd.vercel.app', // Explicitly setting the URL if known or using a default
+    url: 'https://debate.ncskit.org',
     siteName: 'Hải Debate',
     images: [
       {
@@ -46,9 +52,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="vi" suppressHydrationWarning>
       <body
-        className={`${inter.variable} antialiased font-sans`}
+        className={`${inter.variable} ${lora.variable} antialiased font-sans`}
       >
         <NextAuthProvider>
           <AuthProvider>

@@ -202,7 +202,7 @@ export function StepReview({
                 <textarea
                     value={userFinal}
                     onChange={(e) => setUserFinal(e.target.value)}
-                    className="w-full h-80 px-4 py-3 border-2 border-amber-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none font-mono text-sm bg-amber-50/30 text-slate-800 placeholder:text-slate-400 shadow-sm"
+                    className="w-full h-80 px-4 py-3 border-2 border-amber-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none text-sm bg-amber-50/30 text-slate-800 placeholder:text-slate-400 shadow-sm"
                     placeholder="Paste kết quả đã được GVHD phê duyệt vào đây..."
                 />
 

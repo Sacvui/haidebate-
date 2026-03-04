@@ -89,7 +89,7 @@ export const HeroDemo = () => {
                             <div className="space-y-2">
                                 <div className="h-4 w-24 bg-slate-200 rounded animate-pulse"></div>
                                 <div className="p-4 bg-white rounded-xl border border-blue-100 shadow-sm flex items-center gap-3">
-                                    <div className="flex-1 font-mono text-sm text-slate-700">
+                                    <div className="flex-1 text-sm text-slate-700">
                                         {typedText}<span className="animate-pulse">|</span>
                                     </div>
                                 </div>
