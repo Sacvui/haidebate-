@@ -66,13 +66,6 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        if (!model || !prompt) {
-            return NextResponse.json(
-                { error: 'Missing required fields: model and prompt' },
-                { status: 400 }
-            );
-        }
-
         // 4. Get API key (custom or server default)
         let apiKey: string | undefined;
 

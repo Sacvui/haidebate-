@@ -157,10 +157,13 @@ export function createNewProject(
 export function getStepLabel(step: WorkflowStep): string {
     switch (step) {
         case '1_TOPIC': return 'Đề tài';
+        case '1_LIT_REVIEW': return 'Tổng quan tài liệu';
         case '2_MODEL': return 'Mô hình';
+        case '2_ARCH': return 'Kiến trúc hệ thống';
         case '3_OUTLINE': return 'Đề cương';
         case '5_GTM': return 'GTM Strategy';
         case '4_SURVEY': return 'Bảng hỏi';
+        case '4_BENCHMARK': return 'Kiểm thử';
         default: return step;
     }
 }

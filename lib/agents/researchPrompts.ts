@@ -266,6 +266,7 @@ export function getSurveyPrompt(level: AcademicLevel): string {
    const surveyPromptText = ` 
 NHIỆM VỤ: Xây dựng Chương "Phương pháp nghiên cứu" (Methodology).
 MỤC TIÊU: Thiết kế phương pháp phù hợp nhất để trả lời câu hỏi nghiên cứu.
+TRÌNH ĐỘ YÊU CẦU: ${level}
 
 QUY TRÌNH (Tùy chọn phương pháp):
 

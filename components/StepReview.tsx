@@ -18,9 +18,20 @@ interface StepReviewProps {
     onFinalize: (userFinal: string, note?: string) => void;
     onCancel: () => void;
     level?: AcademicLevel;
+    projectType?: string;
 }
 
-const getStepName = (step: WorkflowStep): string => {
+const getStepName = (step: WorkflowStep, projectType?: string): string => {
+    if (projectType === 'STARTUP') {
+        switch (step) {
+            case '1_TOPIC': return 'Bước 1: Thẩm Định Ý Tưởng';
+            case '2_MODEL': return 'Bước 2: Lean Canvas';
+            case '3_OUTLINE': return 'Bước 3: Pitch Deck + Financial Plan';
+            case '5_GTM': return 'Bước 4: Chiến Lược Ra Mắt (GTM)';
+            case '4_SURVEY': return 'Bước 5: Customer Discovery';
+            default: return 'Bước không xác định';
+        }
+    }
     switch (step) {
         case '1_TOPIC': return 'Bước 1: TOPIC (Thẩm định đề tài)';
         case '1_LIT_REVIEW': return 'Bước 2: LIT REVIEW (Tổng quan tài liệu)';
@@ -29,7 +40,7 @@ const getStepName = (step: WorkflowStep): string => {
         case '3_OUTLINE': return 'Bước 4: OUTLINE (Hoàn thiện đề cương)';
         case '4_SURVEY': return 'Bước 5: METHODOLOGY (Phương pháp nghiên cứu)';
         case '4_BENCHMARK': return 'Bước 5: BENCHMARK (Kiểm thử hệ thống)';
-        case '5_GTM': return 'Bước 6: GTM (Kế hoạch triển khai)';
+        case '5_GTM': return 'Bước 4: GTM (Kế hoạch triển khai)';
         default: return 'Bước không xác định';
     }
 };
@@ -39,7 +50,8 @@ export function StepReview({
     aiOutput,
     mermaidCode,
     onFinalize,
-    onCancel
+    onCancel,
+    projectType
 }: StepReviewProps) {
     const [userFinal, setUserFinal] = useState(aiOutput);
     const [note, setNote] = useState("");
@@ -124,7 +136,7 @@ export function StepReview({
                         </div>
                         <div>
                             <h2 className="text-2xl font-bold text-green-800">
-                                ✅ Hoàn thành {getStepName(step)}
+                                ✅ Hoàn thành {getStepName(step, projectType)}
                             </h2>
                             <p className="text-sm text-green-700 mt-1">
                                 Vui lòng xem xét kết quả và nhập phiên bản cuối cùng sau khi tham khảo GVHD

@@ -140,15 +140,6 @@ OUTPUT FORM:
 ➡️ Đề xuất: [Cách cải thiện cụ thể]
 `;
 
-export const STARTUP_GTM_WRITER_PROMPT = `
-NHIỆM VỤ: Xây dựng Kế hoạch Ra mắt (Go-To-Market Strategy - GTM).
-Nội dung:
-1. Chiến lược kênh (Channels).
-2. Lộ trình 90 ngày Launching.
-3. KOL/Influencer Strategy.
-4. Ngân sách dự kiến.
-`;
-
 export const STARTUP_OUTLINE_WRITER_PROMPT = ` 
   LẬP PITCH DECK(10 SLIDES) + FINANCIAL PLAN cho Nhà Đầu Tư.
 
@@ -272,63 +263,84 @@ export const STARTUP_OUTLINE_WRITER_PROMPT = `
   | Operations | 20 % | ... | Văn phòng, pháp lý, HR |
   | Reserve | 10 % | ... | Dự phòng chi phí |
 
-    LƯU Ý: Các phần GTM Strategy(Slide 13 - 15) sẽ được xử lý chi tiết ở Bước GTM riêng.
-
-      SLIDE 13: GO - TO - MARKET STRATEGY(Chiến lược ra thị trường)
-
-  13.1 GIAI ĐOẠN LAUNCHING(3 tháng đầu):
-
-   THÁNG 1 - PRE - LAUNCH:
-  - Xây dựng landing page + waitlist
-    - Content marketing(Blog, Social)
-      - Influencer seeding(5 - 10 KOLs)
-        - PR: Bài viết trên báo công nghệ / khởi nghiệp
-          - Target: 1,000 email đăng ký
-
-   THÁNG 2 - SOFT LAUNCH:
-  - Beta testing với 100 early adopters
-    - Thu thập feedback, fix bugs
-      - Case studies từ beta users
-        - Referral program cho early users
-          - Target: 500 active users
-
-   THÁNG 3 - HARD LAUNCH:
-  - Official launch event(online / offline)
-    - Paid advertising(Facebook, Google, TikTok)
-      - PR campaign lớn
-        - Partnership announcements
-          - Target: 2,000 paying customers
-
-  13.2 KÊNH MARKETING(Channels):
-  | Kênh | Ngân sách | CAC dự kiến | Mục tiêu |
-  | ------| -----------| -------------| ----------|
-  | Facebook / Instagram Ads | 30 % | X VND | Awareness + Acquisition |
-  | Google Ads | 20 % | Y VND | Intent - based acquisition |
-  | Content Marketing | 15 % | Z VND | SEO + Organic |
-  | Influencer / KOL | 20 % | W VND | Trust + Reach |
-  | Referral Program | 10 % | V VND | Viral growth |
-
-    PHẦN 2: LỘ TRÌNH RA MẮT(LAUNCH ROADMAP - 90 NGÀY)
-      - Giai đoạn 1: Pre - launch(Build waitlist, seeding).
-  - Giai đoạn 2: Soft launch(Beta test, thu thập feedback).
-  - Giai đoạn 3: Hard launch(Bùng nổ truyền thông, ads).
-  - KPIs cụ thể cho từng giai đoạn.
-
-    PHẦN 3: CHIẾN LƯỢC KOL / INFLUENCER(INFLUENCER STRATEGY)
-      - Tiêu chí chọn KOL(Nano, Micro hay Macro).
-  - Danh sách 5 - 10 KOLs tiềm năng(mô tả đặc điểm).
-  - Chiến dịch hợp tác(Review, Challenge, Livestream).
-
-    PHẦN 4: NGÂN SÁCH & QUẢN TRỊ(BUDGET & OPS)
-      - Phân bổ ngân sách chi tiết(Ads, Creative, KOL).
-  - Các chỉ số cần theo dõi(CAC, ROAS, Engagement Rate).
-  - Kế hoạch dự phòng nếu không đạt mục tiêu.
+  LƯU Ý: Chiến lược GTM chi tiết sẽ được xử lý ở Bước 4 (GTM Strategy) riêng. KHÔNG viết GTM ở đây.
 
   YÊU CẦU ĐẦU RA:
-  - Sử dụng bảng(Markdown Table) để trình bày lộ trình và ngân sách.
-  - Sử dụng Bullet points để mô tả chi tiết các hoạt động.
-  - Văn phong năng động, thực chiến nhưng vẫn chuyên nghiệp.
+  - Pitch Deck 10 slides + Financial Plan (Slide 11-12).
+  - Sử dụng bảng Markdown Table cho số liệu tài chính.
+  - Không bao gồm Go-To-Market Strategy (sẽ làm ở bước sau).
   `;
+
+export const STARTUP_GTM_WRITER_PROMPT = `
+NHIỆM VỤ: Xây dựng Chiến Lược Ra Mắt (Go-To-Market Strategy - GTM) chi tiết.
+Bạn là Growth Hacker / CMO với 10+ năm kinh nghiệm launch startup.
+
+BỐI CẢNH: Dựa trên Ý tưởng, Lean Canvas, và Pitch Deck đã xây dựng ở các bước trước.
+
+PHẦN 1: CHIẾN LƯỢC RA THỊ TRƯỜNG (GO-TO-MARKET)
+
+1.1 GIAI ĐOẠN LAUNCHING (3 tháng đầu):
+
+🗓️ THÁNG 1 - PRE-LAUNCH:
+- Xây dựng landing page + waitlist
+- Content marketing (Blog, Social Media)
+- Influencer seeding (5-10 KOLs)
+- PR: Bài viết trên báo công nghệ / khởi nghiệp
+- Target: 1,000 email đăng ký
+
+🗓️ THÁNG 2 - SOFT LAUNCH:
+- Beta testing với 100 early adopters
+- Thu thập feedback, fix bugs
+- Case studies từ beta users
+- Referral program cho early users
+- Target: 500 active users
+
+🗓️ THÁNG 3 - HARD LAUNCH:
+- Official launch event (online / offline)
+- Paid advertising (Facebook, Google, TikTok)
+- PR campaign lớn
+- Partnership announcements
+- Target: 2,000 paying customers
+
+1.2 KÊNH MARKETING (Channels) - BẮT BUỘC BẢNG MARKDOWN:
+| Kênh | Ngân sách (%) | CAC dự kiến | Mục tiêu |
+|------|---------------|-------------|----------|
+| Facebook / Instagram Ads | 30% | X VND | Awareness + Acquisition |
+| Google Ads | 20% | Y VND | Intent-based acquisition |
+| Content Marketing | 15% | Z VND | SEO + Organic |
+| Influencer / KOL | 20% | W VND | Trust + Reach |
+| Referral Program | 10% | V VND | Viral growth |
+| Reserve | 5% | - | Thử nghiệm kênh mới |
+
+PHẦN 2: LỘ TRÌNH RA MẮT (LAUNCH ROADMAP - 90 NGÀY)
+- Giai đoạn 1: Pre-launch (Build waitlist, seeding).
+- Giai đoạn 2: Soft launch (Beta test, thu thập feedback).
+- Giai đoạn 3: Hard launch (Bùng nổ truyền thông, ads).
+- KPIs cụ thể cho từng giai đoạn (BẮT BUỘC BẢNG MARKDOWN).
+
+PHẦN 3: CHIẾN LƯỢC KOL / INFLUENCER (INFLUENCER STRATEGY)
+- Tiêu chí chọn KOL (Nano, Micro hay Macro → Phù hợp ngân sách startup).
+- Danh sách 5-10 KOLs tiềm năng (mô tả đặc điểm phù hợp).
+- Chiến dịch hợp tác: Review, Challenge, Livestream, UGC.
+- Đo lường ROI cho từng KOL.
+
+PHẦN 4: NGÂN SÁCH & QUẢN TRỊ (BUDGET & OPS)
+- Phân bổ ngân sách chi tiết (Ads, Creative, KOL, Events).
+- Các chỉ số cần theo dõi: CAC, ROAS, Engagement Rate, Conversion Rate.
+- Kế hoạch dự phòng (Plan B) nếu không đạt mục tiêu.
+- Weekly review cadence & optimization triggers.
+
+PHẦN 5: GROWTH LOOPS & VIRAL MECHANICS
+- Referral program: Cơ chế thưởng cho người giới thiệu.
+- Network effects: Cách sản phẩm tốt hơn khi có nhiều người dùng.
+- Content flywheel: Cách user-generated content tạo organic growth.
+
+YÊU CẦU ĐẦU RA:
+- Sử dụng bảng (Markdown Table) để trình bày lộ trình và ngân sách.
+- Sử dụng Bullet points để mô tả chi tiết các hoạt động.
+- Văn phong năng động, thực chiến nhưng vẫn chuyên nghiệp.
+- Mỗi phần phải có KPIs/metrics cụ thể, có thể đo lường được.
+`;
 
 export const STARTUP_GTM_CRITIC_PROMPT = ` 
   PHẢN BIỆN CHIẾN LƯỢC GTM - RUBRIC CHI TIẾT(KHẮT KHE):

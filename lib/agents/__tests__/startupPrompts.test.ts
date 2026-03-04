@@ -45,7 +45,7 @@ describe('Startup Prompts - Model (Lean Canvas)', () => {
 describe('Startup Prompts - GTM', () => {
     it('writer prompt includes channel & launch strategy', () => {
         expect(STARTUP_GTM_WRITER_PROMPT).toContain('Channels');
-        expect(STARTUP_GTM_WRITER_PROMPT).toContain('90 ngày');
+        expect(STARTUP_GTM_WRITER_PROMPT).toContain('90 NGÀY');
         expect(STARTUP_GTM_WRITER_PROMPT).toContain('KOL');
     });
 

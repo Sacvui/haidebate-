@@ -302,6 +302,11 @@ export async function tryClaimShareReward(userId: string, postUrl: string): Prom
     const countKey = `shares:count:${userId}:${today}`;
     const currentCount = await kv.incr(countKey);
 
+    // Set expiry on first increment to prevent infinite key accumulation
+    if (currentCount === 1) {
+        await kv.expire(countKey, 172800); // 48 hours
+    }
+
     if (currentCount > 3) {
         // Revert increment (optional, but keeps count accurate-ish) or just ignore
         return { success: false, reason: "Bạn đã hết lượt nhận điểm chia sẻ hôm nay (3/3)." };
@@ -333,9 +338,13 @@ export interface RoundsConfig {
 
 const DEFAULT_ROUNDS_CONFIG: RoundsConfig = {
     '1_TOPIC': 3,
+    '1_LIT_REVIEW': 2,
     '2_MODEL': 3,
+    '2_ARCH': 2,
     '3_OUTLINE': 3,
-    '4_SURVEY': 2
+    '4_SURVEY': 2,
+    '4_BENCHMARK': 2,
+    '5_GTM': 2
 };
 
 export async function getRoundsConfig(): Promise<RoundsConfig> {
@@ -369,9 +378,12 @@ export interface SessionData {
         language: 'vi' | 'en';
     };
     step1_topic?: StepResult;
+    step1_lit_review?: StepResult;
     step2_model?: StepResult;
+    step2_arch?: StepResult;
     step3_outline?: StepResult;
     step4_survey?: StepResult;
+    step4_benchmark?: StepResult;
     step5_gtm?: StepResult;
 }
 
@@ -392,8 +404,19 @@ export async function saveStepResult(
         }
     };
 
-    const stepKey = `step${step.charAt(0)}_${step.split('_')[1].toLowerCase()}` as keyof Omit<SessionData, 'metadata'>;
-    session[stepKey] = data;
+    // Map WorkflowStep to SessionData field name
+    const stepMap: Record<string, keyof Omit<SessionData, 'metadata'>> = {
+        '1_TOPIC': 'step1_topic',
+        '1_LIT_REVIEW': 'step1_lit_review',
+        '2_MODEL': 'step2_model',
+        '2_ARCH': 'step2_arch',
+        '3_OUTLINE': 'step3_outline',
+        '4_SURVEY': 'step4_survey',
+        '4_BENCHMARK': 'step4_benchmark',
+        '5_GTM': 'step5_gtm',
+    };
+    const stepKey = stepMap[step];
+    if (stepKey) session[stepKey] = data;
 
     await kv.set(sessionKey, session);
 }

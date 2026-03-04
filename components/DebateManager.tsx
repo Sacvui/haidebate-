@@ -334,13 +334,21 @@ export function DebateManager({
     };
 
     const getStepNumber = (step: WorkflowStep) => {
+        if (projectType === 'STARTUP') {
+            if (step === '1_TOPIC') return 1;
+            if (step === '2_MODEL') return 2;
+            if (step === '3_OUTLINE') return 3;
+            if (step === '5_GTM') return 4;
+            if (step === '4_SURVEY') return 5;
+            return 1;
+        }
+        // Research / Software
         if (step === '1_TOPIC') return 1;
         if (step === '1_LIT_REVIEW') return 2;
         if (step === '2_MODEL' || step === '2_ARCH') return 3;
         if (step === '3_OUTLINE') return 4;
-        if (step === '5_GTM') return 5;
-        if (step === '4_SURVEY' || step === '4_BENCHMARK') return projectType === 'STARTUP' ? 6 : 5;
-        return 7;
+        if (step === '4_SURVEY' || step === '4_BENCHMARK') return 5;
+        return 1;
     };
 
     if (showExport) {
@@ -383,12 +391,12 @@ export function DebateManager({
             <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 mb-6 sticky top-0 z-10">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-bold text-slate-800">
-                        {currentStep === '1_TOPIC' && "Giai Đoạn 1: Thẩm Định Đề Tài"}
+                        {currentStep === '1_TOPIC' && (projectType === 'STARTUP' ? "Giai Đoạn 1: Thẩm Định Ý Tưởng" : "Giai Đoạn 1: Thẩm Định Đề Tài")}
                         {currentStep === '1_LIT_REVIEW' && "Giai Đoạn 2: Tổng Quan Tài Liệu (Lit Review)"}
-                        {currentStep === '2_MODEL' && "Giai Đoạn 3: Xây Dựng Mô Hình"}
+                        {currentStep === '2_MODEL' && (projectType === 'STARTUP' ? "Giai Đoạn 2: Lean Canvas" : "Giai Đoạn 3: Xây Dựng Mô Hình")}
                         {currentStep === '2_ARCH' && "Giai Đoạn 3: Kiến Trúc Hệ Thống & Tech Stack"}
-                        {currentStep === '3_OUTLINE' && (projectType === 'STARTUP' ? "Giai Đoạn 3: Pitch Deck" : "Giai Đoạn 4: Hoàn Thiện Đề Cương")}
-                        {currentStep === '5_GTM' && "Giai Đoạn 4: Chiến lược Ra mắt"}
+                        {currentStep === '3_OUTLINE' && (projectType === 'STARTUP' ? "Giai Đoạn 3: Pitch Deck + Financial Plan" : "Giai Đoạn 4: Hoàn Thiện Đề Cương")}
+                        {currentStep === '5_GTM' && "Giai Đoạn 4: Chiến Lược Ra Mắt (GTM)"}
                         {currentStep === '4_SURVEY' && (projectType === 'STARTUP' ? "Giai Đoạn 5: Customer Discovery" : "Giai Đoạn 5: Phương pháp Nghiên cứu")}
                         {currentStep === '4_BENCHMARK' && "Giai Đoạn 5: Kiểm Thử & Đánh Giá Hiệu Năng"}
                     </h2>
@@ -433,6 +441,7 @@ export function DebateManager({
                     onFinalize={handleFinalize}
                     onCancel={() => setShowReview(false)}
                     level={level}
+                    projectType={projectType}
                 />
             ) : (
                 <div className="flex-1 bg-slate-50 rounded-xl border p-6 overflow-y-auto min-h-[500px] mb-8 space-y-6">
