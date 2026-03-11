@@ -306,14 +306,17 @@ CẤU TRÚC OUTPUT (MARKDOWN):
 
 MINH HỌA QUY TRÌNH BAO GỒM SƠ ĐỒ MERMAID (Nếu được phân tích):
 \`\`\`mermaid
-graph LR
+graph TD
     A[Tổng quan<br>Lý thuyết] --> B[Thiết kế<br>Nghiên cứu]
     B --> C[Bảng hỏi<br>& Thang đo]
     C --> D[Thu thập<br>Dữ liệu]
-    D --> E[Phân tích<br>SEM & Đánh giá]
+    D --> E[Phân tích<br>Dữ liệu (SEM)]
     E --> F[Kết luận<br>& Đề xuất]
 \`\`\`
-*(Lưu ý: Luôn dùng graph LR, tên các bước phải cực kỳ ngắn gọn, nếu dài bắt buộc dùng <br> để ngắt dòng để tránh bị cắt ngang hộp)*
+*(1. LUÔN dùng graph TD (Từ trên xuống) cho Quy trình nghiên cứu.*
+*2. Tên các bước QUÁ DÀI bắt buộc dùng <br> để ngắt dòng làm 2-3 hàng chữ.*
+*3. TUYỆT ĐỐI không dùng hình khối thoi (decision diamonds) hay rẽ nhánh phức tạp. Vẽ thành một luồng tuyến tính rõ ràng các hộp hình chữ nhật [ ] chuẩn khoa học.*
+*4. KHÔNG viết text lơ lửng trên luồng mũi tên (-->) làm rối sơ đồ).*
   `;
    return surveyPromptText;
 }
