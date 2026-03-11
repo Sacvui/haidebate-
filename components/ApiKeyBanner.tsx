@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Key, Save, ExternalLink, CheckCircle, ChevronDown, ChevronUp, AlertTriangle, Sparkles } from 'lucide-react';
+import { Key, Save, ExternalLink, CheckCircle, ChevronDown, ChevronUp, Zap, Sparkles, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ApiKeyBannerProps {
@@ -75,87 +75,111 @@ export const ApiKeyBanner = ({ apiKey, onApiKeyChange }: ApiKeyBannerProps) => {
         <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6"
+            className="mb-8"
         >
-            <div className={`rounded-2xl border-2 overflow-hidden transition-all ${
+            <div className={`rounded-2xl overflow-hidden transition-all ${
                 apiKey
-                    ? 'border-border bg-card'
-                    : 'border-amber-400 dark:border-amber-500 bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:from-amber-900/20 dark:via-orange-900/15 dark:to-yellow-900/10 shadow-lg shadow-amber-200/30 dark:shadow-amber-900/20'
+                    ? 'border-2 border-border bg-card'
+                    : 'border-2 border-amber-400/80 dark:border-amber-500/60 shadow-2xl shadow-amber-300/30 dark:shadow-amber-800/30'
             }`}>
-                {/* Header */}
-                <div className={`px-5 py-4 flex items-start gap-3 ${!apiKey ? '' : 'border-b border-border'}`}>
-                    {!apiKey ? (
-                        <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-800/40 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-                        </div>
-                    ) : (
-                        <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <Key className="w-5 h-5 text-muted-foreground" />
-                        </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                            <h3 className={`text-base font-bold ${
-                                !apiKey ? 'text-amber-800 dark:text-amber-300' : 'text-foreground'
-                            }`}>
-                                {!apiKey ? '⚡ Cần nhập Gemini API Key' : 'Chỉnh sửa API Key'}
-                            </h3>
-                            {apiKey && (
-                                <button
-                                    onClick={() => setIsExpanded(false)}
-                                    className="p-1 rounded-lg hover:bg-muted transition-colors"
-                                >
-                                    <ChevronUp className="w-4 h-4 text-muted-foreground" />
-                                </button>
-                            )}
-                        </div>
-                        <p className={`text-sm mt-1 ${
-                            !apiKey ? 'text-amber-700 dark:text-amber-400' : 'text-muted-foreground'
-                        }`}>
-                            {!apiKey
-                                ? 'Bạn cần nhập API Key miễn phí từ Google AI Studio để sử dụng hệ thống nghiên cứu.'
-                                : 'Cập nhật hoặc thay đổi API Key của bạn.'
-                            }
-                        </p>
-                    </div>
-                </div>
 
-                {/* Body */}
-                <div className="px-5 py-4 space-y-4">
-                    {/* Step-by-step guide (only when no key) */}
-                    {!apiKey && (
-                        <div className="bg-white/70 dark:bg-card/70 rounded-xl p-4 border border-amber-200 dark:border-amber-800/50">
-                            <p className="text-xs font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider mb-2">
-                                Hướng dẫn lấy API Key miễn phí (30 giây)
+                {/* === HERO HEADER (only when no key) === */}
+                {!apiKey && (
+                    <div className="relative bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 dark:from-amber-600 dark:via-orange-600 dark:to-red-600 px-6 py-6 text-white overflow-hidden">
+                        {/* Animated background pattern */}
+                        <div className="absolute inset-0 opacity-10">
+                            <div className="absolute -top-10 -right-10 w-40 h-40 border-[3px] border-white rounded-full" />
+                            <div className="absolute -bottom-8 -left-8 w-32 h-32 border-[3px] border-white rounded-full" />
+                            <div className="absolute top-4 left-1/2 w-24 h-24 border-[2px] border-white rounded-full" />
+                        </div>
+
+                        <div className="relative z-10">
+                            <div className="flex items-center gap-2 mb-2">
+                                <motion.div
+                                    animate={{ rotate: [0, -10, 10, -10, 0] }}
+                                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                                >
+                                    <Zap className="w-7 h-7 text-yellow-200 fill-yellow-200" />
+                                </motion.div>
+                                <h3 className="text-xl font-extrabold tracking-tight">
+                                    Bước bắt buộc: Nhập API Key
+                                </h3>
+                            </div>
+                            <p className="text-white/90 text-sm max-w-md">
+                                Hệ thống cần Gemini API Key (miễn phí) để vận hành AI Writer & Critic. Chỉ mất 30 giây!
                             </p>
-                            <ol className="text-sm text-amber-700 dark:text-amber-400 space-y-1.5 list-decimal list-inside">
-                                <li>Truy cập <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" className="font-bold underline hover:text-amber-900 dark:hover:text-amber-200 inline-flex items-center gap-1">Google AI Studio <ExternalLink className="w-3 h-3" /></a></li>
-                                <li>Đăng nhập bằng tài khoản Google</li>
-                                <li>Nhấn <strong>"Create API Key"</strong> → Copy key</li>
-                                <li>Dán vào ô bên dưới</li>
-                            </ol>
+
+                            {/* Big CTA button to get API key */}
+                            <a
+                                href="https://aistudio.google.com/app/apikey"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="mt-4 inline-flex items-center gap-2.5 px-5 py-3 bg-white text-orange-600 font-extrabold rounded-xl shadow-lg hover:shadow-xl hover:bg-orange-50 transform hover:-translate-y-0.5 active:translate-y-0 transition-all text-sm"
+                            >
+                                <img
+                                    src="https://www.svgrepo.com/show/475656/google-color.svg"
+                                    className="w-5 h-5"
+                                    alt="Google"
+                                />
+                                Lấy API Key miễn phí từ Google
+                                <ExternalLink className="w-4 h-4" />
+                            </a>
+                        </div>
+                    </div>
+                )}
+
+                {/* === EDIT HEADER (when key exists) === */}
+                {apiKey && (
+                    <div className="px-5 py-4 flex items-center justify-between border-b border-border">
+                        <div className="flex items-center gap-2">
+                            <Key className="w-5 h-5 text-muted-foreground" />
+                            <h3 className="text-base font-bold text-foreground">Chỉnh sửa API Key</h3>
+                        </div>
+                        <button
+                            onClick={() => setIsExpanded(false)}
+                            className="p-1 rounded-lg hover:bg-muted transition-colors"
+                        >
+                            <ChevronUp className="w-4 h-4 text-muted-foreground" />
+                        </button>
+                    </div>
+                )}
+
+                {/* === BODY === */}
+                <div className={`px-6 py-5 space-y-4 ${!apiKey ? 'bg-gradient-to-b from-amber-50/80 to-white dark:from-amber-900/10 dark:to-card' : 'bg-card'}`}>
+
+                    {/* Quick steps (only when no key) */}
+                    {!apiKey && (
+                        <div className="flex items-start gap-3 p-3 bg-white/80 dark:bg-card/80 rounded-xl border border-amber-200/60 dark:border-amber-800/40">
+                            <Sparkles className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                            <div className="text-sm text-amber-800 dark:text-amber-300">
+                                <strong>3 bước:</strong> Mở link ở trên → Nhấn "Create API Key" → Dán key vào ô bên dưới
+                            </div>
                         </div>
                     )}
 
                     {/* Input Fields */}
                     <div className="space-y-3">
                         <div>
-                            <label className="block text-sm font-semibold text-foreground mb-1.5">
-                                API Key — Writer AI (Bắt buộc)
+                            <label className="block text-sm font-bold text-foreground mb-1.5">
+                                🔑 API Key — Writer AI
+                                <span className="text-red-500 ml-1">*</span>
                             </label>
                             <input
                                 type="password"
                                 value={writerKey}
                                 onChange={(e) => setWriterKey(e.target.value)}
-                                placeholder="AIzaSy..."
-                                className="w-full px-4 py-3 rounded-xl border border-border bg-card focus:ring-2 focus:ring-amber-500 dark:focus:ring-amber-400 focus:border-transparent outline-none font-mono text-sm text-foreground placeholder:text-muted-foreground transition-all"
+                                placeholder="Dán API Key vào đây (AIzaSy...)"
+                                className={`w-full px-4 py-3.5 rounded-xl border-2 bg-card focus:ring-2 focus:ring-amber-500 dark:focus:ring-amber-400 focus:border-transparent outline-none font-mono text-sm text-foreground placeholder:text-muted-foreground transition-all ${
+                                    !apiKey && !writerKey ? 'border-amber-300 dark:border-amber-700 animate-pulse' : 'border-border'
+                                }`}
+                                autoFocus={!apiKey}
                             />
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-muted-foreground mb-1.5">
                                 API Key — Critic AI (Tùy chọn)
-                                <span className="text-xs ml-1 opacity-60">Dùng key khác để gấp đôi quota</span>
+                                <span className="text-xs ml-1 opacity-60">— Dùng key khác để gấp đôi quota</span>
                             </label>
                             <input
                                 type="password"
@@ -171,7 +195,7 @@ export const ApiKeyBanner = ({ apiKey, onApiKeyChange }: ApiKeyBannerProps) => {
                     <button
                         onClick={handleSave}
                         disabled={!writerKey.trim() || isSaving}
-                        className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${
+                        className={`w-full py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${
                             writerKey.trim()
                                 ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/30 hover:shadow-amber-500/40 transform hover:-translate-y-0.5'
                                 : 'bg-muted text-muted-foreground cursor-not-allowed'
@@ -185,15 +209,16 @@ export const ApiKeyBanner = ({ apiKey, onApiKeyChange }: ApiKeyBannerProps) => {
                         ) : (
                             <>
                                 <Save className="w-4 h-4" />
-                                {apiKey ? 'Cập nhật API Key' : 'Lưu API Key & Bắt đầu'}
+                                {apiKey ? 'Cập nhật API Key' : 'Lưu API Key & Bắt đầu nghiên cứu'}
                             </>
                         )}
                     </button>
 
                     {/* Trust note */}
-                    <p className="text-xs text-center text-muted-foreground">
-                        🔒 API Key được lưu trên trình duyệt của bạn, không gửi lên server.
-                    </p>
+                    <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+                        <ShieldCheck className="w-3.5 h-3.5" />
+                        API Key chỉ lưu trên trình duyệt, không gửi lên server.
+                    </div>
                 </div>
             </div>
         </motion.div>
