@@ -9,6 +9,7 @@ import { AcademicLevel, ProjectType } from "@/lib/agents";
 import { SavedProject, createNewProject, saveProject, getProject } from "@/lib/projectStorage";
 import { LevelGuidelines } from "@/components/LevelGuidelines";
 import { SettingsModal } from "@/components/SettingsModal";
+import { ApiKeyBanner } from "@/components/ApiKeyBanner";
 import { ResearchForm } from "@/components/ResearchForm";
 import { SignupModal } from "@/components/auth/SignupModal";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -121,6 +122,11 @@ export default function Home() {
     } else {
       Cookies.remove("referral_code");
     }
+  };
+
+  const handleApiKeyChange = (key: string, criticKey?: string) => {
+    setApiKey(key);
+    if (criticKey) setApiKeyCritic(criticKey);
   };
 
   const handleStart = (data: ResearchFormData) => {
@@ -362,9 +368,11 @@ export default function Home() {
                 />
               ) : !isStarted || !formData ? (
                 <div className="max-w-xl mx-auto mt-10">
+                  <ApiKeyBanner apiKey={apiKey} onApiKeyChange={handleApiKeyChange} />
                   <ResearchForm
                     onStart={handleStart}
                     onOpenGuidelines={() => setShowGuidelines(true)}
+                    apiKeyPresent={!!apiKey}
                   />
                 </div>
               ) : (

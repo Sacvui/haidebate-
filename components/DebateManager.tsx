@@ -389,9 +389,9 @@ export function DebateManager({
 
     return (
         <div className="flex flex-col h-full max-w-5xl mx-auto">
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 mb-6 sticky top-0 z-10">
+            <div className="bg-card p-6 rounded-xl shadow-sm border border-border mb-6 sticky top-0 z-10">
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-bold text-slate-800">
+                    <h2 className="text-xl font-bold text-foreground">
                         {currentStep === '1_TOPIC' && (projectType === 'STARTUP' ? "Giai Đoạn 1: Thẩm Định Ý Tưởng" : "Giai Đoạn 1: Thẩm Định Đề Tài")}
                         {currentStep === '1_LIT_REVIEW' && "Giai Đoạn 2: Tổng Quan Tài Liệu (Lit Review)"}
                         {currentStep === '2_MODEL' && (projectType === 'STARTUP' ? "Giai Đoạn 2: Lean Canvas" : "Giai Đoạn 3: Xây Dựng Mô Hình")}
@@ -405,15 +405,15 @@ export function DebateManager({
                         <Home size={20} />
                     </button>
                     <div className="flex gap-2">
-                        <span className="bg-slate-100 px-3 py-1 rounded-full text-sm">Mục tiêu: {goal}</span>
+                        <span className="bg-muted px-3 py-1 rounded-full text-sm">Mục tiêu: {goal}</span>
                         <span className={cn("px-3 py-1 rounded-full text-white text-xs", level === 'UNDERGRAD' ? 'bg-green-500' : 'bg-blue-500')}>Trình độ: {level}</span>
                     </div>
                 </div>
                 <StepIndicator currentStep={getStepNumber(currentStep)} totalSteps={projectType === 'STARTUP' ? 5 : 4} projectType={projectType} />
                 <div className="flex items-center justify-between mt-4">
-                    <div className="text-sm font-medium text-slate-500">
+                    <div className="text-sm font-medium text-muted-foreground">
                         Trạng thái: {isProcessing ? "Đang xử lý..." : stepCompleted ? "Đã hoàn thành" : "Sẵn sàng"}
-                        {lastSaved && <span className="ml-4 text-[10px] text-slate-400 italic">Đã lưu: {lastSaved}</span>}
+                        {lastSaved && <span className="ml-4 text-[10px] text-muted-foreground italic">Đã lưu: {lastSaved}</span>}
                     </div>
                     {!isProcessing && !stepCompleted && (
                         <button onClick={runStepLoop} className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2">
@@ -422,8 +422,8 @@ export function DebateManager({
                     )}
                     {stepCompleted && (
                         <div className="flex gap-2">
-                            {currentStep !== '1_TOPIC' && <button onClick={handlePreviousStep} className="bg-slate-100 px-4 py-2 rounded-lg">Quay lại</button>}
-                            <button onClick={() => setShowReview(true)} className="bg-white border px-4 py-2 rounded-lg">Chỉnh sửa</button>
+                            {currentStep !== '1_TOPIC' && <button onClick={handlePreviousStep} className="bg-muted px-4 py-2 rounded-lg">Quay lại</button>}
+                            <button onClick={() => setShowReview(true)} className="bg-card border border-border px-4 py-2 rounded-lg">Chỉnh sửa</button>
                             {(currentStep === '4_SURVEY' || currentStep === '4_BENCHMARK') ? (
                                 <button onClick={() => setShowExport(true)} className="bg-indigo-600 text-white px-6 py-2 rounded-lg">Export</button>
                             ) : (
@@ -445,14 +445,14 @@ export function DebateManager({
                     projectType={projectType}
                 />
             ) : (
-                <div className="flex-1 bg-slate-50 rounded-xl border p-6 overflow-y-auto min-h-[500px] mb-8 space-y-6">
-                    {messages.length === 0 && <div className="text-center text-slate-400 mt-20"><Bot size={48} className="mx-auto" /><p>Nhấn Bắt Đầu</p></div>}
+                <div className="flex-1 bg-muted rounded-xl border border-border p-6 overflow-y-auto min-h-[500px] mb-8 space-y-6">
+                    {messages.length === 0 && <div className="text-center text-muted-foreground mt-20"><Bot size={48} className="mx-auto" /><p>Nhấn Bắt Đầu</p></div>}
                     {messages.map((msg, idx) => (
                         <div key={idx} className={cn("flex gap-4", msg.role === 'writer' ? "justify-start" : "justify-start flex-row-reverse")}>
                             <div className={cn("p-1 rounded-full h-8 w-8 flex-shrink-0", msg.role === 'writer' ? "bg-blue-100 text-blue-600" : "bg-purple-100 text-purple-600")}>
                                 {msg.role === 'writer' ? <Bot size={24} /> : <User size={24} />}
                             </div>
-                            <div className={cn("max-w-[80%] p-4 rounded-xl shadow-sm", msg.role === 'writer' ? "bg-white border" : "bg-purple-50 border-purple-100")}>
+                            <div className={cn("max-w-[80%] p-4 rounded-xl shadow-sm", msg.role === 'writer' ? "bg-card border border-border" : "bg-purple-50 dark:bg-purple-900/15 border-purple-100 dark:border-purple-800/30")}>
                                 <div className="prose prose-slate max-w-none text-sm break-words prose-table:border-collapse prose-table:border prose-table:w-full prose-th:border prose-th:bg-slate-100 prose-th:p-2 prose-td:border prose-td:p-2">
                                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                         {msg.content}

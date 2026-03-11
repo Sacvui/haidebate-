@@ -69,58 +69,58 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                     />
 
                     <motion.div
-                        className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 relative z-10"
+                        className="bg-card rounded-2xl shadow-xl w-full max-w-md p-6 relative z-10"
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.95 }}
                         transition={{ duration: 0.2 }}
                     >
                         <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                                <Key className="text-slate-500" size={20} /> Cài đặt API Key
+                            <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                                <Key className="text-muted-foreground" size={20} /> Cài đặt API Key
                             </h3>
-                            <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
+                            <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
                                 <X size={20} />
                             </button>
                         </div>
 
                         <div className="space-y-4">
                             {/* Info Banner */}
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
-                                <p className="text-blue-900 font-medium mb-1">ℹ️ Tùy chọn API Key</p>
-                                <p className="text-blue-700 text-xs">
+                            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-sm">
+                                <p className="text-blue-900 dark:text-blue-300 font-medium mb-1">ℹ️ Tùy chọn API Key</p>
+                                <p className="text-blue-700 dark:text-blue-400 text-xs">
                                     • <b>Để trống:</b> Dùng API key chung của hệ thống (có giới hạn quota)<br />
                                     • <b>Nhập key riêng:</b> Dùng quota của bạn, không giới hạn
                                 </p>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">
+                                <label className="block text-sm font-medium text-foreground mb-1">
                                     API Key 1: Writer AI (Người Viết)
-                                    <span className="text-slate-400 font-normal ml-1">(Tùy chọn)</span>
+                                    <span className="text-muted-foreground font-normal ml-1">(Tùy chọn)</span>
                                 </label>
                                 <input
                                     type="password"
                                     value={apiKey}
                                     onChange={(e) => setApiKey(e.target.value)}
                                     placeholder="AIzaSy... (để trống nếu dùng key chung)"
-                                    className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none font-mono text-sm"
+                                    className="w-full px-4 py-3 rounded-lg border border-border bg-card focus:ring-2 focus:ring-blue-500 outline-none font-mono text-sm text-foreground"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">
+                                <label className="block text-sm font-medium text-foreground mb-1">
                                     API Key 2: Critic AI (Người Phản Biện)
-                                    <span className="text-slate-400 font-normal ml-1">(Tùy chọn)</span>
+                                    <span className="text-muted-foreground font-normal ml-1">(Tùy chọn)</span>
                                 </label>
                                 <input
                                     type="password"
                                     value={apiKeyCritic}
                                     onChange={(e) => setApiKeyCritic(e.target.value)}
                                     placeholder="AIzaSy... (để trống nếu dùng key chung)"
-                                    className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-orange-500 outline-none font-mono text-sm"
+                                    className="w-full px-4 py-3 rounded-lg border border-border bg-card focus:ring-2 focus:ring-orange-500 outline-none font-mono text-sm text-foreground"
                                 />
-                                <p className="text-xs text-slate-500 mt-2">
+                                <p className="text-xs text-muted-foreground mt-2">
                                     💡 <b>Mẹo:</b> Dùng 2 tài khoản Google khác nhau cho 2 Key để gấp đôi giới hạn (Quota) và tránh lỗi quá tải.
                                 </p>
                             </div>
@@ -135,7 +135,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                 {(apiKey || apiKeyCritic) && (
                                     <button
                                         onClick={handleClear}
-                                        className="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg font-bold text-sm hover:bg-slate-200 flex items-center justify-center gap-2"
+                                        className="px-4 py-2 bg-muted text-muted-foreground rounded-lg font-bold text-sm hover:bg-border flex items-center justify-center gap-2"
                                     >
                                         <RefreshCw size={16} /> Xóa
                                     </button>

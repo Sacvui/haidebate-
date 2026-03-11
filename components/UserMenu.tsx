@@ -43,7 +43,7 @@ export const UserMenu = ({ user, onLogout, onOpenSettings, onOpenGuide, onOpenPr
         <div className="relative" ref={menuRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full border border-slate-200 hover:bg-slate-50 transition-all hover:shadow-sm"
+                className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full border border-border hover:bg-muted transition-all hover:shadow-sm"
             >
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
                     {user.image ? (
@@ -53,10 +53,10 @@ export const UserMenu = ({ user, onLogout, onOpenSettings, onOpenGuide, onOpenPr
                     )}
                 </div>
                 <div className="hidden md:block text-left">
-                    <p className="text-xs font-bold text-slate-700 leading-none">{displayName}</p>
-                    <p className="text-[10px] text-slate-500 font-medium leading-none mt-1">{user.points || 0} pts</p>
+                    <p className="text-xs font-bold text-foreground leading-none">{displayName}</p>
+                    <p className="text-[10px] text-muted-foreground font-medium leading-none mt-1">{user.points || 0} pts</p>
                 </div>
-                <ChevronDown size={14} className={`text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown size={14} className={`text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} />
             </button>
 
             <AnimatePresence>
@@ -66,12 +66,12 @@ export const UserMenu = ({ user, onLogout, onOpenSettings, onOpenGuide, onOpenPr
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
                         transition={{ duration: 0.15 }}
-                        className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-slate-100 z-50 overflow-hidden"
+                        className="absolute right-0 mt-2 w-64 bg-card rounded-xl shadow-xl border border-border z-50 overflow-hidden"
                     >
                         {/* Header Mobile Only */}
-                        <div className="md:hidden p-4 border-b border-slate-100 bg-slate-50">
-                            <p className="font-bold text-slate-900">{displayName}</p>
-                            <p className="text-xs text-slate-500">{user.email}</p>
+                        <div className="md:hidden p-4 border-b border-border bg-muted">
+                            <p className="font-bold text-foreground">{displayName}</p>
+                            <p className="text-xs text-muted-foreground">{user.email}</p>
                         </div>
 
                         {/* Points Badge */}
@@ -106,10 +106,10 @@ export const UserMenu = ({ user, onLogout, onOpenSettings, onOpenGuide, onOpenPr
                                 </button>
                             )}
 
-                            <div className="h-px bg-slate-100 mx-2 my-1"></div>
+                            <div className="h-px bg-border mx-2 my-1"></div>
                             <a
                                 href="/about"
-                                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors text-left"
+                                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-foreground hover:bg-muted rounded-lg transition-colors text-left"
                             >
                                 <Sparkles size={18} className="text-purple-500" />
                                 Giới thiệu
@@ -117,24 +117,24 @@ export const UserMenu = ({ user, onLogout, onOpenSettings, onOpenGuide, onOpenPr
 
                             <a
                                 href="/guide"
-                                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors text-left"
+                                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-foreground hover:bg-muted rounded-lg transition-colors text-left"
                             >
                                 <HelpCircle size={18} className="text-blue-500" />
                                 Hướng dẫn sử dụng
                             </a>
 
-                            <div className="h-px bg-slate-100 mx-2 my-1"></div>
+                            <div className="h-px bg-border mx-2 my-1"></div>
 
                             <button
                                 onClick={() => { setIsOpen(false); onOpenSettings(); }}
-                                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors text-left"
+                                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-foreground hover:bg-muted rounded-lg transition-colors text-left"
                             >
-                                <Settings size={18} className="text-slate-400" />
+                                <Settings size={18} className="text-muted-foreground" />
                                 Cài đặt API Key
                             </button>
                         </div>
 
-                        <div className="h-px bg-slate-100 mx-3"></div>
+                        <div className="h-px bg-border mx-3"></div>
 
                         {/* Logout */}
                         <div className="p-2">

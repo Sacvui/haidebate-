@@ -10,11 +10,12 @@ interface ResearchFormProps {
     onOpenGuidelines: () => void;
     // Visual props for Preview Mode
     isPreview?: boolean;
+    apiKeyPresent?: boolean;
 }
 
 import { GuideModal } from './GuideModal';
 
-export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: ResearchFormProps) => {
+export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false, apiKeyPresent = true }: ResearchFormProps) => {
     const [topic, setTopic] = useState("");
     const [goal, setGoal] = useState<string>(GOAL_OPTIONS.MASTER_THESIS); // Default
     const [audience, setAudience] = useState("Chuyên gia/Nhà nghiên cứu");
@@ -64,37 +65,37 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
             <GuideModal isOpen={showGuide} onClose={() => setShowGuide(false)} />
 
             <div className="text-center space-y-4">
-                <h2 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
+                <h2 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
                     Quy Trình Nghiên Cứu <br />
                     <span className="text-blue-600">3 Bước Chuyên Sâu</span>
                 </h2>
-                <p className="text-lg text-slate-600 max-w-md mx-auto">
+                <p className="text-lg text-muted-foreground max-w-md mx-auto">
                     Từ ý tưởng đến đề cương chi tiết chuẩn APA 7 với sự hỗ trợ của AI Phản Biện.
                 </p>
 
                 <div className="flex justify-center gap-2 text-sm font-semibold text-slate-500 mt-2">
-                    <span className="px-3 py-1 bg-white border rounded-full flex items-center gap-1"><BookOpen size={14} /> Topic Check</span>
-                    <span className="px-3 py-1 bg-white border rounded-full flex items-center gap-1"><BookOpen size={14} /> Model Builder</span>
-                    <span className="px-3 py-1 bg-white border rounded-full flex items-center gap-1"><BookOpen size={14} /> Outline</span>
-                    <span className="px-3 py-1 bg-white border rounded-full flex items-center gap-1"><BookOpen size={14} /> Survey Builder</span>
+                    <span className="px-3 py-1 bg-card border border-border rounded-full flex items-center gap-1"><BookOpen size={14} /> Topic Check</span>
+                    <span className="px-3 py-1 bg-card border border-border rounded-full flex items-center gap-1"><BookOpen size={14} /> Model Builder</span>
+                    <span className="px-3 py-1 bg-card border border-border rounded-full flex items-center gap-1"><BookOpen size={14} /> Outline</span>
+                    <span className="px-3 py-1 bg-card border border-border rounded-full flex items-center gap-1"><BookOpen size={14} /> Survey Builder</span>
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="bg-white p-8 rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 space-y-6">
+            <form onSubmit={handleSubmit} className="bg-card p-8 rounded-2xl shadow-xl shadow-border/30 border border-border space-y-6">
                 <div className="space-y-2">
-                    <label className="text-sm font-semibold text-slate-700">Chủ đề nghiên cứu sơ khởi</label>
+                    <label className="text-sm font-semibold text-foreground">Chủ đề nghiên cứu sơ khởi</label>
                     <textarea
                         required={!isPreview}
                         value={topic}
                         onChange={(e) => setTopic(e.target.value)}
                         placeholder="Ví dụ: Tác động của ESG đến hiệu quả tài chính doanh nghiệp..."
-                        className="w-full h-32 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none text-slate-700 placeholder:text-slate-400"
+                        className="w-full h-32 px-4 py-3 rounded-xl border border-border bg-card focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none text-foreground placeholder:text-muted-foreground"
                     />
                 </div>
 
                 <div className="space-y-2">
                     <div className="flex justify-between items-center">
-                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                        <label className="text-sm font-semibold text-foreground flex items-center gap-2">
                             <GraduationCap size={16} /> Trình độ bài viết
                         </label>
                         <button
@@ -106,15 +107,15 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
                         </button>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 p-1 bg-slate-100 rounded-xl">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 p-1 bg-muted rounded-xl">
                         {ACADEMIC_LEVELS.map((lvl) => (
                             <button
                                 key={lvl.value}
                                 type="button"
                                 onClick={() => handleLevelSelect(lvl.value)}
                                 className={`py-2 rounded-lg text-xs font-bold transition-all ${level === lvl.value
-                                    ? 'bg-white text-blue-700 shadow-sm ring-1 ring-black/5'
-                                    : 'text-slate-500 hover:text-slate-700'
+                                    ? 'bg-card text-blue-700 dark:text-blue-400 shadow-sm ring-1 ring-black/5 dark:ring-white/10'
+                                    : 'text-muted-foreground hover:text-foreground'
                                     }`}
                             >
                                 {lvl.label}
@@ -159,11 +160,11 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <div className="flex justify-between items-center h-6">
-                            <label className="text-sm font-semibold text-slate-700">Loại hình bài viết</label>
+                            <label className="text-sm font-semibold text-foreground">Loại hình bài viết</label>
                             <button
                                 type="button"
                                 onClick={() => setShowGuide(true)}
-                                className="text-xs text-slate-400 font-medium flex items-center gap-1 hover:text-blue-600 transition-colors whitespace-nowrap"
+                                className="text-xs text-muted-foreground font-medium flex items-center gap-1 hover:text-blue-600 transition-colors whitespace-nowrap"
                             >
                                 <Info size={12} /> Hướng dẫn
                             </button>
@@ -172,7 +173,7 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
                         <select
                             value={goal}
                             onChange={(e) => setGoal(e.target.value)}
-                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-slate-700"
+                            className="w-full px-4 py-3 rounded-xl border border-border bg-card focus:ring-2 focus:ring-blue-500 outline-none text-foreground"
                         >
                             {Object.values(GOAL_OPTIONS).map(opt => (
                                 <option key={opt}>{opt}</option>
@@ -183,10 +184,10 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
                     {/* Paper Methodology Selector - New Feature */}
                     <div className="space-y-2">
                         <div className="flex justify-between items-center h-6">
-                            <label className="text-sm font-semibold text-slate-700">Phương pháp / Loại bài báo</label>
+                            <label className="text-sm font-semibold text-foreground">Phương pháp / Loại bài báo</label>
                         </div>
                         <select
-                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-slate-700 bg-white"
+                            className="w-full px-4 py-3 rounded-xl border border-border bg-card focus:ring-2 focus:ring-blue-500 outline-none text-foreground"
                             value={paperType}
                             onChange={(e) => setPaperType(e.target.value)}
                         >
@@ -205,12 +206,12 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <div className="flex justify-between items-center h-6">
-                            <label className="text-sm font-semibold text-slate-700">Đối tượng độc giả</label>
+                            <label className="text-sm font-semibold text-foreground">Đối tượng độc giả</label>
                         </div>
                         <select
                             value={audience}
                             onChange={(e) => setAudience(e.target.value)}
-                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-slate-700"
+                            className="w-full px-4 py-3 rounded-xl border border-border bg-card focus:ring-2 focus:ring-blue-500 outline-none text-foreground"
                         >
                             {AUDIENCE_OPTIONS.map(opt => (
                                 <option key={opt}>{opt}</option>
@@ -219,20 +220,20 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
                     </div>
                     <div className="space-y-2">
                         <div className="flex justify-between items-center h-6">
-                            <label className="text-sm font-semibold text-slate-700">Ngôn ngữ đầu ra</label>
+                            <label className="text-sm font-semibold text-foreground">Ngôn ngữ đầu ra</label>
                         </div>
-                        <div className="flex bg-slate-100 p-1 rounded-xl">
+                        <div className="flex bg-muted p-1 rounded-xl">
                             <button
                                 type="button"
                                 onClick={() => setLanguage('vi')}
-                                className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${language === 'vi' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${language === 'vi' ? 'bg-card text-blue-700 dark:text-blue-400 shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
                             >
                                 🇻🇳 Tiếng Việt
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setLanguage('en')}
-                                className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${language === 'en' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${language === 'en' ? 'bg-card text-blue-700 dark:text-blue-400 shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
                             >
                                 🇺🇸 English
                             </button>
@@ -251,13 +252,18 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false }: R
 
                 <button
                     type="submit"
-                    disabled={isSubmitting || isPreview}
-                    className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 transform hover:-translate-y-0.5 transition-all text-lg disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                    disabled={isSubmitting || isPreview || !apiKeyPresent}
+                    className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 transform hover:-translate-y-0.5 transition-all text-lg disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none relative"
+                    title={!apiKeyPresent ? 'Vui lòng nhập API Key ở phía trên trước' : ''}
                 >
                     {isSubmitting ? (
                         <span className="flex items-center justify-center gap-2">
                             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                             Vui lòng chờ...
+                        </span>
+                    ) : !apiKeyPresent ? (
+                        <span className="flex items-center justify-center gap-2">
+                            🔑 Vui lòng nhập API Key trước
                         </span>
                     ) : (
                         "Bắt đầu quy trình nghiên cứu"
