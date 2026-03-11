@@ -72,7 +72,7 @@ export function SignupModal({ isOpen, onClose, onSuccess }: SignupModalProps) {
 
                 {needsReferral && (
                     <div className="bg-yellow-50 border border-yellow-200 rounded p-3 mb-4">
-                        ⚠️ Hải Debate hiện chỉ mở cho người được mời
+                        Hải Debate hiện chỉ mở cho người được mời
                     </div>
                 )}
 

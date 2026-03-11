@@ -127,7 +127,7 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false, api
                     {level === 'UNDERGRAD' && (
                         <div className="mt-3 p-3 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-xl animate-in fade-in slide-in-from-top-2 duration-300">
                             <label className="text-xs font-bold text-orange-700 mb-2 block">
-                                🎯 Chọn loại dự án
+                                Chọn loại dự án
                             </label>
                             <div className="grid grid-cols-2 gap-2">
                                 {PROJECT_TYPES.map(type => (
@@ -263,7 +263,7 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false, api
                         </span>
                     ) : !apiKeyPresent ? (
                         <span className="flex items-center justify-center gap-2">
-                            🔑 Vui lòng nhập API Key trước
+                            Vui lòng nhập API Key trước
                         </span>
                     ) : (
                         "Bắt đầu quy trình nghiên cứu"

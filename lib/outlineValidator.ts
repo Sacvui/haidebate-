@@ -124,7 +124,7 @@ export function getValidationMessage(result: OutlineValidationResult): string {
     }
 
     if (result.warnings.length > 0) {
-        message += `⚠️ CẢNH BÁO (${result.warnings.length}):\n`;
+        message += `CẢNH BÁO (${result.warnings.length}):\n`;
         result.warnings.forEach((warning, i) => {
             message += `${i + 1}. ${warning}\n`;
         });
@@ -134,10 +134,10 @@ export function getValidationMessage(result: OutlineValidationResult): string {
     message += `📈 CHI TIẾT:\n`;
     message += `- Số từ: ${result.details.wordCount}\n`;
     message += `- Số citations: ${result.details.citationCount}\n`;
-    message += `- Đánh số đúng: ${result.details.hasProperNumbering ? '✅' : '❌'}\n`;
+    message += `- Đánh số đúng: ${result.details.hasProperNumbering ? 'Có' : 'Không'}\n`;
 
     if (result.valid) {
-        message += `\n✅ Đề cương đạt yêu cầu cơ bản!`;
+        message += `\nĐề cương đạt yêu cầu cơ bản!`;
     } else {
         message += `\n❌ Đề cương chưa đạt yêu cầu. Vui lòng sửa các lỗi trên.`;
     }

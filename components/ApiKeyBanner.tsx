@@ -161,7 +161,7 @@ export const ApiKeyBanner = ({ apiKey, onApiKeyChange }: ApiKeyBannerProps) => {
                     <div className="space-y-3">
                         <div>
                             <label className="block text-sm font-bold text-foreground mb-1.5">
-                                🔑 API Key — Writer AI
+                                API Key — Writer AI
                                 <span className="text-red-500 ml-1">*</span>
                             </label>
                             <input

@@ -118,7 +118,7 @@ export function ExportManager({
                         </div>
                         <div>
                             <h2 className="text-2xl font-bold text-indigo-800">
-                                ✅ Bước 5: Export Kết Quả
+                                Bước 5: Export Kết Quả
                             </h2>
                             <p className="text-sm text-indigo-700 mt-1">
                                 Tải xuống đề cương và bảng khảo sát dưới nhiều định dạng
@@ -150,7 +150,7 @@ export function ExportManager({
             {isMobile && (
                 <div className="bg-yellow-50 border-l-4 border-yellow-400 rounded-lg p-4 text-sm">
                     <div className="flex gap-2">
-                        <span className="text-yellow-600 font-bold text-lg">⚠️</span>
+                        <span className="text-yellow-600 font-bold text-lg">!</span>
                         <div>
                             <strong className="text-yellow-800">Lưu ý cho thiết bị di động:</strong>
                             <p className="text-yellow-700 mt-1">
@@ -425,7 +425,7 @@ export function ExportManager({
             {/* Instructions */}
             <div className="bg-amber-50 border-l-4 border-amber-400 rounded-lg p-4 text-sm text-amber-800 mt-8">
                 <div className="flex gap-2">
-                    <span className="text-amber-500 font-bold">💡</span>
+                    <span className="text-amber-500 font-bold">Tip:</span>
                     <div>
                         <strong>Hướng dẫn sử dụng:</strong>
                         <ul className="list-disc ml-5 mt-2 space-y-1 text-amber-700">

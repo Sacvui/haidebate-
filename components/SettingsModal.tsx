@@ -31,14 +31,14 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
         if (apiKey.trim()) {
             localStorage.setItem("gemini_api_key", apiKey.trim());
             if (apiKeyCritic.trim()) localStorage.setItem("gemini_api_key_critic", apiKeyCritic.trim());
-            alert("✅ Đã lưu cấu hình API Key!\n\nHệ thống sẽ dùng quota của bạn thay vì key chung.");
+            alert("Đã lưu cấu hình API Key!\n\nHệ thống sẽ dùng quota của bạn thay vì key chung.");
             onClose();
             window.location.reload(); // Reload to apply changes
         } else {
             // Clear if empty
             localStorage.removeItem("gemini_api_key");
             localStorage.removeItem("gemini_api_key_critic");
-            alert("ℹ️ Đã xóa API Key riêng. Hệ thống sẽ dùng key chung.\n\nLưu ý: Model Pro có thể không khả dụng với key chung.");
+            alert("Đã xóa API Key riêng. Hệ thống sẽ dùng key chung.\n\nLưu ý: Model Pro có thể không khả dụng với key chung.");
             onClose();
             window.location.reload();
         }
@@ -49,7 +49,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
         localStorage.removeItem("gemini_api_key_critic");
         setApiKey("");
         setApiKeyCritic("");
-        alert("🔄 Đã chuyển về dùng API Key chung của hệ thống.\n\nLưu ý: Key chung có giới hạn quota.");
+        alert("Đã chuyển về dùng API Key chung của hệ thống.\n\nLưu ý: Key chung có giới hạn quota.");
         onClose();
         window.location.reload();
     };
@@ -87,7 +87,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                         <div className="space-y-4">
                             {/* Info Banner */}
                             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-sm">
-                                <p className="text-blue-900 dark:text-blue-300 font-medium mb-1">ℹ️ Tùy chọn API Key</p>
+                                <p className="text-blue-900 dark:text-blue-300 font-medium mb-1">Tùy chọn API Key</p>
                                 <p className="text-blue-700 dark:text-blue-400 text-xs">
                                     • <b>Để trống:</b> Dùng API key chung của hệ thống (có giới hạn quota)<br />
                                     • <b>Nhập key riêng:</b> Dùng quota của bạn, không giới hạn
@@ -121,7 +121,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                     className="w-full px-4 py-3 rounded-lg border border-border bg-card focus:ring-2 focus:ring-orange-500 outline-none font-mono text-sm text-foreground"
                                 />
                                 <p className="text-xs text-muted-foreground mt-2">
-                                    💡 <b>Mẹo:</b> Dùng 2 tài khoản Google khác nhau cho 2 Key để gấp đôi giới hạn (Quota) và tránh lỗi quá tải.
+                                    <b>Mẹo:</b> Dùng 2 tài khoản Google khác nhau cho 2 Key để gấp đôi giới hạn (Quota) và tránh lỗi quá tải.
                                 </p>
                             </div>
 

@@ -156,7 +156,7 @@ export function CitationChecker({ content, onVerificationComplete }: CitationChe
                             <div className="flex gap-2">
                                 <XCircle className="text-red-600 flex-shrink-0" size={20} />
                                 <div>
-                                    <strong className="text-red-800">⚠️ Phát hiện {summary.invalid} DOI giả!</strong>
+                                    <strong className="text-red-800">Phát hiện {summary.invalid} DOI giả!</strong>
                                     <p className="text-sm text-red-700 mt-1">
                                         Vui lòng xóa hoặc sửa lại các DOI không hợp lệ trước khi tiếp tục.
                                         DOI giả vi phạm đạo đức nghiên cứu và sẽ bị GVHD từ chối.

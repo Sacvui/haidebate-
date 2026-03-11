@@ -91,7 +91,7 @@ export function StepReview({
         // Check if verification is required but not done
         if (extractedDOIs.length > 0 && verificationResults.length === 0) {
             alert(
-                '⚠️ CẢNH BÁO: Phát hiện DOI trong nội dung!\n\n' +
+                'CẢNH BÁO: Phát hiện DOI trong nội dung!\n\n' +
                 `Tìm thấy ${extractedDOIs.length} DOI chưa được verify.\n\n` +
                 'Vui lòng click "Verify Citations" để kiểm tra trước khi xác nhận.\n' +
                 'Điều này đảm bảo không có DOI giả trong nội dung.'
@@ -104,7 +104,7 @@ export function StepReview({
         if (hasFakeDOIs) {
             const fakeDOIs = verificationResults.filter(r => !r.valid);
             alert(
-                `⚠️ CẢNH BÁO: Phát hiện ${fakeDOIs.length} DOI giả!\n\n` +
+                `CẢNH BÁO: Phát hiện ${fakeDOIs.length} DOI giả!\n\n` +
                 `Các DOI sau không hợp lệ:\n${fakeDOIs.map(r => `- ${r.doi}`).join('\n')}\n\n` +
                 `Vui lòng xóa hoặc sửa lại các DOI này trước khi tiếp tục.\n` +
                 `DOI giả vi phạm đạo đức nghiên cứu!`
@@ -136,7 +136,7 @@ export function StepReview({
                         </div>
                         <div>
                             <h2 className="text-2xl font-bold text-green-800">
-                                ✅ Hoàn thành {getStepName(step, projectType)}
+                                Hoàn thành {getStepName(step, projectType)}
                             </h2>
                             <p className="text-sm text-green-700 mt-1">
                                 Vui lòng xem xét kết quả và nhập phiên bản cuối cùng sau khi tham khảo GVHD
@@ -253,7 +253,7 @@ export function StepReview({
             {/* Warning */}
             <div className="bg-orange-50 border-l-4 border-orange-400 rounded-lg p-4 text-sm text-orange-800">
                 <div className="flex gap-2">
-                    <span className="text-orange-500 font-bold">⚠️</span>
+                    <span className="text-orange-500 font-bold">!</span>
                     <div>
                         <strong>Lưu ý quan trọng:</strong>
                         <ul className="list-disc ml-5 mt-1 space-y-1 text-orange-700">

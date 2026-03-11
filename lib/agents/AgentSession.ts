@@ -209,7 +209,7 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
         try {
             const finalKey = this.writerKey;
             if (!finalKey) {
-                return "⚠️ CHƯA CẤU HÌNH API KEY: Vui lòng vào Cài đặt (⚙️) để nhập API Key của bạn. Hệ thống không còn dùng key mặc định.";
+                return "CHƯA CẤU HÌNH API KEY: Vui lòng vào Cài đặt để nhập API Key của bạn. Hệ thống không còn dùng key mặc định.";
             }
 
             let sysPrompt = "";
@@ -341,7 +341,7 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
         const geminiKey = this.criticKey || this.writerKey;
 
         if (!geminiKey) {
-            return "⚠️ CHƯA CẤU HÌNH API KEY: Vui lòng vào Cài đặt (⚙️) để nhập API Key.";
+            return "CHƯA CẤU HÌNH API KEY: Vui lòng vào Cài đặt để nhập API Key.";
         }
         try {
             let sysPrompt = "";
