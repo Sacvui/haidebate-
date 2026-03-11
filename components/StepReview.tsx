@@ -225,7 +225,25 @@ export function StepReview({
 
                 <div className="bg-muted border-2 border-border rounded-xl p-6 max-h-96 overflow-y-auto shadow-inner">
                     <div className="prose prose-sm max-w-none prose-headings:text-foreground prose-p:text-foreground dark:prose-invert">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        <ReactMarkdown 
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                                code({node, inline, className, children, ...props}: any) {
+                                    const match = /language-(\w+)/.exec(className || '');
+                                    if (!inline && match && match[1] === 'mermaid') {
+                                        return (
+                                            <div className="my-4 p-4 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                                                <div className="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wide">
+                                                    📊 Sơ đồ minh họa (AI đề xuất):
+                                                </div>
+                                                <MermaidChart chart={String(children).replace(/\n$/, '')} />
+                                            </div>
+                                        );
+                                    }
+                                    return <code className={className} {...props}>{children}</code>;
+                                }
+                            }}
+                        >
                             {aiOutput}
                         </ReactMarkdown>
                     </div>

@@ -12,6 +12,7 @@ import { StepReview } from './StepReview';
 import { ShareableCard } from './ShareableCard';
 import { ExportManager } from './ExportManager';
 import { FinalReport } from './FinalReport';
+import { MermaidChart } from './MermaidChart';
 import { getAllProjects, saveProject, getProject, SavedProject } from '@/lib/projectStorage';
 import { cn } from '@/lib/utils';
 
@@ -454,7 +455,25 @@ export function DebateManager({
                             </div>
                             <div className={cn("max-w-[80%] p-4 rounded-xl shadow-sm", msg.role === 'writer' ? "bg-card border border-border" : "bg-purple-50 dark:bg-purple-900/15 border-purple-100 dark:border-purple-800/30")}>
                                 <div className="prose prose-slate max-w-none text-sm break-words prose-table:border-collapse prose-table:border prose-table:w-full prose-th:border prose-th:bg-slate-100 prose-th:p-2 prose-td:border prose-td:p-2">
-                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                    <ReactMarkdown 
+                                        remarkPlugins={[remarkGfm]}
+                                        components={{
+                                            code({node, inline, className, children, ...props}: any) {
+                                                const match = /language-(\w+)/.exec(className || '');
+                                                if (!inline && match && match[1] === 'mermaid') {
+                                                    return (
+                                                        <div className="my-4 p-4 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                                                            <div className="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wide">
+                                                                📊 Sơ đồ minh họa (AI đề xuất):
+                                                            </div>
+                                                            <MermaidChart chart={String(children).replace(/\n$/, '')} />
+                                                        </div>
+                                                    );
+                                                }
+                                                return <code className={className} {...props}>{children}</code>;
+                                            }
+                                        }}
+                                    >
                                         {msg.content}
                                     </ReactMarkdown>
                                 </div>                            </div>

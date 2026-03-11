@@ -15,6 +15,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ExportTemplateSelector, ExportTemplate } from './ExportTemplateSelector';
 import { toast } from 'sonner';
+import { markdownComponents } from '@/lib/markdownUtils';
 
 interface ExportManagerProps {
     topic: string;
@@ -382,7 +383,7 @@ export function ExportManager({
                     </h3>
                     <div className="bg-white rounded-lg p-4 max-h-96 overflow-y-auto border border-slate-200">
                         <div className="prose prose-sm max-w-none">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                                 {outlineContent.substring(0, 1000) + '...'}
                             </ReactMarkdown>
                         </div>
@@ -397,7 +398,7 @@ export function ExportManager({
                     </h3>
                     <div className="bg-white rounded-lg p-4 max-h-96 overflow-y-auto border border-slate-200">
                         <div className="prose prose-sm max-w-none">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                                 {surveyContent.substring(0, 1000) + '...'}
                             </ReactMarkdown>
                         </div>
@@ -414,7 +415,7 @@ export function ExportManager({
                     </h3>
                     <div className="bg-white rounded-lg p-4 max-h-96 overflow-y-auto border border-slate-200">
                         <div className="prose prose-sm max-w-none">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                                 {gtmContent.substring(0, 1000) + '...'}
                             </ReactMarkdown>
                         </div>

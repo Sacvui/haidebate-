@@ -6,6 +6,7 @@ import { MermaidChart } from './MermaidChart';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { generateDocx } from '../lib/docxGenerator';
+import { markdownComponents } from '@/lib/markdownUtils';
 
 interface FinalReportProps {
     topic: string;
@@ -89,7 +90,7 @@ export const FinalReport = ({ topic, goal, audience, level, finalContent, modelC
                         {modelContent && (
                             <div className="mb-12">
                                 <h2 className="text-xl font-bold uppercase mb-4">I. Cơ Sở Lý Thuyết & Mô Hình</h2>
-                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                                     {modelContent}
                                 </ReactMarkdown>
                             </div>
@@ -99,7 +100,7 @@ export const FinalReport = ({ topic, goal, audience, level, finalContent, modelC
                         {outlineContent && (
                             <div className="mb-12">
                                 <h2 className="text-xl font-bold uppercase mb-4">II. Đề Cương Chi Tiết</h2>
-                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                                     {outlineContent}
                                 </ReactMarkdown>
                             </div>
@@ -122,7 +123,7 @@ export const FinalReport = ({ topic, goal, audience, level, finalContent, modelC
                         {gtmContent && (
                             <div className="mb-12">
                                 <h2 className="text-xl font-bold uppercase mb-4">III. Chiến Lược Ra Mắt (GTM Strategy)</h2>
-                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                                     {gtmContent}
                                 </ReactMarkdown>
                             </div>
@@ -130,7 +131,7 @@ export const FinalReport = ({ topic, goal, audience, level, finalContent, modelC
 
                         {/* Fallback for legacy Final Content */}
                         {finalContent && !modelContent && !outlineContent && (
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                                 {finalContent}
                             </ReactMarkdown>
                         )}
@@ -156,7 +157,7 @@ export const FinalReport = ({ topic, goal, audience, level, finalContent, modelC
                                 {gtmContent ? 'IV' : 'III'}. Phụ Lục: Thang Đo & Câu Hỏi Khảo Sát
                             </h3>
                             <div className="prose prose-slate max-w-none font-serif prose-table:border-collapse prose-table:border prose-table:border-black prose-th:border prose-th:border-black prose-th:p-2 prose-td:border prose-td:border-black prose-td:p-2 text-sm">
-                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                                     {surveyContent}
                                 </ReactMarkdown>
                             </div>
@@ -187,7 +188,7 @@ export const FinalReport = ({ topic, goal, audience, level, finalContent, modelC
                         </div>
                         <div className="p-8 overflow-y-auto flex-1 bg-slate-50">
                             <div className="prose prose-slate max-w-none">
-                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                                     {outlineContent}
                                 </ReactMarkdown>
                             </div>
