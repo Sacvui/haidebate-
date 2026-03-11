@@ -147,6 +147,52 @@ export async function verifyAllDOIs(
 }
 
 /**
+ * Search CrossRef for multiple replacement candidates
+ * Returns up to `rows` results for the user to choose from
+ */
+export async function searchReplacements(query: string, rows: number = 3): Promise<DOIVerificationResult[]> {
+    try {
+        const encodedQuery = encodeURIComponent(query);
+        const response = await fetch(`https://api.crossref.org/works?query=${encodedQuery}&rows=${rows}&sort=relevance&order=desc`, {
+            headers: {
+                'User-Agent': 'HaiDebate/1.0 (mailto:support@haidebate.com)'
+            }
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+        const items = data.message.items;
+
+        if (!items || items.length === 0) return [];
+
+        return items.map((work: any) => {
+            const authors = work.author?.map((a: any) => {
+                const given = a.given || '';
+                const family = a.family || '';
+                return `${given} ${family}`.trim();
+            }).filter(Boolean) || [];
+
+            const year = work.published?.['date-parts']?.[0]?.[0] ||
+                work.created?.['date-parts']?.[0]?.[0];
+
+            return {
+                doi: work.DOI || 'N/A',
+                valid: true,
+                title: work.title?.[0] || 'No title',
+                authors,
+                year,
+                journal: work['container-title']?.[0] || 'Unknown journal',
+                url: work.URL || (work.DOI ? `https://doi.org/${work.DOI}` : undefined)
+            } as DOIVerificationResult;
+        }).filter((r: DOIVerificationResult) => r.doi !== 'N/A');
+    } catch (error) {
+        console.error('CrossRef search error:', error);
+        return [];
+    }
+}
+
+/**
  * Get verification summary
  */
 export function getVerificationSummary(results: DOIVerificationResult[]): {
