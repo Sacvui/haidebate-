@@ -19,6 +19,10 @@ export const MermaidChart = memo(function MermaidChart({ chart }: MermaidChartPr
             startOnLoad: false,
             theme: "default",
             securityLevel: "loose",
+            flowchart: {
+                htmlLabels: true,
+                useMaxWidth: true,
+            }
         });
 
         const renderChart = async () => {

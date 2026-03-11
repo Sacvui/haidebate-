@@ -148,12 +148,12 @@ YÊU CẦU ĐẦU RA:
      C --> D[Hành vi Thực tế]
    \`\`\`
    
-   QUY TẮC BẮT BUỘC:
-   - Dùng 'graph LR' hoặc 'graph TD'
-   - Node: [Tên ngắn gọn] (không dấu ngoặc kép)
-   - Mũi tên: --> (không nhãn phức tạp)
-   - Không xuống dòng trong node
-   - Không ký tự đặc biệt: (), {}, "", ''
+   QUY TẮC BẮT BUỘC (ĐỂ ĐẢM BẢO CHUẨN BÀI CÔNG BỐ KHOA HỌC):
+   - LUÔN dùng 'graph LR' (Trái sang Phải) cho mô hình SEM/Conceptual Framework.
+   - Node: [Tên cực kỳ ngắn gọn - Tối đa 3-4 chữ] (không dấu ngoặc kép).
+   - Nếu tên dài, BẮT BUỘC dùng thẻ <br> để ngắt dòng (VD: A[Nhận thức<br>Hữu ích]).
+   - Mũi tên: --> (tuyệt đối không để nhãn trên mũi tên làm rối sơ đồ).
+   - Không ký tự đặc biệt lạ: (), {}, "", ''.
    
 4. Trích dẫn nguồn (Citation) dạng giả định chuẩn APA.
 `;
@@ -304,15 +304,16 @@ CẤU TRÚC OUTPUT (MARKDOWN):
 - Tools: SPSS/AMOS/SmartPLS/NVivo...
 - Methods: Cronbach's Alpha, EFA, CFA, SEM...
 
-MINH HỌA (Mermaid):
+MINH HỌA QUY TRÌNH BAO GỒM SƠ ĐỒ MERMAID (Nếu được phân tích):
 \`\`\`mermaid
 graph LR
-    A[Literature Review] --> B[Hypothesis]
-    B --> C[Questionnaire Design]
-    C --> D[Data Collection (N=300)]
-    D --> E[Data Analysis (SPSS/AMOS)]
-    E --> F[Conclusion]
+    A[Tổng quan<br>Lý thuyết] --> B[Thiết kế<br>Nghiên cứu]
+    B --> C[Bảng hỏi<br>& Thang đo]
+    C --> D[Thu thập<br>Dữ liệu]
+    D --> E[Phân tích<br>SEM & Đánh giá]
+    E --> F[Kết luận<br>& Đề xuất]
 \`\`\`
+*(Lưu ý: Luôn dùng graph LR, tên các bước phải cực kỳ ngắn gọn, nếu dài bắt buộc dùng <br> để ngắt dòng để tránh bị cắt ngang hộp)*
   `;
    return surveyPromptText;
 }

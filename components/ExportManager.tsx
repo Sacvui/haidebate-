@@ -67,9 +67,13 @@ export function ExportManager({
                     return; // generateDocx handles download
 
                 case 'pdf':
-                    blob = await exportOutlineToPDF(topic, outlineContent, modelContent, level);
-                    filename = `De_Cuong_${topic.substring(0, 30).replace(/\s+/g, '_')}.pdf`;
-                    break;
+                    if (onViewReport) {
+                        toast.success('Chuyển sang giao diện Báo Cáo để xuất PDF với định dạng chuẩn nhất. Vui lòng nhấn "Xuất PDF" ở góc trên.', { duration: 4000 });
+                        setTimeout(() => {
+                            onViewReport();
+                        }, 1500);
+                    }
+                    return; // exit flow
 
                 case 'excel':
                     blob = await exportSurveyToExcel(surveyContent, topic);
