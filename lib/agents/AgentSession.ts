@@ -164,7 +164,8 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
                 body: JSON.stringify({
                     model: currentModel,
                     prompt,
-                    useCustomKey: !!customKey
+                    useCustomKey: !!customKey,
+                    userId: this.userId
                 })
             });
 

@@ -19,16 +19,7 @@ const GeminiRequestSchema = z.object({
 
 export async function POST(request: NextRequest) {
     try {
-        // 1. Check authentication
-        const session = await auth();
         const isDev = process.env.NODE_ENV === 'development';
-        
-        if (!session?.user?.email && !isDev) {
-            return NextResponse.json(
-                { error: 'Unauthorized. Please login to use AI features.' },
-                { status: 401 }
-            );
-        }
 
         // 2. Parse and Validate Request Body
         const json = await request.json();
@@ -41,10 +32,34 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const { model, prompt, useCustomKey } = validation.data;
+        const { model, prompt, useCustomKey, userId: reqUserId } = validation.data;
+
+        // 1. Check authentication
+        const session = await auth();
+        
+        let isAuthorized = false;
+        let authenticatedUserId = 'anonymous';
+
+        if (session?.user?.email) {
+            isAuthorized = true;
+            authenticatedUserId = session.user.email;
+        } else if (reqUserId) {
+            const userInKV = await kv.get(`user:${reqUserId}`);
+            if (userInKV) {
+                isAuthorized = true;
+                authenticatedUserId = reqUserId;
+            }
+        }
+
+        if (!isAuthorized && !isDev) {
+            return NextResponse.json(
+                { error: 'Unauthorized. Please login to use AI features.' },
+                { status: 401 }
+            );
+        }
 
         // 3. Rate Limiting (Redis/KV based)
-        const userId = session?.user?.email || 'anonymous';
+        const userId = authenticatedUserId;
 
         // Logic: specific limit for standard users, bypass for custom key
         if (!useCustomKey) {
