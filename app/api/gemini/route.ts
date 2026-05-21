@@ -21,7 +21,9 @@ export async function POST(request: NextRequest) {
     try {
         // 1. Check authentication
         const session = await auth();
-        if (!session?.user?.email) {
+        const isDev = process.env.NODE_ENV === 'development';
+        
+        if (!session?.user?.email && !isDev) {
             return NextResponse.json(
                 { error: 'Unauthorized. Please login to use AI features.' },
                 { status: 401 }
@@ -42,27 +44,32 @@ export async function POST(request: NextRequest) {
         const { model, prompt, useCustomKey } = validation.data;
 
         // 3. Rate Limiting (Redis/KV based)
-        const userId = session.user.email || 'anonymous';
+        const userId = session?.user?.email || 'anonymous';
 
         // Logic: specific limit for standard users, bypass for custom key
         if (!useCustomKey) {
-            // Use UserID if available, fallback to IP
-            const ip = request.headers.get('x-forwarded-for') || 'anonymous_ip';
-            const identifier = userId || ip;
-            const rateKey = `ratelimit:${identifier}`;
+            try {
+                // Use UserID if available, fallback to IP
+                const ip = request.headers.get('x-forwarded-for') || 'anonymous_ip';
+                const identifier = userId || ip;
+                const rateKey = `ratelimit:${identifier}`;
 
-            const current = await kv.incr(rateKey);
+                const current = await kv.incr(rateKey);
 
-            // Set expiration on first request
-            if (current === 1) {
-                await kv.expire(rateKey, RATE_LIMIT_WINDOW);
-            }
+                // Set expiration on first request
+                if (current === 1) {
+                    await kv.expire(rateKey, RATE_LIMIT_WINDOW);
+                }
 
-            if (current > MAX_REQUESTS) {
-                return NextResponse.json(
-                    { error: 'System busy (Rate Limit). Please wait a moment or use your own API Key.' },
-                    { status: 429 }
-                );
+                if (current > MAX_REQUESTS) {
+                    return NextResponse.json(
+                        { error: 'System busy (Rate Limit). Please wait a moment or use your own API Key.' },
+                        { status: 429 }
+                    );
+                }
+            } catch (kvError) {
+                console.error('Rate Limit Error (Redis KV failed, bypassing):', kvError);
+                // Fail-open: allow request if Redis fails
             }
         }
 

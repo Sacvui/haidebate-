@@ -208,7 +208,8 @@ export async function exportOutlineToWord(
     gtm?: string,
     survey?: string,
     outlineChart?: string,
-    template?: any
+    template?: any,
+    paperType?: string
 ): Promise<void> {
     await generateDocx({
         topic,
@@ -218,7 +219,8 @@ export async function exportOutlineToWord(
         gtmContent: gtm,
         surveyContent: survey,
         outlineChart: outlineChart,
-        template: template
+        template: template,
+        paperType: paperType
     });
 }
 

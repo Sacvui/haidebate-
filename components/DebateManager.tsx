@@ -68,6 +68,9 @@ export function DebateManager({
     const [outlineChart, setOutlineChart] = useState<string>("");
     const [gtmContent, setGtmContent] = useState<string>("");
     const [surveyContent, setSurveyContent] = useState<string>("");
+    const [litReviewContent, setLitReviewContent] = useState<string>("");
+    const [archContent, setArchContent] = useState<string>("");
+    const [benchmarkContent, setBenchmarkContent] = useState<string>("");
 
     const [session] = useState(() => new AgentSession(
         topic, goal, audience, level, language as 'vi' | 'en', projectType, apiKey, apiKeyCritic, sessionId, userId
@@ -93,6 +96,9 @@ export function DebateManager({
                         if (data.outlineChart) setOutlineChart(data.outlineChart);
                         if (data.gtmContent) setGtmContent(data.gtmContent);
                         if (data.surveyContent) setSurveyContent(data.surveyContent);
+                        if (data.litReviewContent) setLitReviewContent(data.litReviewContent);
+                        if (data.archContent) setArchContent(data.archContent);
+                        if (data.benchmarkContent) setBenchmarkContent(data.benchmarkContent);
 
                         // 2. Hydrate underlying session (AgentSession)
                         if (project.topic) session.setFinalizedTopic(project.topic);
@@ -100,6 +106,9 @@ export function DebateManager({
                         if (data.outlineContent) session.setFinalizedOutline(data.outlineContent, data.outlineChart);
                         if (data.gtmContent) session.setFinalizedGTM(data.gtmContent);
                         if (data.surveyContent) session.setFinalizedSurvey(data.surveyContent);
+                        if (data.litReviewContent) session.setFinalizedLitReview(data.litReviewContent);
+                        if (data.archContent) session.setFinalizedArch(data.archContent);
+                        if (data.benchmarkContent) session.setFinalizedBenchmark(data.benchmarkContent);
                     }
                 } catch (e) {
                     console.error("Failed to load project data:", e);
@@ -126,7 +135,7 @@ export function DebateManager({
         if (sessionId && session) {
             saveToProjectStorage();
         }
-    }, [messages, currentStep, stepCompleted, roundCount, variableChart, finalContent, outlineContent, gtmContent, surveyContent, sessionId, session]);
+    }, [messages, currentStep, stepCompleted, roundCount, variableChart, finalContent, outlineContent, gtmContent, surveyContent, litReviewContent, archContent, benchmarkContent, sessionId, session]);
 
     const saveToProjectStorage = async () => {
         if (!sessionId || !isInitialized) return;
@@ -142,6 +151,9 @@ export function DebateManager({
                 outlineChart,
                 gtmContent,
                 surveyContent,
+                litReviewContent,
+                archContent,
+                benchmarkContent,
                 completedAt: stepCompleted ? new Date().toISOString() : undefined
             };
 
@@ -242,6 +254,9 @@ export function DebateManager({
             writerContent = await session.generateWriterTurn(currentStep);
             setMessages(prev => [...prev, { role: 'writer', content: writerContent, timestamp: Date.now(), round: 1 }]);
 
+            if (currentStep === '1_LIT_REVIEW') setLitReviewContent(writerContent);
+            if (currentStep === '2_ARCH') setArchContent(writerContent);
+            if (currentStep === '4_BENCHMARK') setBenchmarkContent(writerContent);
             if (currentStep === '2_MODEL') {
                 const chart = extractMermaidCode(writerContent);
                 if (chart) setVariableChart(chart);
@@ -251,11 +266,19 @@ export function DebateManager({
                 const chart = extractMermaidCode(writerContent);
                 if (chart) setOutlineChart(chart);
             }
-            if (currentStep === '4_SURVEY') setSurveyContent(writerContent);
+            if (currentStep === '4_SURVEY' || currentStep === '4_BENCHMARK') setSurveyContent(writerContent);
             if (currentStep === '5_GTM') setGtmContent(writerContent);
 
+            let actualMaxRounds = maxRounds;
+            if (roundsConfig) {
+                if (roundsConfig[currentStep]) actualMaxRounds = roundsConfig[currentStep];
+                else if (currentStep === '1_LIT_REVIEW') actualMaxRounds = roundsConfig['1_TOPIC'] || maxRounds;
+                else if (currentStep === '2_ARCH' || currentStep === '5_GTM') actualMaxRounds = roundsConfig['2_MODEL'] || maxRounds;
+                else if (currentStep === '4_BENCHMARK') actualMaxRounds = roundsConfig['4_SURVEY'] || maxRounds;
+            }
+
             // Debate Loop
-            while (currentRound < maxRounds) {
+            while (currentRound < actualMaxRounds) {
                 const delayTime = session.isUsingSameKey() ? 4000 : 1000;
                 await new Promise(r => setTimeout(r, delayTime));
                 currentRound++;
@@ -266,14 +289,17 @@ export function DebateManager({
                 setMessages(prev => [...prev, { role: 'critic', content: criticMsg, timestamp: Date.now(), round: currentRound }]);
                 lastCriticFeedback = criticMsg;
 
-                if (currentRound < maxRounds) {
+                if (currentRound < actualMaxRounds) {
                     await new Promise(r => setTimeout(r, delayTime));
                     writerContent = await session.generateWriterTurn(currentStep, lastCriticFeedback);
                     setMessages(prev => [...prev, { role: 'writer', content: writerContent, timestamp: Date.now(), round: currentRound + 1 }]);
 
+                    if (currentStep === '1_LIT_REVIEW') setLitReviewContent(writerContent);
+                    if (currentStep === '2_ARCH') setArchContent(writerContent);
+                    if (currentStep === '4_BENCHMARK') setBenchmarkContent(writerContent);
                     if (currentStep === '2_MODEL') { const c = extractMermaidCode(writerContent); if (c) setVariableChart(c); }
                     if (currentStep === '3_OUTLINE') { setOutlineContent(writerContent); const c = extractMermaidCode(writerContent); if (c) setOutlineChart(c); }
-                    if (currentStep === '4_SURVEY') setSurveyContent(writerContent);
+                    if (currentStep === '4_SURVEY' || currentStep === '4_BENCHMARK') setSurveyContent(writerContent);
                     if (currentStep === '5_GTM') setGtmContent(writerContent);
                 }
             }
@@ -291,10 +317,13 @@ export function DebateManager({
     const handleFinalize = async (userFinal: string, note?: string) => {
         try {
             if (currentStep === '1_TOPIC') session.setFinalizedTopic(userFinal);
+            else if (currentStep === '1_LIT_REVIEW') session.setFinalizedLitReview(userFinal);
+            else if (currentStep === '2_ARCH') session.setFinalizedArch(userFinal);
+            else if (currentStep === '4_BENCHMARK') session.setFinalizedBenchmark(userFinal);
             else if (currentStep === '2_MODEL') session.setFinalizedModel(userFinal, variableChart);
             else if (currentStep === '3_OUTLINE') session.setFinalizedOutline(userFinal, outlineChart);
             else if (currentStep === '5_GTM') session.setFinalizedGTM(userFinal);
-            else if (currentStep === '4_SURVEY') session.setFinalizedSurvey(userFinal);
+            else if (currentStep === '4_SURVEY' || currentStep === '4_BENCHMARK') session.setFinalizedSurvey(userFinal);
 
             handleNextStep();
         } catch (error) {
@@ -364,6 +393,7 @@ export function DebateManager({
                 outlineChart={session.finalizedOutlineChart || outlineChart}
                 gtmContent={session.finalizedGTM || gtmContent}
                 surveyContent={session.finalizedSurvey || surveyContent}
+                paperType={paperType}
                 onBack={() => setShowExport(false)}
                 onViewReport={() => setShowReport(true)}
             />

@@ -23,16 +23,19 @@ import {
     STARTUP_SURVEY_WRITER_PROMPT,
     STARTUP_SURVEY_CRITIC_PROMPT,
 } from './startupPrompts';
-import { SOFTWARE_ARCH_WRITER_PROMPT, SOFTWARE_ARCH_CRITIC_PROMPT, SOFTWARE_BENCHMARK_WRITER_PROMPT } from '../software_prompts';
+import { SOFTWARE_ARCH_WRITER_PROMPT, SOFTWARE_ARCH_CRITIC_PROMPT, SOFTWARE_BENCHMARK_WRITER_PROMPT, SOFTWARE_BENCHMARK_CRITIC_PROMPT } from '../software_prompts';
 
 export class AgentSession {
     private messages: AgentMessage[] = [];
     public finalizedTopic?: string;
+    public finalizedLitReview?: string;
     public finalizedModel?: string;
     public finalizedModelChart?: string;
+    public finalizedArch?: string;
     public finalizedOutline?: string;
     public finalizedOutlineChart?: string;
     public finalizedGTM?: string;
+    public finalizedBenchmark?: string;
     public finalizedSurvey?: string;
     private sessionId: string;
     private userId?: string;
@@ -62,6 +65,18 @@ export class AgentSession {
 
     public setFinalizedTopic(topic: string) {
         this.finalizedTopic = topic;
+    }
+
+    public setFinalizedLitReview(litReview: string) {
+        this.finalizedLitReview = litReview;
+    }
+
+    public setFinalizedArch(arch: string) {
+        this.finalizedArch = arch;
+    }
+
+    public setFinalizedBenchmark(benchmark: string) {
+        this.finalizedBenchmark = benchmark;
     }
 
     public setFinalizedModel(model: string, chart?: string) {
@@ -114,7 +129,7 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
     `;
 
         try {
-            const summary = await this.callGeminiAPI(AgentSession.PRIMARY_MODEL, summaryPrompt);
+            const summary = await this.callGeminiAPI(AgentSession.PRIMARY_MODEL, summaryPrompt, this.writerKey);
             this.contextSummary = summary;
             return summary;
         } catch (e) {
@@ -286,6 +301,9 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
                         if (this.finalizedTopic) {
                             contextAddition = `\n\nĐỀ TÀI ĐÃ ĐƯỢC PHÊ DUYỆT (sử dụng làm nền tảng):\n"${this.finalizedTopic}"`;
                         }
+                        if (this.finalizedLitReview) {
+                            contextAddition += `\n\nTỔNG QUAN TÀI LIỆU (Lit Review) ĐÃ PHÊ DUYỆT:\n${this.finalizedLitReview.substring(0, 1500)}...`;
+                        }
                         break;
                     case '3_OUTLINE':
                         sysPrompt = getOutlineWriterPrompt(this.goal);
@@ -302,11 +320,15 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
                     case '2_ARCH':
                         sysPrompt = SOFTWARE_ARCH_WRITER_PROMPT;
                         if (this.finalizedTopic) contextAddition = `\n\nĐỀ TÀI: "${this.finalizedTopic}"`;
+                        if (this.finalizedLitReview) {
+                            contextAddition += `\n\nTỔNG QUAN TÀI LIỆU (Lit Review):\n${this.finalizedLitReview.substring(0, 1500)}...`;
+                        }
                         break;
                     case '4_BENCHMARK':
                         sysPrompt = SOFTWARE_BENCHMARK_WRITER_PROMPT;
                         if (this.finalizedTopic) contextAddition += `\n\nĐỀ TÀI: "${this.finalizedTopic}"`;
-                        if (this.finalizedModel) contextAddition += `\n\nKIẾN TRÚC: ${this.finalizedModel.substring(0, 1500)}...`;
+                        if (this.finalizedArch) contextAddition += `\n\nKIẾN TRÚC: ${this.finalizedArch.substring(0, 1500)}...`;
+                        else if (this.finalizedModel) contextAddition += `\n\nKIẾN TRÚC: ${this.finalizedModel.substring(0, 1500)}...`;
                         break;
                     case '4_SURVEY':
                         sysPrompt = getSurveyPrompt(this.level);
@@ -362,7 +384,7 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
                     case '3_OUTLINE': sysPrompt = OUTLINE_CRITIC_PROMPT; break;
                     case '4_SURVEY': sysPrompt = SURVEY_CRITIC_PROMPT; break;
                     case '2_ARCH': sysPrompt = SOFTWARE_ARCH_CRITIC_PROMPT; break;
-                    case '4_BENCHMARK': sysPrompt = "Bạn là Reviewer chuyên về Empirical Software Engineering. Hãy đánh giá phương pháp kiểm thử và benchmark vừa đề xuất."; break;
+                    case '4_BENCHMARK': sysPrompt = SOFTWARE_BENCHMARK_CRITIC_PROMPT; break;
                 }
             }
 

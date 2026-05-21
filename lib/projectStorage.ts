@@ -28,13 +28,17 @@ export interface SavedProject {
     currentStep: WorkflowStep;
     steps: {
         '1_TOPIC'?: ProjectStep;
+        '1_LIT_REVIEW'?: ProjectStep;
         '2_MODEL'?: ProjectStep;
+        '2_ARCH'?: ProjectStep;
         '3_OUTLINE'?: ProjectStep;
         '4_SURVEY'?: ProjectStep;
+        '4_BENCHMARK'?: ProjectStep;
         '5_GTM'?: ProjectStep;
     };
     status: 'in_progress' | 'completed';
     data?: {
+        paperType?: string;
         messages?: AgentMessage[];
         mermaid?: string;
         finalContent?: string;
@@ -42,6 +46,9 @@ export interface SavedProject {
         outlineChart?: string;
         gtmContent?: string;
         surveyContent?: string;
+        litReviewContent?: string;
+        archContent?: string;
+        benchmarkContent?: string;
         completedAt?: string;
     };
 }
@@ -132,7 +139,8 @@ export function createNewProject(
     audience: string,
     level: AcademicLevel,
     language: 'vi' | 'en',
-    projectType: ProjectType
+    projectType: ProjectType,
+    paperType?: string
 ): SavedProject {
     const now = new Date().toISOString();
     const id = `proj_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
@@ -150,7 +158,8 @@ export function createNewProject(
         audience,
         currentStep: '1_TOPIC',
         steps: {},
-        status: 'in_progress'
+        status: 'in_progress',
+        data: paperType ? { paperType } : undefined
     };
 }
 
@@ -170,15 +179,25 @@ export function getStepLabel(step: WorkflowStep): string {
 
 export function getProjectProgress(project: SavedProject): number {
     const isStartup = project.projectType === 'STARTUP';
+    const isSoftware = project.data?.paperType === 'software';
+
     const steps = isStartup
         ? ['1_TOPIC', '2_MODEL', '3_OUTLINE', '5_GTM', '4_SURVEY'] as const
-        : ['1_TOPIC', '2_MODEL', '3_OUTLINE', '4_SURVEY'] as const;
+        : isSoftware
+        ? ['1_TOPIC', '1_LIT_REVIEW', '2_ARCH', '3_OUTLINE', '4_BENCHMARK'] as const
+        : ['1_TOPIC', '1_LIT_REVIEW', '2_MODEL', '3_OUTLINE', '4_SURVEY'] as const;
 
-    let completed = 0;
-    for (const step of steps) {
-        if (project.steps[step]?.finalized) completed++;
+    const currentIndex = steps.indexOf(project.currentStep as any);
+    if (currentIndex === -1) return 0;
+    
+    let progress = Math.round((currentIndex / steps.length) * 100);
+    
+    // Check if the current (final) step is completed
+    if (project.data?.completedAt && currentIndex === steps.length - 1) {
+        progress = 100;
     }
-    return Math.round((completed / steps.length) * 100);
+    
+    return progress;
 }
 
 export function getProjectTypeLabel(type: ProjectType): string {

@@ -26,6 +26,7 @@ interface ExportManagerProps {
     outlineChart?: string;
     gtmContent?: string;
     surveyContent?: string;
+    paperType?: string;
     onBack: () => void;
     onViewReport?: () => void;
 }
@@ -41,6 +42,7 @@ export function ExportManager({
     outlineChart = '',
     gtmContent = '',
     surveyContent = '',
+    paperType = 'quant',
     onBack,
     onViewReport
 }: ExportManagerProps) {
@@ -63,7 +65,7 @@ export function ExportManager({
 
             switch (type) {
                 case 'word':
-                    await exportOutlineToWord(topic, outlineContent, modelContent, level, gtmContent, surveyContent, outlineChart, selectedTemplate);
+                    await exportOutlineToWord(topic, outlineContent, modelContent, level, gtmContent, surveyContent, outlineChart, selectedTemplate, paperType);
                     return; // generateDocx handles download
 
                 case 'pdf':
@@ -187,7 +189,7 @@ export function ExportManager({
                                 Đề cương Word (.docx)
                             </h3>
                             <p className="text-sm text-slate-600 mb-4">
-                                File Word đầy đủ, có thể chỉnh sửa tiếp. Bao gồm mô hình và đề cương chi tiết.
+                                {paperType === 'software' ? 'File Word đầy đủ, bao gồm kiến trúc hệ thống và kịch bản benchmark.' : 'File Word đầy đủ, có thể chỉnh sửa tiếp. Bao gồm mô hình và đề cương chi tiết.'}
                             </p>
                             <button
                                 onClick={() => handleExport('word')}
@@ -255,6 +257,7 @@ export function ExportManager({
                 </div>
 
                 {/* Excel Export */}
+                {paperType !== 'software' && (
                 <div className="bg-white border-2 border-green-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-all">
                     <div className="flex items-start gap-4">
                         <div className="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center shrink-0">
@@ -292,8 +295,10 @@ export function ExportManager({
                         </div>
                     </div>
                 </div>
+                )}
 
                 {/* CSV Export for Microsoft Forms */}
+                {paperType !== 'software' && (
                 <div className="bg-white border-2 border-purple-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-all">
                     <div className="flex items-start gap-4">
                         <div className="w-14 h-14 bg-purple-100 rounded-lg flex items-center justify-center shrink-0">
@@ -331,6 +336,7 @@ export function ExportManager({
                         </div>
                     </div>
                 </div>
+                )}
 
                 {/* Financial Export for Startup - NEW */}
                 {level === 'UNDERGRAD' && (
@@ -398,7 +404,7 @@ export function ExportManager({
                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-6">
                     <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
                         <Table size={20} className="text-green-600" />
-                        Preview: Bảng khảo sát
+                        {paperType === 'software' ? 'Preview: Kịch bản kiểm thử (Benchmark)' : 'Preview: Bảng khảo sát'}
                     </h3>
                     <div className="bg-white rounded-lg p-4 max-h-96 overflow-y-auto border border-slate-200">
                         <div className="prose prose-sm max-w-none">
@@ -435,8 +441,12 @@ export function ExportManager({
                         <strong>Hướng dẫn sử dụng:</strong>
                         <ul className="list-disc ml-5 mt-2 space-y-1 text-amber-700">
                             <li><strong>Word/PDF</strong>: Dùng để nộp cho GVHD hoặc in ấn</li>
-                            <li><strong>Excel</strong>: Dùng để phân tích dữ liệu sau khi thu thập</li>
-                            <li><strong>CSV</strong>: Import vào Microsoft Forms để tạo form khảo sát online tự động</li>
+                            {paperType !== 'software' && (
+                                <>
+                                    <li><strong>Excel</strong>: Dùng để phân tích dữ liệu sau khi thu thập</li>
+                                    <li><strong>CSV</strong>: Import vào Microsoft Forms để tạo form khảo sát online tự động</li>
+                                </>
+                            )}
                         </ul>
                     </div>
                 </div>

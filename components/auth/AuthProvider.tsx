@@ -43,6 +43,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     useEffect(() => {
+        // Temporary bypass for localhost
+        if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+            setUser({
+                id: 'local-dev-user',
+                email: 'dev@localhost',
+                name: 'Local Developer',
+                points: 9999,
+                referralCode: 'DEV'
+            });
+            setIsLoading(false);
+            return;
+        }
+
         // Check if user is logged in
         const userId = localStorage.getItem('userId');
         if (userId) {

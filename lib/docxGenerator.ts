@@ -27,6 +27,7 @@ interface DocxData {
     gtmContent?: string;
     surveyContent?: string;
     template?: ExportTemplate;
+    paperType?: string;
 }
 
 export const generateDocx = async (data: DocxData) => {
@@ -274,7 +275,7 @@ export const generateDocx = async (data: DocxData) => {
     );
 
     // --- MAIN CONTENT ---
-    sections.push(createHeading("1. Cơ sở Lý thuyết và Mô hình Nghiên cứu", HeadingLevel.HEADING_1));
+    sections.push(createHeading(data.paperType === 'software' ? "1. Cơ sở Lý thuyết và Kiến trúc hệ thống" : "1. Cơ sở Lý thuyết và Mô hình Nghiên cứu", HeadingLevel.HEADING_1));
     if (data.modelContent) sections.push(...parseContentToProjectItems(data.modelContent));
     sections.push(new Paragraph({ children: [new PageBreak()] }));
 
@@ -299,7 +300,7 @@ export const generateDocx = async (data: DocxData) => {
         sections.push(new Paragraph({ children: [new PageBreak()] }));
     }
 
-    sections.push(createHeading(`${data.gtmContent ? '4' : '3'}. Thang đo và Bảng hỏi Khảo sát`, HeadingLevel.HEADING_1));
+    sections.push(createHeading(data.paperType === 'software' ? `${data.gtmContent ? '4' : '3'}. Kịch bản Kiểm thử (Benchmark)` : `${data.gtmContent ? '4' : '3'}. Thang đo và Bảng hỏi Khảo sát`, HeadingLevel.HEADING_1));
     if (data.surveyContent) sections.push(...parseContentToProjectItems(data.surveyContent));
 
     const doc = new Document({
