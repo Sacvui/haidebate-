@@ -21,12 +21,13 @@ interface FinalReportProps {
     variableChart?: string;
     outlineChart?: string;
     onBack: () => void;
+    onExportOptions?: () => void;
 }
 
 import { exportOutlineToPDF, downloadBlob } from '../lib/exportUtils';
 import { toast } from 'sonner';
 
-export const FinalReport = ({ topic, goal, audience, level, finalContent, modelContent, variableChart, outlineChart, surveyContent, gtmContent, outlineContent, onBack }: FinalReportProps) => {
+export const FinalReport = ({ topic, goal, audience, level, finalContent, modelContent, variableChart, outlineChart, surveyContent, gtmContent, outlineContent, onBack, onExportOptions }: FinalReportProps) => {
     const [includeChart, setIncludeChart] = useState(true);
     const [showOutlineModal, setShowOutlineModal] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
@@ -92,6 +93,14 @@ export const FinalReport = ({ topic, goal, audience, level, finalContent, modelC
                         >
                             <Printer size={14} /> {isExporting ? 'Đang xuất...' : 'Xuất PDF (A4)'}
                         </button>
+                        {onExportOptions && (
+                            <button 
+                                onClick={onExportOptions} 
+                                className="flex items-center gap-2 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 rounded-lg text-xs font-bold transition-colors shadow"
+                            >
+                                <Download size={14} /> Dữ Liệu Khác (Excel/CSV)
+                            </button>
+                        )}
                     </div>
                 </div>
 

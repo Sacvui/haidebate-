@@ -426,6 +426,7 @@ export function DebateManager({
                 surveyContent={session.finalizedSurvey || surveyContent}
                 variableChart={session.finalizedModelChart || variableChart}
                 onBack={() => setShowReport(false)}
+                onExportOptions={() => { setShowReport(false); setShowExport(true); }}
             />
         );
     }
@@ -487,8 +488,8 @@ export function DebateManager({
                             )}
                             <button onClick={() => setShowReview(true)} className="bg-card border border-border px-4 py-2 rounded-lg">Chỉnh sửa</button>
                             {currentStep === '3_OUTLINE' ? (
-                                <button onClick={() => setShowExport(true)} className="bg-indigo-600 text-white px-6 py-2 rounded-lg flex items-center gap-2">
-                                    <Download size={16} /> Export
+                                <button onClick={() => setShowReport(true)} className="bg-indigo-600 text-white px-6 py-2 rounded-lg flex items-center gap-2">
+                                    <FileText size={16} /> Xem Báo Cáo
                                 </button>
                             ) : (
                                 <button onClick={handleNextStep} className="bg-green-600 text-white px-6 py-2 rounded-lg flex items-center gap-2">

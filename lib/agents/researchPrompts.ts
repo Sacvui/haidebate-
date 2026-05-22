@@ -162,18 +162,19 @@ YÊU CẦU ĐẦU RA:
 \`\`\`mermaid
    graph LR
    classDef default fill:#ffffff,stroke:#000000;
-     A[Nhận thức<br>Hữu ích] --> C[Ý định<br>Sử dụng]
-     B[Dễ<br>Sử dụng] --> C
-     C --> D[Hành vi<br>Thực tế]
-   \`\`\`
+     A(Nhận thức<br>Hữu ích) -->|H1 (+)| C(Ý định<br>Sử dụng)
+     B(Dễ<br>Sử dụng) -->|H2 (+)| C
+     C -->|H3 (+)| D[Hành vi<br>Thực tế]
+\`\`\`
    
-   QUY TẮC BẮT BUỘC (ĐỂ ĐẢM BẢO CHUẨN BÀI CÔNG BỐ KHOA HỌC):
+   QUY TẮC BẮT BUỘC (ĐỂ ĐẢM BẢO CHUẨN BÀI CÔNG BỐ KHOA HỌC SEM):
    - LUÔN dùng 'graph LR' (Trái sang Phải) cho mô hình SEM/Conceptual Framework.
-   - BẮT BUỘC chèn lệnh \`classDef default fill:#ffffff,stroke:#000000;\` ngay sau khai báo graph để đảm bảo màu nền Trắng - Viền Đen (Cấm dùng màu sắc phi học thuật).
-   - Node: [Tên cực kỳ ngắn gọn - Tối đa 3-4 chữ] (không dấu ngoặc kép).
-   - Nếu tên dài, BẮT BUỘC dùng thẻ <br> để ngắt dòng (VD: A[Nhận thức<br>Hữu ích]).
-   - Mũi tên: --> (tuyệt đối không để nhãn trên mũi tên làm rối sơ đồ).
-   - Không ký tự đặc biệt lạ: (), {}, "", ''.
+   - BẮT BUỘC chèn lệnh \`classDef default fill:#ffffff,stroke:#000000;\` để đổi hình khối thành nền trắng, viền đen.
+   - Biến tiềm ẩn (Latent Constructs): DÙNG HÌNH OVAL bằng dấu ngoặc đơn, VD: \`A(Tên biến)\`.
+   - Biến quan sát (Observed/Hành vi): DÙNG HÌNH CHỮ NHẬT bằng dấu ngoặc vuông, VD: \`B[Tên biến]\`.
+   - Mũi tên tác động: BẮT BUỘC PHẢI DÁN NHÃN tên giả thuyết và chiều tác động, VD: \`-->|H1 (+)|\` hoặc \`-->|H2 (-)|\`.
+   - Tên biến: Phải ngắt dòng bằng thẻ \`<br>\` nếu dài hơn 3 chữ (VD: \`A(Nhận thức<br>Hữu ích)\`).
+   - Tuyệt đối không dùng dấu ngoặc kép ("") bên trong nhãn.
    
 4. Trích dẫn nguồn (Citation) dạng giả định chuẩn APA.
 `;

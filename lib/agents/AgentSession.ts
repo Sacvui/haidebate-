@@ -143,8 +143,8 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
     }
 
     // Primary and fallback models
-    private static PRIMARY_MODEL = 'gemini-3-flash-preview';
-    private static FALLBACK_MODEL = 'gemini-flash-latest';
+    private static PRIMARY_MODEL = 'gemini-2.0-flash';
+    private static FALLBACK_MODEL = 'gemini-1.5-flash';
 
     private async callGeminiAPI(model: string, prompt: string, customKey?: string, retries = 3, useFallback = false): Promise<string> {
         const currentModel = useFallback ? AgentSession.FALLBACK_MODEL : model;
@@ -355,7 +355,7 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
                 ? `${context}\n\nPHẢN HỒI CỦA CRITIC (Vòng trước): ${previousCriticFeedback}\n\n${sysPrompt}\nHãy cải thiện/viết tiếp dựa trên phản hồi này.`
                 : `${context}\n\n${sysPrompt}\nHãy bắt đầu thực hiện nhiệm vụ cho giai đoạn này.`;
 
-            return await this.callGeminiAPI('gemini-3-flash-preview', prompt, finalKey);
+            return await this.callGeminiAPI(AgentSession.PRIMARY_MODEL, prompt, finalKey);
 
         } catch (error: any) {
             console.error("Gemini Writer Error:", error);
@@ -396,7 +396,7 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
 
             const prompt = `${context}\n\n${sysPrompt}\n\nBÀI LÀM CỦA WRITER:\n${writerDraft}\n\nHãy đóng vai trò Critic và đưa ra nhận xét chi tiết, khắt khe.`;
 
-            return await this.callGeminiAPI('gemini-3-flash-preview', prompt, geminiKey);
+            return await this.callGeminiAPI(AgentSession.PRIMARY_MODEL, prompt, geminiKey);
 
         } catch (error) {
             return `Lỗi Critic (Quota/Network): ${error}`;

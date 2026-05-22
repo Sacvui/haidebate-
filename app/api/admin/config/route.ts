@@ -6,13 +6,6 @@ const ADMIN_EMAIL = 'foreverlove3004@gmail.com';
 
 export async function GET(req: NextRequest) {
     try {
-        const session = await auth();
-
-        // Allow all authenticated users to read config
-        if (!session?.user?.email) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
         const config = await getRoundsConfig();
         return NextResponse.json({ config });
     } catch (error) {

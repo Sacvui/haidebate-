@@ -279,7 +279,6 @@ export async function exportOutlineToPDF(
         if (yPos + neededHeight > pageHeight - margin) {
             doc.addPage();
             yPos = margin;
-            doc.setFont('Roboto', 'normal');
         }
     };
 
@@ -342,20 +341,23 @@ export async function exportOutlineToPDF(
                 // Render table
                 const tableHeaders = currentTableLines[0].split('|').map(c => c.trim()).filter(c => c);
                 const tableBody = [];
-                for (let i = 2; i < currentTableLines.length; i++) {
+                for (let i = 1; i < currentTableLines.length; i++) {
+                    if (currentTableLines[i].match(/\|[\s-]*\|/)) continue; // skip separator
                     const row = currentTableLines[i].split('|').map(c => c.trim()).filter((_, idx, arr) => idx > 0 && idx < arr.length - 1);
                     if (row.length > 0) tableBody.push(row);
                 }
                 
-                autoTable(doc, {
-                    startY: yPos,
-                    head: [tableHeaders],
-                    body: tableBody,
-                    styles: { font: 'Roboto', fontStyle: 'normal' },
-                    headStyles: { fillColor: [41, 128, 185], fontStyle: 'bold' },
-                    margin: { left: margin, right: margin }
-                });
-                yPos = (doc as any).lastAutoTable.finalY + 10;
+                if (tableHeaders.length > 0) {
+                    autoTable(doc, {
+                        startY: yPos,
+                        head: [tableHeaders],
+                        body: tableBody,
+                        styles: { font: 'Roboto', fontStyle: 'normal' },
+                        headStyles: { fillColor: [41, 128, 185], fontStyle: 'bold' },
+                        margin: { left: margin, right: margin }
+                    });
+                    yPos = (doc as any).lastAutoTable.finalY + 10;
+                }
                 
                 currentTableLines = [];
                 inTable = false;
@@ -384,7 +386,6 @@ export async function exportOutlineToPDF(
             text = text.replace(/\*(.*?)\*/g, '$1');
             text = text.replace(/_(.*?)_/g, '$1');
 
-            checkPageBreak(fontSize);
             doc.setFont('Roboto', isBold ? 'bold' : 'normal');
             doc.setFontSize(fontSize);
             
@@ -396,21 +397,24 @@ export async function exportOutlineToPDF(
         }
         
         if (inTable && currentTableLines.length > 0) {
-            const tableHeaders = currentTableLines[0].split('|').map(c => c.trim()).filter(c => c);
-            const tableBody = [];
-            for (let i = 2; i < currentTableLines.length; i++) {
-                const row = currentTableLines[i].split('|').map(c => c.trim()).filter((_, idx, arr) => idx > 0 && idx < arr.length - 1);
-                if (row.length > 0) tableBody.push(row);
-            }
-            autoTable(doc, {
-                startY: yPos,
-                head: [tableHeaders],
-                body: tableBody,
-                styles: { font: 'Roboto', fontStyle: 'normal' },
-                headStyles: { fillColor: [41, 128, 185], fontStyle: 'bold' },
-                margin: { left: margin, right: margin }
-            });
-            yPos = (doc as any).lastAutoTable.finalY + 10;
+                const tableHeaders = currentTableLines[0].split('|').map(c => c.trim()).filter(c => c);
+                const tableBody = [];
+                for (let i = 1; i < currentTableLines.length; i++) {
+                    if (currentTableLines[i].match(/\|[\s-]*\|/)) continue; // skip separator
+                    const row = currentTableLines[i].split('|').map(c => c.trim()).filter((_, idx, arr) => idx > 0 && idx < arr.length - 1);
+                    if (row.length > 0) tableBody.push(row);
+                }
+                if (tableHeaders.length > 0) {
+                    autoTable(doc, {
+                        startY: yPos,
+                        head: [tableHeaders],
+                        body: tableBody,
+                        styles: { font: 'Roboto', fontStyle: 'normal' },
+                        headStyles: { fillColor: [41, 128, 185], fontStyle: 'bold' },
+                        margin: { left: margin, right: margin }
+                    });
+                    yPos = (doc as any).lastAutoTable.finalY + 10;
+                }
         }
     };
 

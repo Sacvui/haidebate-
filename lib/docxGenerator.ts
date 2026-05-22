@@ -75,6 +75,44 @@ export const generateDocx = async (data: DocxData) => {
 
     const theme = themes[template];
 
+    // Helper to parse markdown formatting
+    const createFormattedTextRuns = (text: string, defaultBold = false, defaultItalic = false, defaultSize = theme.bodySize, defaultColor?: string) => {
+        const runs: TextRun[] = [];
+        // Split by bold (** or __) or italic (* or _)
+        const parts = text.split(/(\*\*.*?\*\*|\*.*?\*|__.*?__|_.*?_)/g);
+        
+        parts.forEach(part => {
+            if (!part) return;
+            let isBold = defaultBold;
+            let isItalic = defaultItalic;
+            let cleanText = part;
+            
+            if (part.startsWith('**') && part.endsWith('**')) {
+                isBold = true;
+                cleanText = part.substring(2, part.length - 2);
+            } else if (part.startsWith('__') && part.endsWith('__')) {
+                isBold = true;
+                cleanText = part.substring(2, part.length - 2);
+            } else if (part.startsWith('*') && part.endsWith('*') && part.length > 2) {
+                isItalic = true;
+                cleanText = part.substring(1, part.length - 1);
+            } else if (part.startsWith('_') && part.endsWith('_') && part.length > 2) {
+                isItalic = true;
+                cleanText = part.substring(1, part.length - 1);
+            }
+            
+            runs.push(new TextRun({
+                text: cleanText,
+                font: theme.font,
+                size: defaultSize,
+                bold: isBold,
+                italics: isItalic,
+                color: defaultColor
+            }));
+        });
+        return runs;
+    };
+
     // Helper for standard text paragraph
     const createParagraph = (text: string, bold = false, italic = false, alignment = AlignmentType.LEFT) => {
         return new Paragraph({
@@ -83,16 +121,7 @@ export const generateDocx = async (data: DocxData) => {
                 line: theme.spacing,
                 lineRule: "auto"
             },
-            children: [
-                new TextRun({
-                    text: text,
-                    font: theme.font,
-                    size: theme.bodySize,
-                    bold: bold,
-                    italics: italic,
-                    color: alignment === AlignmentType.LEFT ? undefined : theme.headingColor
-                }),
-            ],
+            children: createFormattedTextRuns(text, bold, italic, theme.bodySize, alignment === AlignmentType.LEFT ? undefined : theme.headingColor),
             indent: (alignment === AlignmentType.LEFT && template === 'academic') ? { firstLine: 720 } : undefined,
         });
     };
@@ -100,8 +129,9 @@ export const generateDocx = async (data: DocxData) => {
     // Helper for Headings
     const createHeading = (text: string, level: typeof HeadingLevel[keyof typeof HeadingLevel]) => {
         const isH1 = level === HeadingLevel.HEADING_1;
+        const cleanText = text.replace(/[\*\_]/g, ''); // Remove markdown formatting from headings
         return new Paragraph({
-            text: text,
+            text: cleanText,
             heading: level,
             alignment: isH1 ? theme.alignment : AlignmentType.LEFT,
             spacing: {
@@ -200,10 +230,18 @@ export const generateDocx = async (data: DocxData) => {
             if (trimmed.startsWith('# ')) items.push(createHeading(trimmed.substring(2), HeadingLevel.HEADING_1));
             else if (trimmed.startsWith('## ')) items.push(createHeading(trimmed.substring(3), HeadingLevel.HEADING_2));
             else if (trimmed.startsWith('### ')) items.push(createHeading(trimmed.substring(4), HeadingLevel.HEADING_3));
-            else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+            else if ((trimmed.startsWith('- ') || trimmed.startsWith('* ')) && !trimmed.startsWith('**')) {
                 items.push(new Paragraph({
-                    children: [new TextRun({ text: trimmed.substring(2), font: theme.font, size: theme.bodySize })],
-                    bullet: { level: 0 }
+                    children: createFormattedTextRuns(trimmed.substring(2), false, false, theme.bodySize),
+                    bullet: { level: 0 },
+                    spacing: { line: theme.spacing }
+                }));
+            }
+            else if (trimmed.match(/^\d+\.\s/)) {
+                items.push(new Paragraph({
+                    children: createFormattedTextRuns(trimmed, false, false, theme.bodySize),
+                    indent: { left: 720, hanging: 360 },
+                    spacing: { line: theme.spacing }
                 }));
             }
             else {
