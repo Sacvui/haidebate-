@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { toast } from "sonner";
-import { Play, Bot, User, CheckCircle, ArrowRight, ArrowLeft, FileText, Download, Share2, Home } from 'lucide-react';
+import { Play, Bot, User, CheckCircle, ArrowRight, ArrowLeft, FileText, Download, Share2, Home, Save } from 'lucide-react';
 import { AgentSession, WorkflowStep, AcademicLevel, ProjectType, AgentMessage } from '@/lib/agents';
 import { StepIndicator } from './StepIndicator';
 import { ThinkingAnimation } from './ThinkingAnimation';
@@ -445,9 +445,14 @@ export function DebateManager({
                         {currentStep === '4_BENCHMARK' && "Giai Đoạn 4: Kiểm Thử & Đánh Giá Hiệu Năng"}
                         {currentStep === '3_OUTLINE' && (projectType === 'STARTUP' ? "Giai Đoạn 5: Pitch Deck + Financial Plan" : "Giai Đoạn 5: Hoàn Thiện Đề Cương")}
                     </h2>
-                    <button onClick={() => { saveToProjectStorage(); if (onExit) onExit(); }} className="p-2 text-slate-400 hover:text-blue-600">
-                        <Home size={20} />
-                    </button>
+                    <div className="flex items-center gap-1">
+                        <button onClick={async () => { await saveToProjectStorage(); toast.success("Đã lưu dự án thành công!"); }} className="p-2 text-slate-400 hover:text-green-600 transition-colors" title="Lưu dự án">
+                            <Save size={20} />
+                        </button>
+                        <button onClick={async () => { await saveToProjectStorage(); if (onExit) onExit(); }} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Về trang chủ">
+                            <Home size={20} />
+                        </button>
+                    </div>
                     <div className="flex gap-2">
                         <span className="bg-muted px-3 py-1 rounded-full text-sm">Mục tiêu: {goal}</span>
                         <span className={cn("px-3 py-1 rounded-full text-white text-xs", level === 'UNDERGRAD' ? 'bg-green-500' : 'bg-blue-500')}>Trình độ: {level}</span>
@@ -466,7 +471,7 @@ export function DebateManager({
                                     <ArrowLeft size={16} /> Quay lại
                                 </button>
                             ) : (
-                                <button onClick={() => { saveToProjectStorage(); if (onExit) onExit(); }} className="bg-muted hover:bg-slate-200 px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors">
+                                <button onClick={async () => { await saveToProjectStorage(); if (onExit) onExit(); }} className="bg-muted hover:bg-slate-200 px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors">
                                     <Home size={16} /> Trang chủ
                                 </button>
                             )}
@@ -482,7 +487,7 @@ export function DebateManager({
                                     <ArrowLeft size={16} /> Quay lại
                                 </button>
                             ) : (
-                                <button onClick={() => { saveToProjectStorage(); if (onExit) onExit(); }} className="bg-muted hover:bg-slate-200 px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors">
+                                <button onClick={async () => { await saveToProjectStorage(); if (onExit) onExit(); }} className="bg-muted hover:bg-slate-200 px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors">
                                     <Home size={16} /> Trang chủ
                                 </button>
                             )}
