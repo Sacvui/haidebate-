@@ -144,7 +144,7 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
 
     // Primary and fallback models
     private static PRIMARY_MODEL = 'gemini-2.0-flash';
-    private static FALLBACK_MODEL = 'gemini-1.5-flash';
+    private static FALLBACK_MODEL = 'gemini-1.5-pro';
 
     private async callGeminiAPI(model: string, prompt: string, customKey?: string, retries = 3, useFallback = false): Promise<string> {
         const currentModel = useFallback ? AgentSession.FALLBACK_MODEL : model;
