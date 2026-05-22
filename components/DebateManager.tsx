@@ -459,18 +459,41 @@ export function DebateManager({
                         {lastSaved && <span className="ml-4 text-[10px] text-muted-foreground italic">Đã lưu: {lastSaved}</span>}
                     </div>
                     {!isProcessing && !stepCompleted && (
-                        <button onClick={runStepLoop} className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2">
-                            <Play size={18} /> Bắt Đầu
-                        </button>
+                        <div className="flex gap-2">
+                            {currentStep !== '1_TOPIC' ? (
+                                <button onClick={handlePreviousStep} className="bg-muted hover:bg-slate-200 px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors">
+                                    <ArrowLeft size={16} /> Quay lại
+                                </button>
+                            ) : (
+                                <button onClick={() => { saveToProjectStorage(); if (onExit) onExit(); }} className="bg-muted hover:bg-slate-200 px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors">
+                                    <Home size={16} /> Trang chủ
+                                </button>
+                            )}
+                            <button onClick={runStepLoop} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors">
+                                <Play size={18} /> Bắt Đầu
+                            </button>
+                        </div>
                     )}
                     {stepCompleted && (
                         <div className="flex gap-2">
-                            {currentStep !== '1_TOPIC' && <button onClick={handlePreviousStep} className="bg-muted px-4 py-2 rounded-lg">Quay lại</button>}
+                            {currentStep !== '1_TOPIC' ? (
+                                <button onClick={handlePreviousStep} className="bg-muted hover:bg-slate-200 px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors">
+                                    <ArrowLeft size={16} /> Quay lại
+                                </button>
+                            ) : (
+                                <button onClick={() => { saveToProjectStorage(); if (onExit) onExit(); }} className="bg-muted hover:bg-slate-200 px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors">
+                                    <Home size={16} /> Trang chủ
+                                </button>
+                            )}
                             <button onClick={() => setShowReview(true)} className="bg-card border border-border px-4 py-2 rounded-lg">Chỉnh sửa</button>
                             {currentStep === '3_OUTLINE' ? (
-                                <button onClick={() => setShowExport(true)} className="bg-indigo-600 text-white px-6 py-2 rounded-lg">Export</button>
+                                <button onClick={() => setShowExport(true)} className="bg-indigo-600 text-white px-6 py-2 rounded-lg flex items-center gap-2">
+                                    <Download size={16} /> Export
+                                </button>
                             ) : (
-                                <button onClick={handleNextStep} className="bg-green-600 text-white px-6 py-2 rounded-lg">Tiếp theo</button>
+                                <button onClick={handleNextStep} className="bg-green-600 text-white px-6 py-2 rounded-lg flex items-center gap-2">
+                                    Tiếp theo <ArrowRight size={16} />
+                                </button>
                             )}
                         </div>
                     )}

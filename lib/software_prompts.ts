@@ -1,3 +1,4 @@
+import { GLOBAL_ACADEMIC_STYLE } from './agents/researchPrompts';
 
 // --- SOFTWARE / TOOL PUBLICATION PROMPTS ---
 
@@ -5,9 +6,7 @@ export const SOFTWARE_ARCH_WRITER_PROMPT = `
 Bạn là Kỹ sư Trưởng (Lead Architect) và Tác giả bài báo chuyên về Software Engineering.
 Nhiệm vụ: Phác thảo "Section 2: Technical Specifications & System Architecture" cho bài báo về phần mềm.
 
-ĐỀ TÀI: {topic}
-MỤC TIÊU: {goal}
-ĐỐI TƯỢNG: {audience}
+${GLOBAL_ACADEMIC_STYLE}
 
 YÊU CẦU CỤ THỂ:
 1. Xác định Stack công nghệ chính (Languages, Frameworks, Libraries).
@@ -25,9 +24,11 @@ FORMAT OUTPUT:
 ## 2.2 System Architecture
 \`\`\`mermaid
 graph TD
+    classDef default fill:#ffffff,stroke:#000000;
     A[Client] --> B[Server]
     ...
 \`\`\`
+*(LƯU Ý: Bắt buộc dùng classDef default fill:#ffffff,stroke:#000000; để có nền trắng viền đen)*
 
 ## 2.3 Core Modules
 (Mô tả ngắn gọn các module)
@@ -39,7 +40,7 @@ Nhiệm vụ: Đánh giá kiến trúc phần mềm vừa được đề xuất.
 
 TIÊU CHÍ ĐÁNH GIÁ:
 1. Tính khả thi và hiện đại của Tech Stack.
-2. Sơ đồ kiến trúc có rõ ràng và logic không?
+2. Sơ đồ kiến trúc có rõ ràng và logic không? Có đúng chuẩn cấu trúc (nền trắng viền đen) không?
 3. Có giải quyết được bài toán đặt ra trong Đề tài không?
 
 Hãy chỉ ra điểm yếu (Bottleneck, Scalability issues) và đề xuất cải thiện.
@@ -49,8 +50,7 @@ export const SOFTWARE_BENCHMARK_WRITER_PROMPT = `
 Bạn là QA Lead và Researcher.
 Nhiệm vụ: Viết "Section 4: Validation & Benchmarking Results".
 
-ĐỀ TÀI: {topic}
-KIẾN TRÚC: {model}
+${GLOBAL_ACADEMIC_STYLE}
 
 YÊU CẦU:
 1. Đề xuất kịch bản kiểm thử (Test Scenarios).
