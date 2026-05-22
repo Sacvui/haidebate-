@@ -117,17 +117,68 @@ export async function POST(request: NextRequest) {
         const safeUserId = userId ? `${userId.substring(0, 3)}***@***` : 'anonymous';
         console.log(`📡 Gemini API Call: Model=${model}, KeySource=${keySource}, User=${safeUserId}`);
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        const executeGemini = async (targetModel: string) => {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apiKey}`;
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }]
+                })
+            });
+            return res.json();
+        };
 
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }]
-            })
-        });
+        let data = await executeGemini(model);
 
-        const data = await response.json();
+        // Auto-discovery logic if model is deprecated or not found (404)
+        if (data.error && data.error.code === 404) {
+            console.log(`Model ${model} not found, attempting auto-discovery...`);
+            try {
+                const modelsUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
+                const modelsRes = await fetch(modelsUrl);
+                const modelsData = await modelsRes.json();
+                
+                if (modelsData.models) {
+                    const isFlash = model.includes('flash');
+                    
+                    let availableModels = modelsData.models
+                        .map((m: any) => m.name.replace('models/', ''))
+                        .filter((m: string) => m.startsWith('gemini-') && !m.includes('vision') && !m.includes('exp'));
+                        
+                    const exactTypeModels = availableModels.filter((m: string) => isFlash ? m.includes('flash') : m.includes('pro'));
+                    
+                    if (exactTypeModels.length > 0) {
+                        availableModels = exactTypeModels;
+                    }
+                    
+                    if (availableModels.length > 0) {
+                        // Sort so that higher versions come first, and 'latest' comes before others
+                        availableModels.sort((a: string, b: string) => {
+                            const matchA = a.match(/gemini-(\d+\.\d+)/);
+                            const matchB = b.match(/gemini-(\d+\.\d+)/);
+                            const numA = matchA ? parseFloat(matchA[1]) : 0;
+                            const numB = matchB ? parseFloat(matchB[1]) : 0;
+                            if (numA !== numB) return numB - numA; // Descending
+                            if (a.includes('latest') && !b.includes('latest')) return -1;
+                            if (!a.includes('latest') && b.includes('latest')) return 1;
+                            return b.localeCompare(a);
+                        });
+                        
+                        const discoveredModel = availableModels[0];
+                        console.log(`Auto-discovered fallback model: ${discoveredModel}`);
+                        
+                        // Retry with discovered model
+                        data = await executeGemini(discoveredModel);
+                        
+                        // Update model variable for subsequent logging if needed
+                        model = discoveredModel;
+                    }
+                }
+            } catch (e) {
+                console.error("Auto-discovery failed:", e);
+            }
+        }
 
         // 6. Handle Gemini API errors
         if (data.error) {
