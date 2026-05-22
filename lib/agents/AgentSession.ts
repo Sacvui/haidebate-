@@ -349,7 +349,11 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
                 }
             }
 
-            const context = `CHỦ ĐỀ GỐC: ${this.topic}\nLOẠI HÌNH (OUTPUT): ${this.goal}\nĐỐI TƯỢNG: ${this.audience}\nTRÌNH ĐỘ: ${this.level}\nNGÔN NGỮ ĐẦU RA (OUTPUT LANGUAGE): ${this.language === 'en' ? 'ENGLISH (100%)' : 'VIETNAMESE (100%)'}${contextAddition}`;
+            let languageInstruction = this.language === 'en' 
+                ? 'ENGLISH (100%). CRITICAL: DO NOT translate word-for-word from Vietnamese. Use standard, native Academic/Business English terminology. Ensure ALL text, headings, tables, and Mermaid chart labels are completely in English. The writing style MUST be formal and adhere strictly to international standards.'
+                : 'VIETNAMESE (100%)';
+
+            const context = `CHỦ ĐỀ GỐC: ${this.topic}\nLOẠI HÌNH (OUTPUT): ${this.goal}\nĐỐI TƯỢNG: ${this.audience}\nTRÌNH ĐỘ: ${this.level}\nNGÔN NGỮ ĐẦU RA (OUTPUT LANGUAGE): ${languageInstruction}${contextAddition}`;
 
             const prompt = previousCriticFeedback
                 ? `${context}\n\nPHẢN HỒI CỦA CRITIC (Vòng trước): ${previousCriticFeedback}\n\n${sysPrompt}\nHãy cải thiện/viết tiếp dựa trên phản hồi này.`
@@ -392,7 +396,11 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
                 }
             }
 
-            const context = `TRÌNH ĐỘ: ${this.level}\nĐỐI TƯỢNG: ${this.audience}\nĐỀ TÀI: ${this.topic}\nLOẠI HÌNH: ${this.goal}\nNGÔN NGỮ: ${this.language === 'en' ? 'ENGLISH' : 'VIETNAMESE'}`;
+            let languageInstruction = this.language === 'en'
+                ? 'ENGLISH. CRITICAL: Rigorously evaluate if the text uses native Academic/Business English. Penalize any awkward translations from Vietnamese (Vinglish). ALL charts, headings, and data MUST be in English. Force the Writer to fix unnatural phrasing.'
+                : 'VIETNAMESE';
+
+            const context = `TRÌNH ĐỘ: ${this.level}\nĐỐI TƯỢNG: ${this.audience}\nĐỀ TÀI: ${this.topic}\nLOẠI HÌNH: ${this.goal}\nNGÔN NGỮ: ${languageInstruction}`;
 
             const prompt = `${context}\n\n${sysPrompt}\n\nBÀI LÀM CỦA WRITER:\n${writerDraft}\n\nHãy đóng vai trò Critic và đưa ra nhận xét chi tiết, khắt khe.`;
 
