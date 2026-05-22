@@ -5,11 +5,25 @@ import { getModelRequirements, getOutlineStructure, getCriticPersona } from './h
 // RESEARCH PROJECT PROMPTS
 // =============================================================================
 
+// --- Global Academic Style ---
+export const GLOBAL_ACADEMIC_STYLE = `
+--- HIẾN PHÁP HỌC THUẬT (GLOBAL WRITING STYLE GUIDE) ---
+BẮT BUỘC TUÂN THỦ CÁC QUY TẮC SAU TRONG TOÀN BỘ NỘI DUNG:
+1. Giọng văn học thuật: Kết luận linh hoạt theo bằng chứng (dùng "Gợi ý rằng", "Có thể hiểu là"). KHÔNG dùng ngôn ngữ kịch tính, PR ("vô cùng cấp thiết", "khổng lồ"). Rào đón đúng mực.
+2. Logic nhân quả: Phải giải thích cơ chế, không gán ghép bừa bãi. Sử dụng 100% Tiếng Việt, không chêm tiếng Anh kiểu "Khái niệm A (Concept A)" giữa các đoạn.
+3. Đối thoại học thuật: Cấu trúc phản biện phải là Lập luận A -> Lập luận B -> Mâu thuẫn -> Hướng nghiên cứu/Gap. Không liệt kê nguồn như một danh sách.
+4. Bối cảnh Việt Nam: Khi dùng tài liệu quốc tế áp dụng vào Việt Nam, phải ghi rõ "đây là ngoại suy có điều kiện".
+5. Nhịp điệu & Mạch đoạn: Đoạn 3-5 câu. Không lặp cấu trúc. Không biến đoạn văn thành danh sách trá hình.
+---------------------------------------------------------
+`;
+
 // --- Literature Review ---
 
 export const LIT_REVIEW_WRITER_PROMPT = `
 Bạn là Nhà nghiên cứu học thuật đẳng cấp (Senior Researcher).
 Nhiệm vụ: Viết phần "Literature Review" (Tổng quan tài liệu) và Xác định "Research Gap".
+
+\${GLOBAL_ACADEMIC_STYLE}
 
 YÊU CẦU CỤ THỂ:
 1. Tổng hợp các dòng lý thuyết chính liên quan (Theoretical Streams).
@@ -49,6 +63,8 @@ TIÊU CHÍ ĐÁNH GIÁ(HARDCORE):
 
 export const TOPIC_WRITER_PROMPT = `
 NHIỆM VỤ: Đề xuất / tinh chỉnh Tên Đề Tài nghiên cứu.
+
+\${GLOBAL_ACADEMIC_STYLE}
 
 VÍ DỤ MẪU(FEW - SHOT EXAMPLES):
 
@@ -115,6 +131,8 @@ NHIỆM VỤ: Xây dựng Cơ sở lý thuyết và Mô hình nghiên cứu.
 TRÌNH ĐỘ YÊU CẦU: ${level}
 ${getModelRequirements(level)}
 
+${GLOBAL_ACADEMIC_STYLE}
+
 VÍ DỤ MẪU(FEW - SHOT EXAMPLES):
 
 VÍ DỤ 1: GIẢI THÍCH LÝ THUYẾT TỐT(TAM)
@@ -143,13 +161,15 @@ YÊU CẦU ĐẦU RA:
    VÍ DỤ CHUẨN:
 \`\`\`mermaid
    graph LR
-     A[Nhận thức Hữu ích] --> C[Ý định Sử dụng]
-     B[Dễ Sử dụng] --> C
-     C --> D[Hành vi Thực tế]
+   classDef default fill:#ffffff,stroke:#000000;
+     A[Nhận thức<br>Hữu ích] --> C[Ý định<br>Sử dụng]
+     B[Dễ<br>Sử dụng] --> C
+     C --> D[Hành vi<br>Thực tế]
    \`\`\`
    
    QUY TẮC BẮT BUỘC (ĐỂ ĐẢM BẢO CHUẨN BÀI CÔNG BỐ KHOA HỌC):
    - LUÔN dùng 'graph LR' (Trái sang Phải) cho mô hình SEM/Conceptual Framework.
+   - BẮT BUỘC chèn lệnh \`classDef default fill:#ffffff,stroke:#000000;\` ngay sau khai báo graph để đảm bảo màu nền Trắng - Viền Đen (Cấm dùng màu sắc phi học thuật).
    - Node: [Tên cực kỳ ngắn gọn - Tối đa 3-4 chữ] (không dấu ngoặc kép).
    - Nếu tên dài, BẮT BUỘC dùng thẻ <br> để ngắt dòng (VD: A[Nhận thức<br>Hữu ích]).
    - Mũi tên: --> (tuyệt đối không để nhãn trên mũi tên làm rối sơ đồ).
@@ -200,6 +220,8 @@ export const getOutlineWriterPrompt = (outputType: string) => `
 NHIỆM VỤ: Lập Đề cương nghiên cứu (Research Proposal/Outline) PHIÊN BẢN CUỐI CÙNG HOÀN HẢO NHẤT.
 
 BỐI CẢNH: Bạn đã trải qua các vòng tranh biện và nhận phản hồi từ Critic. Nhiệm vụ bây giờ là TỔNG HỢP tất cả những điểm tốt nhất để tạo ra một bản đề cương hoàn chỉnh.
+
+${GLOBAL_ACADEMIC_STYLE}
 
 YÊU CẦU ĐẶC BIỆT VỀ FORMAT (QUAN TRỌNG):
 1. **KHÔNG** thêm bất kỳ lời dẫn nhập, kết luận, hay ghi chú cá nhân nào (ví dụ: "Dưới đây là đề cương...", "Tôi đã chỉnh sửa...").
@@ -268,6 +290,8 @@ NHIỆM VỤ: Xây dựng Chương "Phương pháp nghiên cứu" (Methodology).
 MỤC TIÊU: Thiết kế phương pháp phù hợp nhất để trả lời câu hỏi nghiên cứu.
 TRÌNH ĐỘ YÊU CẦU: ${level}
 
+${GLOBAL_ACADEMIC_STYLE}
+
 QUY TRÌNH (Tùy chọn phương pháp):
 
 OPTION A: ĐỊNH LƯỢNG (QUANTITATIVE - Mặc định cho Model Kiểm định)
@@ -305,15 +329,17 @@ CẤU TRÚC OUTPUT (MARKDOWN):
 - Methods: Cronbach's Alpha, EFA, CFA, SEM...
 
 MINH HỌA QUY TRÌNH BAO GỒM SƠ ĐỒ MERMAID (Nếu được phân tích):
-\`\`\`mermaid
+\\\`\\\`\\\`mermaid
 graph TD
+    classDef default fill:#ffffff,stroke:#000000;
     A[Tổng quan<br>Lý thuyết] --> B[Thiết kế<br>Nghiên cứu]
     B --> C[Bảng hỏi<br>& Thang đo]
     C --> D[Thu thập<br>Dữ liệu]
     D --> E[Phân tích<br>Dữ liệu (SEM)]
     E --> F[Kết luận<br>& Đề xuất]
-\`\`\`
+\\\`\\\`\\\`
 *(1. LUÔN dùng graph TD (Từ trên xuống) cho Quy trình nghiên cứu.*
+*1.5. BẮT BUỘC chèn lệnh \`classDef default fill:#ffffff,stroke:#000000;\` để đổi hình khối thành nền trắng, viền đen.*
 *2. Tên các bước QUÁ DÀI bắt buộc dùng <br> để ngắt dòng làm 2-3 hàng chữ.*
 *3. TUYỆT ĐỐI không dùng hình khối thoi (decision diamonds) hay rẽ nhánh phức tạp. Vẽ thành một luồng tuyến tính rõ ràng các hộp hình chữ nhật [ ] chuẩn khoa học.*
 *4. KHÔNG viết text lơ lửng trên luồng mũi tên (-->) làm rối sơ đồ).*

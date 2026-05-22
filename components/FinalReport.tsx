@@ -23,12 +23,36 @@ interface FinalReportProps {
     onBack: () => void;
 }
 
+import { exportOutlineToPDF, downloadBlob } from '../lib/exportUtils';
+import { toast } from 'sonner';
+
 export const FinalReport = ({ topic, goal, audience, level, finalContent, modelContent, variableChart, outlineChart, surveyContent, gtmContent, outlineContent, onBack }: FinalReportProps) => {
     const [includeChart, setIncludeChart] = useState(true);
     const [showOutlineModal, setShowOutlineModal] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
 
-    const handlePrint = () => {
-        window.print();
+    const handleExportPDF = async () => {
+        try {
+            setIsExporting(true);
+            toast.loading('Đang khởi tạo tệp PDF...', { id: 'pdf-export' });
+            
+            const pdfBlob = await exportOutlineToPDF(
+                topic,
+                outlineContent || '',
+                modelContent || finalContent || '',
+                level as any,
+                gtmContent,
+                surveyContent
+            );
+            
+            downloadBlob(pdfBlob, `BaoCao_${topic.substring(0, 30).replace(/[^a-zA-Z0-9]/g, '_')}.pdf`);
+            toast.success('Xuất PDF thành công!', { id: 'pdf-export' });
+        } catch (error) {
+            console.error(error);
+            toast.error('Có lỗi xảy ra khi xuất PDF', { id: 'pdf-export' });
+        } finally {
+            setIsExporting(false);
+        }
     };
 
     return (
@@ -61,8 +85,12 @@ export const FinalReport = ({ topic, goal, audience, level, finalContent, modelC
                         >
                             <FileText size={14} /> Tải DOCX (APA)
                         </button>
-                        <button onClick={handlePrint} className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-lg text-xs font-bold transition-colors shadow">
-                            <Printer size={14} /> Xuất PDF (A4)
+                        <button 
+                            onClick={handleExportPDF} 
+                            disabled={isExporting}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shadow ${isExporting ? 'bg-slate-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                        >
+                            <Printer size={14} /> {isExporting ? 'Đang xuất...' : 'Xuất PDF (A4)'}
                         </button>
                     </div>
                 </div>

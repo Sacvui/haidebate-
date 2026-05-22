@@ -263,12 +263,12 @@ export const STARTUP_OUTLINE_WRITER_PROMPT = `
   | Operations | 20 % | ... | Văn phòng, pháp lý, HR |
   | Reserve | 10 % | ... | Dự phòng chi phí |
 
-  LƯU Ý: Chiến lược GTM chi tiết sẽ được xử lý ở Bước 4 (GTM Strategy) riêng. KHÔNG viết GTM ở đây.
+  LƯU Ý: Sử dụng Chiến lược GTM đã có từ bước trước để tóm tắt ngắn gọn vào Pitch Deck (ví dụ: Marketing Channels, CAC, Timeline).
 
   YÊU CẦU ĐẦU RA:
   - Pitch Deck 10 slides + Financial Plan (Slide 11-12).
   - Sử dụng bảng Markdown Table cho số liệu tài chính.
-  - Không bao gồm Go-To-Market Strategy (sẽ làm ở bước sau).
+  - Tổng hợp số liệu và insight từ Customer Discovery và GTM Strategy vào các Slide tương ứng.
   `;
 
 export const STARTUP_GTM_WRITER_PROMPT = `

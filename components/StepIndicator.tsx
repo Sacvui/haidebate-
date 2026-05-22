@@ -13,17 +13,17 @@ const RESEARCH_STEPS = [
     { id: 1, label: "Tên Đề Tài (Topic)" },
     { id: 2, label: "Lit Review" },
     { id: 3, label: "Mô Hình (Model)" },
-    { id: 4, label: "Đề Cương (Outline)" },
-    { id: 5, label: "Phương pháp (Method)" },
+    { id: 4, label: "Phương pháp (Method)" },
+    { id: 5, label: "Đề Cương (Outline)" },
     { id: 6, label: "Export Files" }
 ];
 
 const STARTUP_STEPS = [
     { id: 1, label: "Ý tưởng (Topic)" },
     { id: 2, label: "Lean Canvas" },
-    { id: 3, label: "Pitch Deck" },
+    { id: 3, label: "Discovery" },
     { id: 4, label: "GTM Strategy" },
-    { id: 5, label: "Discovery" },
+    { id: 5, label: "Pitch Deck" },
     { id: 6, label: "Export" }
 ];
 

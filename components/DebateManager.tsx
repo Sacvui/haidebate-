@@ -341,11 +341,17 @@ export function DebateManager({
             }
         }
 
-        if (currentStep === '1_TOPIC') setCurrentStep(projectType === 'STARTUP' ? '2_MODEL' : '1_LIT_REVIEW');
-        else if (currentStep === '1_LIT_REVIEW') setCurrentStep(paperType === 'software' ? '2_ARCH' : '2_MODEL');
-        else if (currentStep === '2_MODEL' || currentStep === '2_ARCH') setCurrentStep('3_OUTLINE');
-        else if (currentStep === '3_OUTLINE') setCurrentStep(projectType === 'STARTUP' ? '5_GTM' : (paperType === 'software' ? '4_BENCHMARK' : '4_SURVEY'));
-        else if (currentStep === '5_GTM') setCurrentStep('4_SURVEY');
+        if (projectType === 'STARTUP') {
+            if (currentStep === '1_TOPIC') setCurrentStep('2_MODEL');
+            else if (currentStep === '2_MODEL') setCurrentStep('4_SURVEY');
+            else if (currentStep === '4_SURVEY') setCurrentStep('5_GTM');
+            else if (currentStep === '5_GTM') setCurrentStep('3_OUTLINE');
+        } else {
+            if (currentStep === '1_TOPIC') setCurrentStep('1_LIT_REVIEW');
+            else if (currentStep === '1_LIT_REVIEW') setCurrentStep(paperType === 'software' ? '2_ARCH' : '2_MODEL');
+            else if (currentStep === '2_MODEL' || currentStep === '2_ARCH') setCurrentStep(paperType === 'software' ? '4_BENCHMARK' : '4_SURVEY');
+            else if (currentStep === '4_SURVEY' || currentStep === '4_BENCHMARK') setCurrentStep('3_OUTLINE');
+        }
 
         setRoundCount(0);
         setStepCompleted(false);
@@ -353,11 +359,17 @@ export function DebateManager({
     };
 
     const handlePreviousStep = () => {
-        if (currentStep === '1_LIT_REVIEW') setCurrentStep('1_TOPIC');
-        else if (currentStep === '2_MODEL' || currentStep === '2_ARCH') setCurrentStep(projectType === 'STARTUP' ? '1_TOPIC' : '1_LIT_REVIEW');
-        else if (currentStep === '3_OUTLINE') setCurrentStep(paperType === 'software' ? '2_ARCH' : '2_MODEL');
-        else if (currentStep === '5_GTM') setCurrentStep('3_OUTLINE');
-        else if (currentStep === '4_SURVEY' || currentStep === '4_BENCHMARK') setCurrentStep(projectType === 'STARTUP' ? '5_GTM' : '3_OUTLINE');
+        if (projectType === 'STARTUP') {
+            if (currentStep === '3_OUTLINE') setCurrentStep('5_GTM');
+            else if (currentStep === '5_GTM') setCurrentStep('4_SURVEY');
+            else if (currentStep === '4_SURVEY') setCurrentStep('2_MODEL');
+            else if (currentStep === '2_MODEL') setCurrentStep('1_TOPIC');
+        } else {
+            if (currentStep === '3_OUTLINE') setCurrentStep(paperType === 'software' ? '4_BENCHMARK' : '4_SURVEY');
+            else if (currentStep === '4_SURVEY' || currentStep === '4_BENCHMARK') setCurrentStep(paperType === 'software' ? '2_ARCH' : '2_MODEL');
+            else if (currentStep === '2_MODEL' || currentStep === '2_ARCH') setCurrentStep('1_LIT_REVIEW');
+            else if (currentStep === '1_LIT_REVIEW') setCurrentStep('1_TOPIC');
+        }
 
         setRoundCount(0);
         setStepCompleted(true);
@@ -368,17 +380,17 @@ export function DebateManager({
         if (projectType === 'STARTUP') {
             if (step === '1_TOPIC') return 1;
             if (step === '2_MODEL') return 2;
-            if (step === '3_OUTLINE') return 3;
+            if (step === '4_SURVEY') return 3;
             if (step === '5_GTM') return 4;
-            if (step === '4_SURVEY') return 5;
+            if (step === '3_OUTLINE') return 5;
             return 1;
         }
         // Research / Software
         if (step === '1_TOPIC') return 1;
         if (step === '1_LIT_REVIEW') return 2;
         if (step === '2_MODEL' || step === '2_ARCH') return 3;
-        if (step === '3_OUTLINE') return 4;
-        if (step === '4_SURVEY' || step === '4_BENCHMARK') return 5;
+        if (step === '4_SURVEY' || step === '4_BENCHMARK') return 4;
+        if (step === '3_OUTLINE') return 5;
         return 1;
     };
 
@@ -427,10 +439,10 @@ export function DebateManager({
                         {currentStep === '1_LIT_REVIEW' && "Giai Đoạn 2: Tổng Quan Tài Liệu (Lit Review)"}
                         {currentStep === '2_MODEL' && (projectType === 'STARTUP' ? "Giai Đoạn 2: Lean Canvas" : "Giai Đoạn 3: Xây Dựng Mô Hình")}
                         {currentStep === '2_ARCH' && "Giai Đoạn 3: Kiến Trúc Hệ Thống & Tech Stack"}
-                        {currentStep === '3_OUTLINE' && (projectType === 'STARTUP' ? "Giai Đoạn 3: Pitch Deck + Financial Plan" : "Giai Đoạn 4: Hoàn Thiện Đề Cương")}
+                        {currentStep === '4_SURVEY' && (projectType === 'STARTUP' ? "Giai Đoạn 3: Customer Discovery" : "Giai Đoạn 4: Phương pháp Nghiên cứu")}
                         {currentStep === '5_GTM' && "Giai Đoạn 4: Chiến Lược Ra Mắt (GTM)"}
-                        {currentStep === '4_SURVEY' && (projectType === 'STARTUP' ? "Giai Đoạn 5: Customer Discovery" : "Giai Đoạn 5: Phương pháp Nghiên cứu")}
-                        {currentStep === '4_BENCHMARK' && "Giai Đoạn 5: Kiểm Thử & Đánh Giá Hiệu Năng"}
+                        {currentStep === '4_BENCHMARK' && "Giai Đoạn 4: Kiểm Thử & Đánh Giá Hiệu Năng"}
+                        {currentStep === '3_OUTLINE' && (projectType === 'STARTUP' ? "Giai Đoạn 5: Pitch Deck + Financial Plan" : "Giai Đoạn 5: Hoàn Thiện Đề Cương")}
                     </h2>
                     <button onClick={() => { saveToProjectStorage(); if (onExit) onExit(); }} className="p-2 text-slate-400 hover:text-blue-600">
                         <Home size={20} />
@@ -455,7 +467,7 @@ export function DebateManager({
                         <div className="flex gap-2">
                             {currentStep !== '1_TOPIC' && <button onClick={handlePreviousStep} className="bg-muted px-4 py-2 rounded-lg">Quay lại</button>}
                             <button onClick={() => setShowReview(true)} className="bg-card border border-border px-4 py-2 rounded-lg">Chỉnh sửa</button>
-                            {(currentStep === '4_SURVEY' || currentStep === '4_BENCHMARK') ? (
+                            {currentStep === '3_OUTLINE' ? (
                                 <button onClick={() => setShowExport(true)} className="bg-indigo-600 text-white px-6 py-2 rounded-lg">Export</button>
                             ) : (
                                 <button onClick={handleNextStep} className="bg-green-600 text-white px-6 py-2 rounded-lg">Tiếp theo</button>

@@ -257,6 +257,12 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
                         if (this.finalizedModelChart) {
                             contextAddition += `\n\nSƠ ĐỒ BUSINESS MODEL: \n\`\`\`mermaid\n${this.finalizedModelChart}\n\`\`\``;
                         }
+                        if (this.finalizedSurvey) {
+                            contextAddition += `\n\nCUSTOMER DISCOVERY (Insight khảo sát): \n${this.finalizedSurvey.substring(0, 1000)}...`;
+                        }
+                        if (this.finalizedGTM) {
+                            contextAddition += `\n\nGTM STRATEGY (Chiến lược ra mắt): \n${this.finalizedGTM.substring(0, 1000)}...`;
+                        }
                         break;
                     case '5_GTM':
                         sysPrompt = STARTUP_GTM_WRITER_PROMPT;
@@ -266,8 +272,8 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
                         if (this.finalizedModel) {
                             contextAddition += `\n\nLEAN CANVAS: ${this.finalizedModel.substring(0, 1500)}...`;
                         }
-                        if (this.finalizedOutline) {
-                            contextAddition += `\n\nPITCH DECK: ${this.finalizedOutline.substring(0, 1000)}...`;
+                        if (this.finalizedSurvey) {
+                            contextAddition += `\n\nCUSTOMER DISCOVERY: ${this.finalizedSurvey.substring(0, 1000)}...`;
                         }
                         break;
                     case '4_SURVEY':
@@ -277,12 +283,6 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
                         }
                         if (this.finalizedModel) {
                             contextAddition += `\n\nLEAN CANVAS: ${this.finalizedModel.substring(0, 1500)}...`;
-                        }
-                        if (this.finalizedOutline) {
-                            contextAddition += `\n\nPITCH DECK: ${this.finalizedOutline.substring(0, 1500)}...`;
-                        }
-                        if (this.finalizedGTM) {
-                            contextAddition += `\n\nCHIẾN LƯỢC GTM: ${this.finalizedGTM.substring(0, 1500)}...`;
                         }
                         break;
                 }
@@ -317,6 +317,12 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
                         if (this.finalizedModelChart) {
                             contextAddition += `\n\nSƠ ĐỒ MÔ HÌNH:\n\`\`\`mermaid\n${this.finalizedModelChart}\n\`\`\``;
                         }
+                        if (this.finalizedSurvey) {
+                            contextAddition += `\n\nPHƯƠNG PHÁP NGHIÊN CỨU ĐÃ PHÊ DUYỆT:\n${this.finalizedSurvey.substring(0, 1500)}...`;
+                        }
+                        if (this.finalizedBenchmark) {
+                            contextAddition += `\n\nKẾT QUẢ KIỂM THỬ ĐÃ PHÊ DUYỆT:\n${this.finalizedBenchmark.substring(0, 1500)}...`;
+                        }
                         break;
                     case '2_ARCH':
                         sysPrompt = SOFTWARE_ARCH_WRITER_PROMPT;
@@ -338,9 +344,6 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
                         }
                         if (this.finalizedModel) {
                             contextAddition += `\n\nMÔ HÌNH: ${this.finalizedModel.substring(0, 1500)}...`;
-                        }
-                        if (this.finalizedOutline) {
-                            contextAddition += `\n\nĐỀ CƯƠNG (trích đoạn): ${this.finalizedOutline.substring(0, 1500)}...`;
                         }
                         break;
                 }

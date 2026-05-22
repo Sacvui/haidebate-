@@ -224,77 +224,200 @@ export async function exportOutlineToWord(
     });
 }
 
-// Export đề cương ra PDF
+let cachedVietnameseFontBold: string | null = null;
+
+// Export đề cương ra PDF (Native PDF from Markdown)
 export async function exportOutlineToPDF(
     topic: string,
     outline: string,
     model: string,
-    level: AcademicLevel
+    level: AcademicLevel,
+    gtm?: string,
+    survey?: string
 ): Promise<Blob> {
     const doc = new jsPDF();
 
-    // 1. Load Unicode Font (Roboto Regular) - Vietnamese Support
+    // 1. Load Unicode Fonts
     try {
         if (!cachedVietnameseFont) {
             const fontUrl = 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Regular.ttf';
             const fontResponse = await fetch(fontUrl);
-
             if (fontResponse.ok) {
                 const fontBuffer = await fontResponse.arrayBuffer();
                 cachedVietnameseFont = arrayBufferToBase64(fontBuffer);
-            } else {
-                console.warn("Failed to load Vietnamese font, fallback to default.");
+            }
+        }
+        if (!cachedVietnameseFontBold) {
+            const fontUrlBold = 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Medium.ttf';
+            const fontResponseBold = await fetch(fontUrlBold);
+            if (fontResponseBold.ok) {
+                const fontBufferBold = await fontResponseBold.arrayBuffer();
+                cachedVietnameseFontBold = arrayBufferToBase64(fontBufferBold);
             }
         }
 
         if (cachedVietnameseFont) {
-            // Add font to VFS and register it
             doc.addFileToVFS('Roboto-Regular.ttf', cachedVietnameseFont);
             doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
-            doc.setFont('Roboto'); // Activate font
         }
+        if (cachedVietnameseFontBold) {
+            doc.addFileToVFS('Roboto-Bold.ttf', cachedVietnameseFontBold);
+            doc.addFont('Roboto-Bold.ttf', 'Roboto', 'bold');
+        }
+        doc.setFont('Roboto', 'normal');
     } catch (e) {
         console.warn("Error loading font:", e);
     }
 
     let yPos = 20;
+    const margin = 20;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const maxWidth = pageWidth - margin * 2;
+    const pageHeight = doc.internal.pageSize.getHeight();
 
-    // Title
-    doc.setFontSize(16);
-    // doc.setFont('Roboto', 'bold'); // jsPDF basic font management is tricky with styles unless added
-    doc.text('DE CUONG NGHIEN CUU CHI TIET', 105, yPos, { align: 'center' }); // Keep ascii title slightly safe or use localized if font loaded
-    yPos += 10;
+    const checkPageBreak = (neededHeight: number) => {
+        if (yPos + neededHeight > pageHeight - margin) {
+            doc.addPage();
+            yPos = margin;
+            doc.setFont('Roboto', 'normal');
+        }
+    };
 
+    // --- TITLE PAGE ---
+    doc.setFont('Roboto', 'bold');
+    doc.setFontSize(18);
+    const titleLines = doc.splitTextToSize(topic.toUpperCase(), maxWidth);
+    checkPageBreak(titleLines.length * 8 + 30);
+    doc.text(titleLines, pageWidth / 2, yPos, { align: 'center' });
+    yPos += titleLines.length * 8 + 15;
+
+    doc.setFont('Roboto', 'normal');
     doc.setFontSize(14);
-    doc.text(topic, 105, yPos, { align: 'center', maxWidth: 180 });
-    yPos += 15;
-
-    doc.setFontSize(10);
-    doc.text(`Trinh do: ${level}`, 105, yPos, { align: 'center' });
+    doc.text("ĐỀ XUẤT NGHIÊN CỨU & KẾ HOẠCH PHÁT TRIỂN", pageWidth / 2, yPos, { align: 'center' });
+    yPos += 10;
+    doc.setFontSize(12);
+    doc.text(`Trình độ: ${level}`, pageWidth / 2, yPos, { align: 'center' });
     yPos += 20;
+    
+    doc.addPage();
+    yPos = margin;
 
-    // Model section
-    doc.setFontSize(12);
-    doc.text('MO HINH NGHIEN CUU', 20, yPos);
-    yPos += 7;
+    // --- RENDER CONTENT ---
+    const renderMarkdownToPdf = (content: string, sectionTitle: string) => {
+        checkPageBreak(20);
+        doc.setFont('Roboto', 'bold');
+        doc.setFontSize(16);
+        doc.text(sectionTitle.toUpperCase(), margin, yPos);
+        yPos += 12;
 
-    doc.setFontSize(10);
-    // Keep Vietnamese characters
-    const modelText = model.substring(0, 500);
-    const modelLines = doc.splitTextToSize(modelText, 170);
-    doc.text(modelLines, 20, yPos);
-    yPos += modelLines.length * 5 + 10;
+        const lines = content.split('\n');
+        let currentTableLines: string[] = [];
+        let inTable = false;
+        let inMermaid = false;
 
-    // Outline
-    doc.setFontSize(12);
-    doc.text('DE CUONG CHI TIET', 20, yPos);
-    yPos += 7;
+        for (const line of lines) {
+            const trimmed = line.trim();
 
-    doc.setFontSize(10);
-    // Keep Vietnamese characters
-    const outlineText = outline.substring(0, 1000);
-    const outlineLines = doc.splitTextToSize(outlineText, 170);
-    doc.text(outlineLines, 20, yPos);
+            if (trimmed.startsWith('```mermaid')) {
+                inMermaid = true;
+                checkPageBreak(10);
+                doc.setFont('Roboto', 'italic');
+                doc.setFontSize(10);
+                doc.text("[Vui lòng tham khảo sơ đồ Mermaid tại bản Web hoặc file Word]", margin, yPos);
+                yPos += 10;
+                continue;
+            }
+            if (inMermaid) {
+                if (trimmed === '```') {
+                    inMermaid = false;
+                }
+                continue;
+            }
+
+            if (trimmed.startsWith('|') || (inTable && trimmed.includes('|'))) {
+                inTable = true;
+                currentTableLines.push(trimmed);
+                continue;
+            } else if (inTable) {
+                // Render table
+                const tableHeaders = currentTableLines[0].split('|').map(c => c.trim()).filter(c => c);
+                const tableBody = [];
+                for (let i = 2; i < currentTableLines.length; i++) {
+                    const row = currentTableLines[i].split('|').map(c => c.trim()).filter((_, idx, arr) => idx > 0 && idx < arr.length - 1);
+                    if (row.length > 0) tableBody.push(row);
+                }
+                
+                autoTable(doc, {
+                    startY: yPos,
+                    head: [tableHeaders],
+                    body: tableBody,
+                    styles: { font: 'Roboto', fontStyle: 'normal' },
+                    headStyles: { fillColor: [41, 128, 185], fontStyle: 'bold' },
+                    margin: { left: margin, right: margin }
+                });
+                yPos = (doc as any).lastAutoTable.finalY + 10;
+                
+                currentTableLines = [];
+                inTable = false;
+                if (!trimmed) continue;
+            }
+
+            if (!trimmed) {
+                yPos += 4;
+                continue;
+            }
+
+            let text = trimmed;
+            let isHeading = false;
+            let fontSize = 11;
+            let isBold = false;
+            let indent = margin;
+
+            if (text.startsWith('# ')) { isHeading = true; fontSize = 15; isBold = true; text = text.substring(2); yPos += 6; }
+            else if (text.startsWith('## ')) { isHeading = true; fontSize = 13; isBold = true; text = text.substring(3); yPos += 4; }
+            else if (text.startsWith('### ')) { isHeading = true; fontSize = 11; isBold = true; text = text.substring(4); yPos += 2; }
+            else if (text.startsWith('- ') || text.startsWith('* ')) { indent = margin + 5; text = '• ' + text.substring(2); }
+            else if (text.match(/^\d+\.\s/)) { indent = margin + 5; }
+
+            // Strip inline formatting
+            text = text.replace(/\*\*(.*?)\*\*/g, '$1');
+            text = text.replace(/\*(.*?)\*/g, '$1');
+            text = text.replace(/_(.*?)_/g, '$1');
+
+            checkPageBreak(fontSize);
+            doc.setFont('Roboto', isBold ? 'bold' : 'normal');
+            doc.setFontSize(fontSize);
+            
+            const wrappedText = doc.splitTextToSize(text, maxWidth - (indent - margin));
+            const blockHeight = wrappedText.length * (fontSize * 0.45);
+            checkPageBreak(blockHeight);
+            doc.text(wrappedText, indent, yPos);
+            yPos += blockHeight + 2;
+        }
+        
+        if (inTable && currentTableLines.length > 0) {
+            const tableHeaders = currentTableLines[0].split('|').map(c => c.trim()).filter(c => c);
+            const tableBody = [];
+            for (let i = 2; i < currentTableLines.length; i++) {
+                const row = currentTableLines[i].split('|').map(c => c.trim()).filter((_, idx, arr) => idx > 0 && idx < arr.length - 1);
+                if (row.length > 0) tableBody.push(row);
+            }
+            autoTable(doc, {
+                startY: yPos,
+                head: [tableHeaders],
+                body: tableBody,
+                styles: { font: 'Roboto', fontStyle: 'normal' },
+                headStyles: { fillColor: [41, 128, 185], fontStyle: 'bold' },
+                margin: { left: margin, right: margin }
+            });
+            yPos = (doc as any).lastAutoTable.finalY + 10;
+        }
+    };
+
+    if (model) renderMarkdownToPdf(model, "1. Cơ sở Lý thuyết và Mô hình Nghiên cứu");
+    if (outline) { doc.addPage(); yPos = margin; renderMarkdownToPdf(outline, "2. Đề cương Nghiên cứu Chi tiết"); }
+    if (gtm) { doc.addPage(); yPos = margin; renderMarkdownToPdf(gtm, "3. Chiến lược Ra mắt (Go-To-Market Strategy)"); }
+    if (survey) { doc.addPage(); yPos = margin; renderMarkdownToPdf(survey, gtm ? "4. Thang đo và Bảng hỏi Khảo sát" : "3. Thang đo và Bảng hỏi Khảo sát"); }
 
     return doc.output('blob');
 }
