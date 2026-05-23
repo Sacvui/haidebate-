@@ -11,11 +11,16 @@ const MAX_REQUESTS = 10; // Max requests per window
 const GeminiRequestSchema = z.object({
     model: z.string().min(1, "Model is required"),
     prompt: z.string().min(1, "Prompt is required"),
+    inlineData: z.object({
+        mimeType: z.string(),
+        data: z.string()
+    }).optional(),
     useCustomKey: z.boolean().optional().default(false),
     userId: z.string().optional() // Optional for tracking
 });
 
 // export const runtime = 'edge'; // Disabled for Node.js compatibility (ioredis)
+export const maxDuration = 60; // Allow longer execution for Gemini API
 
 export async function POST(request: NextRequest) {
     try {
@@ -32,7 +37,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const { model, prompt, useCustomKey, userId: reqUserId } = validation.data;
+        const { model, prompt, inlineData, useCustomKey, userId: reqUserId } = validation.data;
 
         // 1. Check authentication
         const session = await auth();
@@ -119,14 +124,32 @@ export async function POST(request: NextRequest) {
 
         const executeGemini = async (targetModel: string) => {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apiKey}`;
+            
+            const parts: any[] = [{ text: prompt }];
+            if (inlineData) {
+                parts.push({
+                    inlineData: {
+                        mimeType: inlineData.mimeType,
+                        data: inlineData.data
+                    }
+                });
+            }
+
             const res = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }]
+                    contents: [{ parts }]
                 })
             });
-            return res.json();
+            
+            const rawText = await res.text();
+            try {
+                return JSON.parse(rawText);
+            } catch (e) {
+                console.error("Gemini API non-JSON response:", rawText.substring(0, 200));
+                return { error: { code: res.status || 502, message: "Invalid JSON response from Google API (possible timeout or 502)" } };
+            }
         };
 
         let data = await executeGemini(model);

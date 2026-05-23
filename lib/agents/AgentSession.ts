@@ -169,10 +169,17 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
                 })
             });
 
-            const data = await response.json();
+            let data;
+            try {
+                const rawText = await response.text();
+                data = JSON.parse(rawText);
+            } catch (jsonError) {
+                console.error("Failed to parse server response as JSON:", jsonError);
+                throw new Error("SERVER_TIMEOUT_OR_502");
+            }
 
             if (!response.ok) {
-                const errorMsg = data.error || 'Unknown error';
+                const errorMsg = data?.error || 'Unknown error';
 
                 console.error(`🚨 Gemini Proxy Error: `, {
                     model: currentModel,
@@ -212,8 +219,13 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
             return data.text || "Lỗi: Không có phản hồi từ AI.";
 
         } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-            if (retries > 0 && (error.message?.includes('fetch') || error.message?.includes('network'))) {
-                console.warn(`Network error, retrying... (${retries} left)`);
+            const isRetryableError = error.message?.includes('fetch') || 
+                                     error.message?.includes('network') || 
+                                     error.message?.includes('SERVER_TIMEOUT') ||
+                                     error.message?.includes('JSON');
+            
+            if (retries > 0 && isRetryableError) {
+                console.warn(`Transient error, retrying... (${retries} left)`);
                 await new Promise(resolve => setTimeout(resolve, 3000));
                 return this.callGeminiAPI(model, prompt, customKey, retries - 1, useFallback);
             }

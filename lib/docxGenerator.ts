@@ -24,10 +24,12 @@ interface DocxData {
     modelContent?: string;
     outlineContent?: string;
     outlineChart?: string;
+    variableChart?: string;
     gtmContent?: string;
     surveyContent?: string;
     template?: ExportTemplate;
     paperType?: string;
+    goal?: string;
 }
 
 export const generateDocx = async (data: DocxData) => {
@@ -78,8 +80,12 @@ export const generateDocx = async (data: DocxData) => {
     // Helper to parse markdown formatting
     const createFormattedTextRuns = (text: string, defaultBold = false, defaultItalic = false, defaultSize = theme.bodySize, defaultColor?: string) => {
         const runs: TextRun[] = [];
+        
+        // Pre-process: strip links [text](url) -> text
+        const processedText = text.replace(/\[(.*?)\]\(.*?\)/g, '$1');
+        
         // Split by bold (** or __) or italic (* or _)
-        const parts = text.split(/(\*\*.*?\*\*|\*.*?\*|__.*?__|_.*?_)/g);
+        const parts = processedText.split(/(\*\*.*?\*\*|\*.*?\*|__.*?__|_.*?_)/g);
         
         parts.forEach(part => {
             if (!part) return;
@@ -205,9 +211,31 @@ export const generateDocx = async (data: DocxData) => {
         const lines = content.split('\n');
         let currentTableLines: string[] = [];
         let inTable = false;
+        let inMermaid = false;
 
         for (const line of lines) {
             const trimmed = line.trim();
+
+            if (trimmed.startsWith('```mermaid')) {
+                inMermaid = true;
+                items.push(new Paragraph({
+                    children: [
+                        new TextRun({
+                            text: "[Vui lòng tham khảo sơ đồ Mermaid tại bản Web]",
+                            italics: true,
+                            font: theme.font,
+                            size: theme.bodySize - 4
+                        })
+                    ]
+                }));
+                continue;
+            }
+            if (inMermaid) {
+                if (trimmed === '```') {
+                    inMermaid = false;
+                }
+                continue;
+            }
 
             // More robust table detection: allows indentation and strictly checks for pipe at start/end or internal structure
             // Regex: Starts with optional space, then pipe, then content...
@@ -281,10 +309,23 @@ export const generateDocx = async (data: DocxData) => {
             alignment: theme.alignment,
             children: [
                 new TextRun({
-                    text: "ĐỀ XUẤT NGHIÊN CỨU & KẾ HOẠCH PHÁT TRIỂN",
+                    text: data.goal ? `Mục tiêu: ${data.goal}` : "ĐỀ XUẤT NGHIÊN CỨU & KẾ HOẠCH PHÁT TRIỂN",
                     font: theme.font,
                     size: theme.bodySize,
-                    color: theme.accentColor
+                    color: theme.accentColor,
+                    italics: !!data.goal
+                }),
+            ],
+        }),
+        new Paragraph({ spacing: { before: 200 }, children: [] }),
+        new Paragraph({
+            alignment: theme.alignment,
+            children: [
+                new TextRun({
+                    text: `Tác giả: ${data.studentName || 'Nhà Nghiên Cứu AI & Cộng Sự'}`,
+                    font: theme.font,
+                    size: theme.bodySize,
+                    bold: true
                 }),
             ],
         }),
@@ -315,6 +356,18 @@ export const generateDocx = async (data: DocxData) => {
     // --- MAIN CONTENT ---
     sections.push(createHeading(data.paperType === 'software' ? "1. Cơ sở Lý thuyết và Kiến trúc hệ thống" : "1. Cơ sở Lý thuyết và Mô hình Nghiên cứu", HeadingLevel.HEADING_1));
     if (data.modelContent) sections.push(...parseContentToProjectItems(data.modelContent));
+    
+    if (data.variableChart) {
+        sections.push(new Paragraph({
+            alignment: AlignmentType.CENTER,
+            spacing: { before: 400, after: 400 },
+            children: [
+                new TextRun({ text: "[SƠ ĐỒ MÔ HÌNH NGHIÊN CỨU / CẤU TRÚC HỆ THỐNG]", bold: true, font: theme.font, color: theme.accentColor }),
+                new TextRun({ text: "\n(Vui lòng chèn sơ đồ tại đây)", italics: true, font: theme.font, size: theme.bodySize - 4 })
+            ]
+        }));
+    }
+    
     sections.push(new Paragraph({ children: [new PageBreak()] }));
 
     sections.push(createHeading("2. Đề cương Nghiên cứu Chi tiết", HeadingLevel.HEADING_1));

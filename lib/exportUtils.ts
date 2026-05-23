@@ -209,16 +209,21 @@ export async function exportOutlineToWord(
     survey?: string,
     outlineChart?: string,
     template?: any,
-    paperType?: string
+    paperType?: string,
+    goal?: string,
+    variableChart?: string
 ): Promise<void> {
     await generateDocx({
         topic,
         level,
+        goal,
+        studentName: 'Nhà Nghiên Cứu AI & Cộng Sự',
         modelContent: model,
         outlineContent: outline,
         gtmContent: gtm,
         surveyContent: survey,
         outlineChart: outlineChart,
+        variableChart: variableChart,
         template: template,
         paperType: paperType
     });
@@ -233,14 +238,15 @@ export async function exportOutlineToPDF(
     model: string,
     level: AcademicLevel,
     gtm?: string,
-    survey?: string
+    survey?: string,
+    goal?: string
 ): Promise<Blob> {
     const doc = new jsPDF();
 
     // 1. Load Unicode Fonts
     try {
         if (!cachedVietnameseFont) {
-            const fontUrl = 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Regular.ttf';
+            const fontUrl = '/fonts/Roboto-Regular.ttf';
             const fontResponse = await fetch(fontUrl);
             if (fontResponse.ok) {
                 const fontBuffer = await fontResponse.arrayBuffer();
@@ -248,7 +254,7 @@ export async function exportOutlineToPDF(
             }
         }
         if (!cachedVietnameseFontBold) {
-            const fontUrlBold = 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Medium.ttf';
+            const fontUrlBold = '/fonts/Roboto-Medium.ttf';
             const fontResponseBold = await fetch(fontUrlBold);
             if (fontResponseBold.ok) {
                 const fontBufferBold = await fontResponseBold.arrayBuffer();
@@ -290,10 +296,25 @@ export async function exportOutlineToPDF(
     doc.text(titleLines, pageWidth / 2, yPos, { align: 'center' });
     yPos += titleLines.length * 8 + 15;
 
+    if (goal) {
+        doc.setFont('Roboto', 'italic');
+        doc.setFontSize(14);
+        const goalLines = doc.splitTextToSize(`Mục tiêu: ${goal}`, maxWidth);
+        doc.text(goalLines, pageWidth / 2, yPos, { align: 'center' });
+        yPos += goalLines.length * 8 + 10;
+    }
+
     doc.setFont('Roboto', 'normal');
     doc.setFontSize(14);
     doc.text("ĐỀ XUẤT NGHIÊN CỨU & KẾ HOẠCH PHÁT TRIỂN", pageWidth / 2, yPos, { align: 'center' });
+    yPos += 15;
+    
+    doc.setFont('Roboto', 'bold');
+    doc.setFontSize(12);
+    doc.text("Tác giả: Nhà Nghiên Cứu AI & Cộng Sự", pageWidth / 2, yPos, { align: 'center' });
     yPos += 10;
+
+    doc.setFont('Roboto', 'normal');
     doc.setFontSize(12);
     doc.text(`Trình độ: ${level}`, pageWidth / 2, yPos, { align: 'center' });
     yPos += 20;
@@ -381,10 +402,11 @@ export async function exportOutlineToPDF(
             else if (text.startsWith('- ') || text.startsWith('* ')) { indent = margin + 5; text = '• ' + text.substring(2); }
             else if (text.match(/^\d+\.\s/)) { indent = margin + 5; }
 
-            // Strip inline formatting
+            // Strip inline formatting and links
             text = text.replace(/\*\*(.*?)\*\*/g, '$1');
             text = text.replace(/\*(.*?)\*/g, '$1');
             text = text.replace(/_(.*?)_/g, '$1');
+            text = text.replace(/\[(.*?)\]\(.*?\)/g, '$1');
 
             doc.setFont('Roboto', isBold ? 'bold' : 'normal');
             doc.setFontSize(fontSize);

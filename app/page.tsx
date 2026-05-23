@@ -24,6 +24,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ProjectManager } from "@/components/ProjectManager";
 import { UserMenu } from "@/components/UserMenu";
 import { MobileMenu } from "@/components/MobileMenu";
+import { ReviewManager } from "@/components/ReviewManager";
 
 // Lazy load heavy components
 const DebateManager = dynamic(() => import("@/components/DebateManager").then(mod => mod.DebateManager), {
@@ -50,6 +51,7 @@ export default function Home() {
   const [showShare, setShowShare] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const [showProjects, setShowProjects] = useState(false);
+  const [showReviewMode, setShowReviewMode] = useState(false);
   const [currentProject, setCurrentProject] = useState<SavedProject | null>(null);
   const [apiKey, setApiKey] = useState("");
   const [apiKeyCritic, setApiKeyCritic] = useState<string | undefined>(undefined);
@@ -180,6 +182,7 @@ export default function Home() {
   const handleGoHome = () => {
     setIsStarted(false);
     setShowProjects(false);
+    setShowReviewMode(false);
 
     // Update local session to not auto-start on refresh
     const savedSession = localStorage.getItem("current_session");
@@ -345,6 +348,12 @@ export default function Home() {
                     onOpenProjects={() => setShowProjects(true)}
                     onOpenShare={() => setShowShare(true)}
                   />
+                  <button
+                    onClick={() => { setShowReviewMode(true); setShowProjects(false); setIsStarted(false); }}
+                    className="ml-2 px-3 py-1.5 bg-accent/10 hover:bg-accent/20 text-accent font-bold rounded-lg transition-colors border border-accent/20"
+                  >
+                    Thẩm định Đề cương
+                  </button>
                 </div>
 
                 {/* Mobile Hamburger Menu */}
@@ -361,7 +370,14 @@ export default function Home() {
             </header>
 
             <div className="pt-24 px-4 pb-12 transition-all duration-500">
-              {showProjects ? (
+              {showReviewMode ? (
+                <div className="max-w-6xl mx-auto">
+                    <button onClick={() => setShowReviewMode(false)} className="mb-4 text-muted-foreground hover:text-foreground flex items-center gap-2 font-medium">
+                        ← Quay lại trang chủ
+                    </button>
+                    <ReviewManager />
+                </div>
+              ) : showProjects ? (
                 <ProjectManager
                   onSelectProject={handleSelectProject}
                   onCreateNew={() => { setShowProjects(false); setIsStarted(false); setFormData(null); }}

@@ -24,6 +24,7 @@ interface ExportManagerProps {
     modelContent?: string;
     outlineContent?: string;
     outlineChart?: string;
+    variableChart?: string;
     gtmContent?: string;
     surveyContent?: string;
     paperType?: string;
@@ -40,6 +41,7 @@ export function ExportManager({
     modelContent = '',
     outlineContent = '',
     outlineChart = '',
+    variableChart = '',
     gtmContent = '',
     surveyContent = '',
     paperType = 'quant',
@@ -65,7 +67,7 @@ export function ExportManager({
 
             switch (type) {
                 case 'word':
-                    await exportOutlineToWord(topic, outlineContent, modelContent, level, gtmContent, surveyContent, outlineChart, selectedTemplate, paperType);
+                    await exportOutlineToWord(topic, outlineContent, modelContent, level, gtmContent, surveyContent, outlineChart, selectedTemplate, paperType, goal, variableChart);
                     return; // generateDocx handles download
 
                 case 'pdf':
@@ -75,7 +77,8 @@ export function ExportManager({
                         modelContent,
                         level as any,
                         gtmContent,
-                        surveyContent
+                        surveyContent,
+                        goal
                     );
                     filename = `BaoCao_${topic.substring(0, 30).replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
                     break;

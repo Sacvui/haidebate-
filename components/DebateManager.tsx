@@ -403,6 +403,7 @@ export function DebateManager({
                 modelContent={session.finalizedModel}
                 outlineContent={session.finalizedOutline}
                 outlineChart={session.finalizedOutlineChart || outlineChart}
+                variableChart={session.finalizedModelChart || variableChart}
                 gtmContent={session.finalizedGTM || gtmContent}
                 surveyContent={session.finalizedSurvey || surveyContent}
                 paperType={paperType}

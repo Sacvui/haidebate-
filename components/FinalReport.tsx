@@ -43,7 +43,8 @@ export const FinalReport = ({ topic, goal, audience, level, finalContent, modelC
                 modelContent || finalContent || '',
                 level as any,
                 gtmContent,
-                surveyContent
+                surveyContent,
+                goal
             );
             
             downloadBlob(pdfBlob, `BaoCao_${topic.substring(0, 30).replace(/[^a-zA-Z0-9]/g, '_')}.pdf`);
@@ -76,9 +77,12 @@ export const FinalReport = ({ topic, goal, audience, level, finalContent, modelC
                             onClick={() => generateDocx({
                                 topic,
                                 level,
+                                goal,
+                                studentName: "Nhà Nghiên Cứu AI & Cộng Sự",
                                 modelContent: modelContent || finalContent,
                                 outlineContent: outlineContent,
                                 outlineChart: outlineChart,
+                                variableChart: variableChart,
                                 gtmContent: gtmContent,
                                 surveyContent: surveyContent
                             })}
