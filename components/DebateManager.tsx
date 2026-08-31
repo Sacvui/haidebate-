@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { toast } from "sonner";
-import { Play, Bot, User, CheckCircle, ArrowRight, ArrowLeft, FileText, Download, Share2, Home, Save } from 'lucide-react';
+import { Play, Bot, User, CheckCircle, ArrowRight, ArrowLeft, FileText, Download, Share2, Home, Save, Check } from 'lucide-react';
 import { AgentSession, WorkflowStep, AcademicLevel, ProjectType, AgentMessage } from '@/lib/agents';
 import { StepIndicator } from './StepIndicator';
 import { ThinkingAnimation } from './ThinkingAnimation';
