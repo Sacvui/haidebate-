@@ -1,49 +1,59 @@
-import { kv as vercelKv } from '@vercel/kv';
+import { createClient } from '@vercel/kv';
 import { hash } from 'bcryptjs';
 import { WorkflowStep } from './agents';
 
 // Adapter to handle Vercel KV (HTTP) - Edge Compatible
 class KVAdapter {
+    private client: ReturnType<typeof createClient>;
+
     constructor() {
-        if (!process.env.KV_REST_API_URL || !process.env.KV_REST_API_TOKEN) {
-            console.warn("KV_REST_API_URL and KV_REST_API_TOKEN are not configured. KV will not work.");
+        const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL || process.env.REDIS_URL;
+        const token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
+        
+        if (!url || !token) {
+            console.warn("Upstash/Vercel KV is not configured. Database features will fail.");
         }
+        
+        this.client = createClient({
+            url: url || "https://dummy-url.upstash.io",
+            token: token || "dummy-token"
+        });
     }
 
     async get<T>(key: string): Promise<T | null> {
-        return vercelKv.get<T>(key);
+        return this.client.get<T>(key);
     }
 
     async set(key: string, value: any): Promise<void> {
-        await vercelKv.set(key, value);
+        await this.client.set(key, value);
     }
 
     async incr(key: string): Promise<number> {
-        return vercelKv.incr(key);
+        return this.client.incr(key);
     }
 
     async sadd(key: string, value: any): Promise<number> {
-        return vercelKv.sadd(key, value);
+        return this.client.sadd(key, value);
     }
 
     async lpush(key: string, value: any): Promise<number> {
-        return vercelKv.lpush(key, value);
+        return this.client.lpush(key, value);
     }
 
     async keys(pattern: string): Promise<string[]> {
-        return vercelKv.keys(pattern);
+        return this.client.keys(pattern);
     }
 
     async sismember(key: string, member: any): Promise<number> {
-        return vercelKv.sismember(key, member);
+        return this.client.sismember(key, member);
     }
 
     async del(key: string): Promise<void> {
-        await vercelKv.del(key);
+        await this.client.del(key);
     }
 
     async expire(key: string, seconds: number): Promise<void> {
-        await vercelKv.expire(key, seconds);
+        await this.client.expire(key, seconds);
     }
 }
 
