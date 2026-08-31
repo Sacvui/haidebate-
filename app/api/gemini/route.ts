@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
         const safeUserId = userId ? `${userId.substring(0, 3)}***@***` : 'anonymous';
         console.log(`📡 Gemini API Call: Model=${model}, KeySource=${keySource}, User=${safeUserId}`);
 
-                const executeGemini = async (targetModel: string) => {
+                const executeGemini = (targetModel: string): Response => {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:streamGenerateContent?alt=sse&key=${apiKey}`;
             
             const parts: any[] = [{ text: prompt }];
@@ -136,28 +136,59 @@ export async function POST(request: NextRequest) {
                 });
             }
 
-            const res = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts }],
-                    generationConfig: {
-                        maxOutputTokens: 8192
+            // Create a ReadableStream that starts immediately
+            const stream = new ReadableStream({
+                async start(controller) {
+                    try {
+                        // Send an immediate SSE comment to flush headers and bypass Vercel 504 timeout
+                        controller.enqueue(new TextEncoder().encode(': keep-alive\n\n'));
+                        
+                        const res = await fetch(url, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                contents: [{ parts }],
+                                generationConfig: {
+                                    maxOutputTokens: 8192
+                                }
+                            })
+                        });
+
+                        if (!res.ok) {
+                            const rawText = await res.text();
+                            let errorObj;
+                            try {
+                                errorObj = JSON.parse(rawText);
+                            } catch (e) {
+                                errorObj = { error: { code: res.status || 502, message: "Invalid JSON response from Google API" } };
+                            }
+                            controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(errorObj)}\n\n`));
+                            controller.close();
+                            return;
+                        }
+
+                        if (!res.body) {
+                            controller.close();
+                            return;
+                        }
+
+                        const reader = res.body.getReader();
+                        while (true) {
+                            const { done, value } = await reader.read();
+                            if (done) break;
+                            controller.enqueue(value);
+                        }
+                        controller.close();
+                    } catch (error: any) {
+                        const errorObj = { error: { code: 500, message: error.message || "Fetch failed" } };
+                        controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(errorObj)}\n\n`));
+                        controller.close();
                     }
-                })
-            });
-            
-            if (!res.ok) {
-                const rawText = await res.text();
-                try {
-                    return JSON.parse(rawText);
-                } catch (e) {
-                    return { error: { code: res.status || 502, message: "Invalid JSON response from Google API" } };
                 }
-            }
-            
-            // Return stream directly
-            return new NextResponse(res.body, {
+            });
+
+            // Return stream immediately to prevent Vercel 504 timeout waiting for first byte from upstream
+            return new NextResponse(stream, {
                 headers: {
                     'Content-Type': 'text/event-stream',
                     'Cache-Control': 'no-cache',
