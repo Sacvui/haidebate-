@@ -211,76 +211,7 @@ export async function POST(request: NextRequest) {
 
         const result = await executeGemini(model);
         
-        // If it's a standard response (meaning it's a stream)
-        if (result instanceof NextResponse || result instanceof Response) {
-            return result;
-        }
-        
-        // Otherwise it's an error object, handle it
-        let data = result;
-
-        // Auto-discovery logic if model is deprecated or not found (404)
-        if (data.error && data.error.code === 404) {
-            console.log(`Model ${model} not found, attempting auto-discovery...`);
-            try {
-                const modelsUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
-                const modelsRes = await fetch(modelsUrl);
-                const modelsData = await modelsRes.json();
-                
-                if (modelsData.models) {
-                    const isFlash = model.includes('flash');
-                    
-                    let availableModels = modelsData.models
-                        .map((m: any) => m.name.replace('models/', ''))
-                        .filter((m: string) => m.startsWith('gemini-') && !m.includes('vision') && !m.includes('exp'));
-                        
-                    const exactTypeModels = availableModels.filter((m: string) => isFlash ? m.includes('flash') : m.includes('pro'));
-                    
-                    if (exactTypeModels.length > 0) {
-                        availableModels = exactTypeModels;
-                    }
-                    
-                    if (availableModels.length > 0) {
-                        availableModels.sort((a: string, b: string) => {
-                            const matchA = a.match(/gemini-(\d+\.\d+)/);
-                            const matchB = b.match(/gemini-(\d+\.\d+)/);
-                            const numA = matchA ? parseFloat(matchA[1]) : 0;
-                            const numB = matchB ? parseFloat(matchB[1]) : 0;
-                            if (numA !== numB) return numB - numA; 
-                            if (a.includes('latest') && !b.includes('latest')) return -1;
-                            if (!a.includes('latest') && b.includes('latest')) return 1;
-                            return b.localeCompare(a);
-                        });
-                        
-                        const discoveredModel = availableModels[0];
-                        console.log(`Auto-discovered fallback model: ${discoveredModel}`);
-                        
-                        const retryResult = await executeGemini(discoveredModel);
-                        if (retryResult instanceof NextResponse || retryResult instanceof Response) return retryResult;
-                        data = retryResult;
-                    }
-                }
-            } catch (e) {
-                console.error("Auto-discovery failed:", e);
-            }
-        }
-
-        if (data.error) {
-            const errorCode = data.error.code;
-            const errorMsg = data.error.message;
-            if (errorCode === 429 || errorMsg.toLowerCase().includes('quota')) {
-                return NextResponse.json({ error: `API quota exceeded. Please wait or use your own API key in Settings.` }, { status: 429 });
-            }
-            if (errorCode === 404) {
-                return NextResponse.json({ error: `Model "${model}" not found.` }, { status: 404 });
-            }
-            if (errorCode === 401 || errorCode === 403) {
-                return NextResponse.json({ error: 'Invalid API key.' }, { status: 401 });
-            }
-            return NextResponse.json({ error: `Gemini API error (${errorCode}): ${errorMsg}` }, { status: 500 });
-        }
-        
-        return NextResponse.json({ error: 'Unexpected error' }, { status: 500 });
+        return result;
 
     } catch (error: any) {
         console.error('Gemini proxy error:', error);
