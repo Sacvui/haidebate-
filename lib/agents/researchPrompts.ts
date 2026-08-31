@@ -499,7 +499,7 @@ graph TD
     E --> F[Kết luận<br>& Đề xuất]
 \`\`\`
 *(1. LUÔN dùng graph TD (Từ trên xuống) cho Quy trình nghiên cứu.*
-*1.5. BẮT BUỘC chèn lệnh `classDef default fill:#ffffff,stroke:#000000;` để đổi hình khối thành nền trắng, viền đen.*
+*1.5. BẮT BUỘC chèn lệnh \`classDef default fill:#ffffff,stroke:#000000;\` để đổi hình khối thành nền trắng, viền đen.*
 *2. Tên các bước QUÁ DÀI bắt buộc dùng <br> để ngắt dòng làm 2-3 hàng chữ.*
 *3. TUYỆT ĐỐI không dùng hình khối thoi (decision diamonds) hay rẽ nhánh phức tạp. Vẽ thành một luồng tuyến tính rõ ràng các hộp hình chữ nhật [ ] chuẩn khoa học.*
 *4. KHÔNG viết text lơ lửng trên luồng mũi tên (-->) làm rối sơ đồ).*
