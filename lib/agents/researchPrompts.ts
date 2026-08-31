@@ -150,13 +150,13 @@ QUY TẮC "LIÊM CHÍNH KHOA HỌC"(BẮT BUỘC):
 YÊU CẦU ĐẦU RA:
 1. Giải thích lý thuyết nền tảng.
 2. Danh sách các Chủ đề (Themes) và Câu hỏi nghiên cứu (RQ1, RQ2...). (Tuyệt đối KHÔNG viết Giả thuyết H1, H2).
-3. SƠ ĐỒ MERMAID(BẮT BUỘC): Vẽ Khung khái niệm bằng \\`graph TD\\`.
-   \\`\\`\\`mermaid
+3. SƠ ĐỒ MERMAID(BẮT BUỘC): Vẽ Khung khái niệm bằng \`graph TD\`.
+   \`\`\`mermaid
    graph TD
    classDef default fill:#ffffff,stroke:#000000;
    A[Lý thuyết nền] --> B[Theme 1: Nhận thức]
    A --> C[Theme 2: Hành động]
-   \\`\\`\\`
+   \`\`\`
 4. Trích dẫn nguồn (Citation) chuẩn APA.
 `;
     }
@@ -172,7 +172,7 @@ ${GLOBAL_ACADEMIC_STYLE}
 YÊU CẦU ĐẦU RA:
 1. Giải thích lý thuyết nền tảng.
 2. Nêu các Chủ đề khám phá (Định tính) VÀ các Giả thuyết kiểm định (Định lượng).
-3. SƠ ĐỒ MERMAID(BẮT BUỘC): Vẽ mô hình bằng \\`graph LR\\` kết hợp các biến độc lập và phụ thuộc.
+3. SƠ ĐỒ MERMAID(BẮT BUỘC): Vẽ mô hình bằng \`graph LR\` kết hợp các biến độc lập và phụ thuộc.
 4. Trích dẫn nguồn (Citation) chuẩn APA.
 `;
     }
@@ -211,21 +211,21 @@ YÊU CẦU ĐẦU RA:
 3. SƠ ĐỒ MERMAID(BẮT BUỘC):
    
    VÍ DỤ CHUẨN:
-   \\`\\`\\`mermaid
+   \`\`\`mermaid
    graph LR
    classDef default fill:#ffffff,stroke:#000000;
      A(Nhận thức<br>Hữu ích) -->|H1 (+)| C(Ý định<br>Sử dụng)
      B(Dễ<br>Sử dụng) -->|H2 (+)| C
      C -->|H3 (+)| D[Hành vi<br>Thực tế]
-   \\`\\`\\`
+   \`\`\`
    
    QUY TẮC BẮT BUỘC (ĐỂ ĐẢM BẢO CHUẨN BÀI CÔNG BỐ KHOA HỌC SEM):
    - LUÔN dùng 'graph LR' (Trái sang Phải) cho mô hình SEM/Conceptual Framework.
-   - BẮT BUỘC chèn lệnh \\`classDef default fill:#ffffff,stroke:#000000;\\` để đổi hình khối thành nền trắng, viền đen.
-   - Biến tiềm ẩn (Latent Constructs): DÙNG HÌNH OVAL bằng dấu ngoặc đơn, VD: \\`A(Tên biến)\\`.
-   - Biến quan sát (Observed/Hành vi): DÙNG HÌNH CHỮ NHẬT bằng dấu ngoặc vuông, VD: \\`B[Tên biến]\\`.
-   - Mũi tên tác động: BẮT BUỘC PHẢI DÁN NHÃN tên giả thuyết và chiều tác động, VD: \\`-->|H1 (+)|\\` hoặc \\`-->|H2 (-)|\\`.
-   - Tên biến: Phải ngắt dòng bằng thẻ \\`<br>\\` nếu dài hơn 3 chữ (VD: \\`A(Nhận thức<br>Hữu ích)\\`).
+   - BẮT BUỘC chèn lệnh \`classDef default fill:#ffffff,stroke:#000000;\` để đổi hình khối thành nền trắng, viền đen.
+   - Biến tiềm ẩn (Latent Constructs): DÙNG HÌNH OVAL bằng dấu ngoặc đơn, VD: \`A(Tên biến)\`.
+   - Biến quan sát (Observed/Hành vi): DÙNG HÌNH CHỮ NHẬT bằng dấu ngoặc vuông, VD: \`B[Tên biến]\`.
+   - Mũi tên tác động: BẮT BUỘC PHẢI DÁN NHÃN tên giả thuyết và chiều tác động, VD: \`-->|H1 (+)|\` hoặc \`-->|H2 (-)|\`.
+   - Tên biến: Phải ngắt dòng bằng thẻ \`<br>\` nếu dài hơn 3 chữ (VD: \`A(Nhận thức<br>Hữu ích)\`).
    - Tuyệt đối không dùng dấu ngoặc kép ("") bên trong nhãn.
    
 4. Trích dẫn nguồn (Citation) dạng giả định chuẩn APA.
@@ -402,7 +402,7 @@ CẤU TRÚC OUTPUT (MARKDOWN):
 - Methods: Thematic Analysis / Coding process...
 
 MINH HỌA QUY TRÌNH (MERMAID):
-\\`\\`\\`mermaid
+\`\`\`mermaid
 graph TD
     classDef default fill:#ffffff,stroke:#000000;
     A[Tổng quan Lý thuyết] --> B[Thiết kế Khung Phỏng vấn]
@@ -410,7 +410,7 @@ graph TD
     C --> D[Mã hóa Dữ liệu (Coding)]
     D --> E[Phân tích Chủ đề (Thematic)]
     E --> F[Kết luận]
-\\`\\`\\`
+\`\`\`
         `;
     }
     
@@ -444,14 +444,14 @@ CẤU TRÚC OUTPUT (MARKDOWN):
 (Cách kết hợp kết quả của 2 pha)
 
 MINH HỌA QUY TRÌNH (MERMAID):
-\\`\\`\\`mermaid
+\`\`\`mermaid
 graph TD
     classDef default fill:#ffffff,stroke:#000000;
     A[Phase 1: Qualitative Study] --> B[Develop Survey Instrument]
     B --> C[Phase 2: Quantitative Study]
     C --> D[Data Integration & Analysis]
     D --> E[Final Conclusion]
-\\`\\`\\`
+\`\`\`
         `;
     }
 
@@ -489,7 +489,7 @@ CẤU TRÚC OUTPUT (MARKDOWN):
 - Methods: Cronbach's Alpha, EFA, CFA, SEM...
 
 MINH HỌA QUY TRÌNH BAO GỒM SƠ ĐỒ MERMAID:
-\\`\\`\\`mermaid
+\`\`\`mermaid
 graph TD
     classDef default fill:#ffffff,stroke:#000000;
     A[Tổng quan<br>Lý thuyết] --> B[Thiết kế<br>Nghiên cứu]
@@ -497,7 +497,7 @@ graph TD
     C --> D[Thu thập<br>Dữ liệu]
     D --> E[Phân tích<br>Dữ liệu (SEM)]
     E --> F[Kết luận<br>& Đề xuất]
-\\`\\`\\`
+\`\`\`
 *(1. LUÔN dùng graph TD (Từ trên xuống) cho Quy trình nghiên cứu.*
 *1.5. BẮT BUỘC chèn lệnh `classDef default fill:#ffffff,stroke:#000000;` để đổi hình khối thành nền trắng, viền đen.*
 *2. Tên các bước QUÁ DÀI bắt buộc dùng <br> để ngắt dòng làm 2-3 hàng chữ.*
