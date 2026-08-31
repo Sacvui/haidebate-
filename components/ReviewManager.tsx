@@ -138,7 +138,7 @@ export function ReviewManager() {
 
             {/* Upload Area */}
             <div 
-                className={\`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-colors \${file ? 'border-accent bg-accent/5' : 'border-border hover:border-accent hover:bg-muted'}\`}
+                className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-colors ${file ? 'border-accent bg-accent/5' : 'border-border hover:border-accent hover:bg-muted'}`}
                 onClick={() => fileInputRef.current?.click()}
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}

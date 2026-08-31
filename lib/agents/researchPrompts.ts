@@ -23,7 +23,7 @@ export const LIT_REVIEW_WRITER_PROMPT = `
 Bạn là Nhà nghiên cứu học thuật đẳng cấp (Senior Researcher).
 Nhiệm vụ: Viết phần "Literature Review" (Tổng quan tài liệu) và Xác định "Research Gap".
 
-\${GLOBAL_ACADEMIC_STYLE}
+${GLOBAL_ACADEMIC_STYLE}
 
 YÊU CẦU CỤ THỂ:
 1. Tổng hợp các dòng lý thuyết chính liên quan (Theoretical Streams).
@@ -65,7 +65,7 @@ TIÊU CHÍ ĐÁNH GIÁ(HARDCORE):
 export const TOPIC_WRITER_PROMPT = `
 NHIỆM VỤ: Đề xuất / tinh chỉnh Tên Đề Tài nghiên cứu.
 
-\${GLOBAL_ACADEMIC_STYLE}
+${GLOBAL_ACADEMIC_STYLE}
 
 VÍ DỤ MẪU(FEW - SHOT EXAMPLES):
 
@@ -129,12 +129,12 @@ OUTPUT FORM:
 
 export function getModelWriterPrompt(level: AcademicLevel, method: string): string {
     if (method === 'qual') {
-        return \`
+        return `
 NHIỆM VỤ: Xây dựng Cơ sở lý thuyết và Khung khái niệm (Conceptual Framework) cho nghiên cứu ĐỊNH TÍNH.
-TRÌNH ĐỘ YÊU CẦU: \${level}
-\${getModelRequirements(level)}
+TRÌNH ĐỘ YÊU CẦU: ${level}
+${getModelRequirements(level)}
 
-\${GLOBAL_ACADEMIC_STYLE}
+${GLOBAL_ACADEMIC_STYLE}
 
 VÍ DỤ MẪU:
 VÍ DỤ 1: LÝ THUYẾT NỀN TẢNG
@@ -150,40 +150,40 @@ QUY TẮC "LIÊM CHÍNH KHOA HỌC"(BẮT BUỘC):
 YÊU CẦU ĐẦU RA:
 1. Giải thích lý thuyết nền tảng.
 2. Danh sách các Chủ đề (Themes) và Câu hỏi nghiên cứu (RQ1, RQ2...). (Tuyệt đối KHÔNG viết Giả thuyết H1, H2).
-3. SƠ ĐỒ MERMAID(BẮT BUỘC): Vẽ Khung khái niệm bằng \\\`graph TD\\\`.
-   \\\`\\\`\\\`mermaid
+3. SƠ ĐỒ MERMAID(BẮT BUỘC): Vẽ Khung khái niệm bằng \\`graph TD\\`.
+   \\`\\`\\`mermaid
    graph TD
    classDef default fill:#ffffff,stroke:#000000;
    A[Lý thuyết nền] --> B[Theme 1: Nhận thức]
    A --> C[Theme 2: Hành động]
-   \\\`\\\`\\\`
+   \\`\\`\\`
 4. Trích dẫn nguồn (Citation) chuẩn APA.
-\`;
+`;
     }
 
     if (method === 'mixed') {
-        return \`
+        return `
 NHIỆM VỤ: Xây dựng Cơ sở lý thuyết và Mô hình nghiên cứu HỖN HỢP (Mixed Methods).
-TRÌNH ĐỘ YÊU CẦU: \${level}
-\${getModelRequirements(level)}
+TRÌNH ĐỘ YÊU CẦU: ${level}
+${getModelRequirements(level)}
 
-\${GLOBAL_ACADEMIC_STYLE}
+${GLOBAL_ACADEMIC_STYLE}
 
 YÊU CẦU ĐẦU RA:
 1. Giải thích lý thuyết nền tảng.
 2. Nêu các Chủ đề khám phá (Định tính) VÀ các Giả thuyết kiểm định (Định lượng).
-3. SƠ ĐỒ MERMAID(BẮT BUỘC): Vẽ mô hình bằng \\\`graph LR\\\` kết hợp các biến độc lập và phụ thuộc.
+3. SƠ ĐỒ MERMAID(BẮT BUỘC): Vẽ mô hình bằng \\`graph LR\\` kết hợp các biến độc lập và phụ thuộc.
 4. Trích dẫn nguồn (Citation) chuẩn APA.
-\`;
+`;
     }
 
     // Default quantitative
-    return \`
+    return `
 NHIỆM VỤ: Xây dựng Cơ sở lý thuyết và Mô hình nghiên cứu.
-TRÌNH ĐỘ YÊU CẦU: \${level}
-\${getModelRequirements(level)}
+TRÌNH ĐỘ YÊU CẦU: ${level}
+${getModelRequirements(level)}
 
-\${GLOBAL_ACADEMIC_STYLE}
+${GLOBAL_ACADEMIC_STYLE}
 
 VÍ DỤ MẪU(FEW - SHOT EXAMPLES):
 
@@ -211,30 +211,30 @@ YÊU CẦU ĐẦU RA:
 3. SƠ ĐỒ MERMAID(BẮT BUỘC):
    
    VÍ DỤ CHUẨN:
-   \\\`\\\`\\\`mermaid
+   \\`\\`\\`mermaid
    graph LR
    classDef default fill:#ffffff,stroke:#000000;
      A(Nhận thức<br>Hữu ích) -->|H1 (+)| C(Ý định<br>Sử dụng)
      B(Dễ<br>Sử dụng) -->|H2 (+)| C
      C -->|H3 (+)| D[Hành vi<br>Thực tế]
-   \\\`\\\`\\\`
+   \\`\\`\\`
    
    QUY TẮC BẮT BUỘC (ĐỂ ĐẢM BẢO CHUẨN BÀI CÔNG BỐ KHOA HỌC SEM):
    - LUÔN dùng 'graph LR' (Trái sang Phải) cho mô hình SEM/Conceptual Framework.
-   - BẮT BUỘC chèn lệnh \\\`classDef default fill:#ffffff,stroke:#000000;\\\` để đổi hình khối thành nền trắng, viền đen.
-   - Biến tiềm ẩn (Latent Constructs): DÙNG HÌNH OVAL bằng dấu ngoặc đơn, VD: \\\`A(Tên biến)\\\`.
-   - Biến quan sát (Observed/Hành vi): DÙNG HÌNH CHỮ NHẬT bằng dấu ngoặc vuông, VD: \\\`B[Tên biến]\\\`.
-   - Mũi tên tác động: BẮT BUỘC PHẢI DÁN NHÃN tên giả thuyết và chiều tác động, VD: \\\`-->|H1 (+)|\\\` hoặc \\\`-->|H2 (-)|\\\`.
-   - Tên biến: Phải ngắt dòng bằng thẻ \\\`<br>\\\` nếu dài hơn 3 chữ (VD: \\\`A(Nhận thức<br>Hữu ích)\\\`).
+   - BẮT BUỘC chèn lệnh \\`classDef default fill:#ffffff,stroke:#000000;\\` để đổi hình khối thành nền trắng, viền đen.
+   - Biến tiềm ẩn (Latent Constructs): DÙNG HÌNH OVAL bằng dấu ngoặc đơn, VD: \\`A(Tên biến)\\`.
+   - Biến quan sát (Observed/Hành vi): DÙNG HÌNH CHỮ NHẬT bằng dấu ngoặc vuông, VD: \\`B[Tên biến]\\`.
+   - Mũi tên tác động: BẮT BUỘC PHẢI DÁN NHÃN tên giả thuyết và chiều tác động, VD: \\`-->|H1 (+)|\\` hoặc \\`-->|H2 (-)|\\`.
+   - Tên biến: Phải ngắt dòng bằng thẻ \\`<br>\\` nếu dài hơn 3 chữ (VD: \\`A(Nhận thức<br>Hữu ích)\\`).
    - Tuyệt đối không dùng dấu ngoặc kép ("") bên trong nhãn.
    
 4. Trích dẫn nguồn (Citation) dạng giả định chuẩn APA.
-\`;
+`;
 }
 
 export function getModelCriticPrompt(level: AcademicLevel, method: string): string {
     if (method === 'qual') {
-        return \`
+        return `
 PHẢN BIỆN KHUNG KHÁI NIỆM ĐỊNH TÍNH - RUBRIC CHI TIẾT:
 
 1. CƠ SỞ LÝ THUYẾT (THEORY) - 4 điểm:
@@ -256,11 +256,11 @@ OUTPUT FORM:
 📊 ĐIỂM SỐ: .../10
 ❌ Lỗi chính: ...
 ➡️ Đề xuất: ...
-\`;
+`;
     }
 
     // Default quantitative and mixed
-    return \`
+    return `
 PHẢN BIỆN MÔ HÌNH - RUBRIC CHI TIẾT (NGHIÊM KHẮC):
 
 1. CƠ SỞ LÝ THUYẾT (THEORY) - 3 điểm:
@@ -294,17 +294,17 @@ OUTPUT FORM:
 ❌ Lỗi chính: ...
 ➡️ Đề xuất: ...
 ⚠️ Cảnh báo DOI: ...
-\`;
+`;
 }
 
 // --- Outline ---
 
-export const getOutlineWriterPrompt = (outputType: string) => \`
+export const getOutlineWriterPrompt = (outputType: string) => `
 NHIỆM VỤ: Lập Đề cương nghiên cứu (Research Proposal/Outline) PHIÊN BẢN CUỐI CÙNG HOÀN HẢO NHẤT.
 
 BỐI CẢNH: Bạn đã trải qua các vòng tranh biện và nhận phản hồi từ Critic. Nhiệm vụ bây giờ là TỔNG HỢP tất cả những điểm tốt nhất để tạo ra một bản đề cương hoàn chỉnh.
 
-\${GLOBAL_ACADEMIC_STYLE}
+${GLOBAL_ACADEMIC_STYLE}
 
 YÊU CẦU ĐẶC BIỆT VỀ FORMAT (QUAN TRỌNG):
 1. **KHÔNG** thêm bất kỳ lời dẫn nhập, kết luận, hay ghi chú cá nhân nào (ví dụ: "Dưới đây là đề cương...", "Tôi đã chỉnh sửa...").
@@ -312,13 +312,13 @@ YÊU CẦU ĐẶC BIỆT VỀ FORMAT (QUAN TRỌNG):
 3. **FONT CHỮ & NGÔN NGỮ**: Dùng Tiếng Việt chuẩn mực học thuật. Tuyệt đối KHÔNG dùng ký tự lạ, font lỗi, hoặc bullet points không chuẩn. Dùng hệ thống đánh số 1, 1.1, 1.1.1.
 4. **MỨC ĐỘ CHI TIẾT**: Cực kỳ chi tiết. Mỗi mục phải có ít nhất 3-4 gạch đầu dòng diễn giải nội dung cần viết.
 
-CẤU TRÚC BẮT BUỘC (\${outputType}):
-\${getOutlineStructure(outputType)}
+CẤU TRÚC BẮT BUỘC (${outputType}):
+${getOutlineStructure(outputType)}
 
 HÃY VIẾT NHƯ MỘT NHÀ NGHIÊN CỨU CHUYÊN NGHIỆP ĐANG NỘP ĐỀ CƯƠNG CHO HỘI ĐỒNG.
-\`;
+`;
 
-export const OUTLINE_CRITIC_PROMPT = \`
+export const OUTLINE_CRITIC_PROMPT = `
 PHẢN BIỆN ĐỀ CƯƠNG - RUBRIC CHI TIẾT (BẮT BUỘC CHẤM ĐIỂM):
 
 1. LOGIC FLOW (3 điểm):
@@ -363,17 +363,17 @@ OUTPUT FORM:
 
 ➡️ YÊU CẦU SỬA:
 ...
-\`;
+`;
 
 // --- Survey ---
 
 export function getSurveyPrompt(level: AcademicLevel, method: string): string {
     if (method === 'qual') {
-        return \` 
+        return ` 
 NHIỆM VỤ: Xây dựng Chương "Phương pháp nghiên cứu" (Methodology) theo hướng ĐỊNH TÍNH (QUALITATIVE).
-TRÌNH ĐỘ YÊU CẦU: \${level}
+TRÌNH ĐỘ YÊU CẦU: ${level}
 
-\${GLOBAL_ACADEMIC_STYLE}
+${GLOBAL_ACADEMIC_STYLE}
 
 QUY TRÌNH BẮT BUỘC (ĐỊNH TÍNH):
 1. Phương pháp thu thập dữ liệu: Phỏng vấn sâu (In-depth Interviews) hoặc Thảo luận nhóm (Focus Group).
@@ -402,7 +402,7 @@ CẤU TRÚC OUTPUT (MARKDOWN):
 - Methods: Thematic Analysis / Coding process...
 
 MINH HỌA QUY TRÌNH (MERMAID):
-\\\`\\\`\\\`mermaid
+\\`\\`\\`mermaid
 graph TD
     classDef default fill:#ffffff,stroke:#000000;
     A[Tổng quan Lý thuyết] --> B[Thiết kế Khung Phỏng vấn]
@@ -410,16 +410,16 @@ graph TD
     C --> D[Mã hóa Dữ liệu (Coding)]
     D --> E[Phân tích Chủ đề (Thematic)]
     E --> F[Kết luận]
-\\\`\\\`\\\`
-        \`;
+\\`\\`\\`
+        `;
     }
     
     if (method === 'mixed') {
-        return \` 
+        return ` 
 NHIỆM VỤ: Xây dựng Chương "Phương pháp nghiên cứu" (Methodology) theo hướng HỖN HỢP (MIXED METHODS).
-TRÌNH ĐỘ YÊU CẦU: \${level}
+TRÌNH ĐỘ YÊU CẦU: ${level}
 
-\${GLOBAL_ACADEMIC_STYLE}
+${GLOBAL_ACADEMIC_STYLE}
 
 QUY TRÌNH BẮT BUỘC (MIXED METHODS):
 Yêu cầu thiết kế theo mô hình Exploratory Sequential (Định tính trước, Định lượng sau) hoặc Explanatory Sequential (Định lượng trước, Định tính sau).
@@ -444,23 +444,23 @@ CẤU TRÚC OUTPUT (MARKDOWN):
 (Cách kết hợp kết quả của 2 pha)
 
 MINH HỌA QUY TRÌNH (MERMAID):
-\\\`\\\`\\\`mermaid
+\\`\\`\\`mermaid
 graph TD
     classDef default fill:#ffffff,stroke:#000000;
     A[Phase 1: Qualitative Study] --> B[Develop Survey Instrument]
     B --> C[Phase 2: Quantitative Study]
     C --> D[Data Integration & Analysis]
     D --> E[Final Conclusion]
-\\\`\\\`\\\`
-        \`;
+\\`\\`\\`
+        `;
     }
 
     // Default to Quantitative
-    return \` 
+    return ` 
 NHIỆM VỤ: Xây dựng Chương "Phương pháp nghiên cứu" (Methodology) theo hướng ĐỊNH LƯỢNG (QUANTITATIVE).
-TRÌNH ĐỘ YÊU CẦU: \${level}
+TRÌNH ĐỘ YÊU CẦU: ${level}
 
-\${GLOBAL_ACADEMIC_STYLE}
+${GLOBAL_ACADEMIC_STYLE}
 
 QUY TRÌNH BẮT BUỘC (ĐỊNH LƯỢNG):
 1. Xây dựng Thang đo (Measure Scales) từ các bài báo gốc (Author, Year).
@@ -489,7 +489,7 @@ CẤU TRÚC OUTPUT (MARKDOWN):
 - Methods: Cronbach's Alpha, EFA, CFA, SEM...
 
 MINH HỌA QUY TRÌNH BAO GỒM SƠ ĐỒ MERMAID:
-\\\`\\\`\\\`mermaid
+\\`\\`\\`mermaid
 graph TD
     classDef default fill:#ffffff,stroke:#000000;
     A[Tổng quan<br>Lý thuyết] --> B[Thiết kế<br>Nghiên cứu]
@@ -497,16 +497,16 @@ graph TD
     C --> D[Thu thập<br>Dữ liệu]
     D --> E[Phân tích<br>Dữ liệu (SEM)]
     E --> F[Kết luận<br>& Đề xuất]
-\\\`\\\`\\\`
+\\`\\`\\`
 *(1. LUÔN dùng graph TD (Từ trên xuống) cho Quy trình nghiên cứu.*
-*1.5. BẮT BUỘC chèn lệnh \`classDef default fill:#ffffff,stroke:#000000;\` để đổi hình khối thành nền trắng, viền đen.*
+*1.5. BẮT BUỘC chèn lệnh `classDef default fill:#ffffff,stroke:#000000;` để đổi hình khối thành nền trắng, viền đen.*
 *2. Tên các bước QUÁ DÀI bắt buộc dùng <br> để ngắt dòng làm 2-3 hàng chữ.*
 *3. TUYỆT ĐỐI không dùng hình khối thoi (decision diamonds) hay rẽ nhánh phức tạp. Vẽ thành một luồng tuyến tính rõ ràng các hộp hình chữ nhật [ ] chuẩn khoa học.*
 *4. KHÔNG viết text lơ lửng trên luồng mũi tên (-->) làm rối sơ đồ).*
-  \`;
+  `;
 }
 
-export const SURVEY_CRITIC_PROMPT = \` 
+export const SURVEY_CRITIC_PROMPT = ` 
 PHẢN BIỆN PHƯƠNG PHÁP NGHIÊN CỨU - RUBRIC CHI TIẾT:
 
 1. VALIDITY(HỢP LỆ) - 3 điểm:
@@ -537,4 +537,4 @@ OUTPUT:
 LỖI CỤ THỂ:
 1. ...
 2. ...
-\`;
+`;
