@@ -1,86 +1,49 @@
 import { kv as vercelKv } from '@vercel/kv';
-import Redis from 'ioredis';
 import { hash } from 'bcryptjs';
 import { WorkflowStep } from './agents';
 
-// Adapter to handle both Vercel KV (HTTP) and Standard Redis (TCP)
+// Adapter to handle Vercel KV (HTTP) - Edge Compatible
 class KVAdapter {
-    private redis: Redis | null = null;
-    private useVercelKV: boolean = false;
-
     constructor() {
-        if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
-            this.useVercelKV = true;
-        } else if (process.env.REDIS_URL) {
-            this.redis = new Redis(process.env.REDIS_URL);
-        } else {
-            console.warn("KV/Redis not configured");
+        if (!process.env.KV_REST_API_URL || !process.env.KV_REST_API_TOKEN) {
+            console.warn("KV_REST_API_URL and KV_REST_API_TOKEN are not configured. KV will not work.");
         }
     }
 
     async get<T>(key: string): Promise<T | null> {
-        if (this.useVercelKV) return vercelKv.get<T>(key);
-        if (this.redis) {
-            const val = await this.redis.get(key);
-            return val ? JSON.parse(val) : null;
-        }
-        return null;
+        return vercelKv.get<T>(key);
     }
 
     async set(key: string, value: any): Promise<void> {
-        if (this.useVercelKV) {
-            await vercelKv.set(key, value);
-        } else if (this.redis) {
-            await this.redis.set(key, JSON.stringify(value));
-        }
+        await vercelKv.set(key, value);
     }
 
     async incr(key: string): Promise<number> {
-        if (this.useVercelKV) return vercelKv.incr(key);
-        if (this.redis) return this.redis.incr(key);
-        return 0;
+        return vercelKv.incr(key);
     }
 
     async sadd(key: string, value: any): Promise<number> {
-        if (this.useVercelKV) return vercelKv.sadd(key, value);
-        if (this.redis) return this.redis.sadd(key, value);
-        return 0;
+        return vercelKv.sadd(key, value);
     }
 
     async lpush(key: string, value: any): Promise<number> {
-        if (this.useVercelKV) return vercelKv.lpush(key, value);
-        if (this.redis) {
-            return this.redis.lpush(key, JSON.stringify(value));
-        }
-        return 0;
+        return vercelKv.lpush(key, value);
     }
 
     async keys(pattern: string): Promise<string[]> {
-        if (this.useVercelKV) return vercelKv.keys(pattern);
-        if (this.redis) return this.redis.keys(pattern);
-        return [];
+        return vercelKv.keys(pattern);
     }
 
     async sismember(key: string, member: any): Promise<number> {
-        if (this.useVercelKV) return vercelKv.sismember(key, member);
-        if (this.redis) return this.redis.sismember(key, member);
-        return 0;
+        return vercelKv.sismember(key, member);
     }
 
     async del(key: string): Promise<void> {
-        if (this.useVercelKV) {
-            await vercelKv.del(key);
-        } else if (this.redis) {
-            await this.redis.del(key);
-        }
+        await vercelKv.del(key);
     }
 
     async expire(key: string, seconds: number): Promise<void> {
-        if (this.useVercelKV) {
-            await vercelKv.expire(key, seconds);
-        } else if (this.redis) {
-            await this.redis.expire(key, seconds);
-        }
+        await vercelKv.expire(key, seconds);
     }
 }
 

@@ -19,7 +19,7 @@ const GeminiRequestSchema = z.object({
     userId: z.string().optional() // Optional for tracking
 });
 
-// export const runtime = 'edge'; // Disabled for Node.js compatibility (ioredis)
+export const runtime = 'edge'; // Disabled for Node.js compatibility (ioredis)
 export const maxDuration = 60; // Allow longer execution for Gemini API
 
 export async function POST(request: NextRequest) {
@@ -37,7 +37,8 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const { model, prompt, inlineData, useCustomKey, userId: reqUserId } = validation.data;
+        let { model } = validation.data;
+        const { prompt, inlineData, useCustomKey, userId: reqUserId } = validation.data;
 
         // 1. Check authentication
         const session = await auth();
@@ -122,8 +123,8 @@ export async function POST(request: NextRequest) {
         const safeUserId = userId ? `${userId.substring(0, 3)}***@***` : 'anonymous';
         console.log(`📡 Gemini API Call: Model=${model}, KeySource=${keySource}, User=${safeUserId}`);
 
-        const executeGemini = async (targetModel: string) => {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apiKey}`;
+                const executeGemini = async (targetModel: string) => {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:streamGenerateContent?alt=sse&key=${apiKey}`;
             
             const parts: any[] = [{ text: prompt }];
             if (inlineData) {
@@ -139,20 +140,41 @@ export async function POST(request: NextRequest) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    contents: [{ parts }]
+                    contents: [{ parts }],
+                    generationConfig: {
+                        maxOutputTokens: 8192
+                    }
                 })
             });
             
-            const rawText = await res.text();
-            try {
-                return JSON.parse(rawText);
-            } catch (e) {
-                console.error("Gemini API non-JSON response:", rawText.substring(0, 200));
-                return { error: { code: res.status || 502, message: "Invalid JSON response from Google API (possible timeout or 502)" } };
+            if (!res.ok) {
+                const rawText = await res.text();
+                try {
+                    return JSON.parse(rawText);
+                } catch (e) {
+                    return { error: { code: res.status || 502, message: "Invalid JSON response from Google API" } };
+                }
             }
+            
+            // Return stream directly
+            return new NextResponse(res.body, {
+                headers: {
+                    'Content-Type': 'text/event-stream',
+                    'Cache-Control': 'no-cache',
+                    'Connection': 'keep-alive',
+                }
+            });
         };
 
-        let data = await executeGemini(model);
+        const result = await executeGemini(model);
+        
+        // If it's a standard response (meaning it's a stream)
+        if (result instanceof NextResponse || result instanceof Response) {
+            return result;
+        }
+        
+        // Otherwise it's an error object, handle it
+        let data = result;
 
         // Auto-discovery logic if model is deprecated or not found (404)
         if (data.error && data.error.code === 404) {
@@ -176,13 +198,12 @@ export async function POST(request: NextRequest) {
                     }
                     
                     if (availableModels.length > 0) {
-                        // Sort so that higher versions come first, and 'latest' comes before others
                         availableModels.sort((a: string, b: string) => {
                             const matchA = a.match(/gemini-(\d+\.\d+)/);
                             const matchB = b.match(/gemini-(\d+\.\d+)/);
                             const numA = matchA ? parseFloat(matchA[1]) : 0;
                             const numB = matchB ? parseFloat(matchB[1]) : 0;
-                            if (numA !== numB) return numB - numA; // Descending
+                            if (numA !== numB) return numB - numA; 
                             if (a.includes('latest') && !b.includes('latest')) return -1;
                             if (!a.includes('latest') && b.includes('latest')) return 1;
                             return b.localeCompare(a);
@@ -191,11 +212,9 @@ export async function POST(request: NextRequest) {
                         const discoveredModel = availableModels[0];
                         console.log(`Auto-discovered fallback model: ${discoveredModel}`);
                         
-                        // Retry with discovered model
-                        data = await executeGemini(discoveredModel);
-                        
-                        // Update model variable for subsequent logging if needed
-                        model = discoveredModel;
+                        const retryResult = await executeGemini(discoveredModel);
+                        if (retryResult instanceof NextResponse || retryResult instanceof Response) return retryResult;
+                        data = retryResult;
                     }
                 }
             } catch (e) {
@@ -203,53 +222,22 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        // 6. Handle Gemini API errors
         if (data.error) {
             const errorCode = data.error.code;
             const errorMsg = data.error.message;
-
-            console.error('Gemini API Error:', { model, code: errorCode, message: errorMsg, userId });
-
-            // Return user-friendly error messages
             if (errorCode === 429 || errorMsg.toLowerCase().includes('quota')) {
-                console.error(`🚨 QUOTA EXCEEDED: Model=${model}, KeySource=${keySource}, User=${userId}`);
-                return NextResponse.json(
-                    { error: `API quota exceeded (Model: ${model}, Key: ${keySource}). Please wait or use your own API key in Settings.` },
-                    { status: 429 }
-                );
+                return NextResponse.json({ error: `API quota exceeded. Please wait or use your own API key in Settings.` }, { status: 429 });
             }
-
             if (errorCode === 404) {
-                return NextResponse.json(
-                    { error: `Model "${model}" not found. Please check the model name.` },
-                    { status: 404 }
-                );
+                return NextResponse.json({ error: `Model "${model}" not found.` }, { status: 404 });
             }
-
             if (errorCode === 401 || errorCode === 403) {
-                return NextResponse.json(
-                    { error: 'Invalid API key. Please check configuration.' },
-                    { status: 401 }
-                );
+                return NextResponse.json({ error: 'Invalid API key.' }, { status: 401 });
             }
-
-            return NextResponse.json(
-                { error: `Gemini API error (${errorCode}): ${errorMsg}` },
-                { status: response.status }
-            );
+            return NextResponse.json({ error: `Gemini API error (${errorCode}): ${errorMsg}` }, { status: 500 });
         }
-
-        // 7. Extract and return response
-        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-        if (!text) {
-            return NextResponse.json(
-                { error: 'No response from AI' },
-                { status: 500 }
-            );
-        }
-
-        return NextResponse.json({ text });
+        
+        return NextResponse.json({ error: 'Unexpected error' }, { status: 500 });
 
     } catch (error: any) {
         console.error('Gemini proxy error:', error);

@@ -27,9 +27,10 @@ Nhiệm vụ: Viết phần "Literature Review" (Tổng quan tài liệu) và X�
 
 YÊU CẦU CỤ THỂ:
 1. Tổng hợp các dòng lý thuyết chính liên quan (Theoretical Streams).
-2. Trích dẫn (giả lập) các nghiên cứu kinh điển và mới nhất (2020-2025). 
-   - QUAN TRỌNG: Với mỗi trích dẫn, hãy cung cấp mã DOI giả lập (định dạng 10.xxxx/xxxx) để hệ thống có thể kiểm chứng (Verify).
-3. Chỉ ra RESEARCH GAP:
+2. TỔNG HỢP TỪ DỮ LIỆU RAG (BẮT BUỘC): Bạn ĐƯỢC CUNG CẤP tóm tắt của các bài báo có thật ở phần Ngữ cảnh (Context). Bạn BẮT BUỘC phải viết Literature Review dựa trên các bài báo này. 
+   - Tuyệt đối KHÔNG ĐƯỢC BỊA THÊM nguồn khác bên ngoài nếu không chắc chắn 100%.
+   - Trích dẫn tác giả, năm và DOI chính xác từ dữ liệu được cấp.
+3. Chỉ ra RESEARCH GAP dựa trên những bài báo đã tổng hợp:
    - Gap về lý thuyết (Theoretical Gap): Mâu thuẫn, thiếu sót?
    - Gap về thực tiễn (Practical Gap): Bối cảnh mới?
    - Gap về phương pháp (Methodological Gap)?
@@ -126,12 +127,63 @@ OUTPUT FORM:
 
 // --- Model ---
 
-export const getModelWriterPrompt = (level: AcademicLevel) => `
-NHIỆM VỤ: Xây dựng Cơ sở lý thuyết và Mô hình nghiên cứu.
-TRÌNH ĐỘ YÊU CẦU: ${level}
-${getModelRequirements(level)}
+export function getModelWriterPrompt(level: AcademicLevel, method: string): string {
+    if (method === 'qual') {
+        return \`
+NHIỆM VỤ: Xây dựng Cơ sở lý thuyết và Khung khái niệm (Conceptual Framework) cho nghiên cứu ĐỊNH TÍNH.
+TRÌNH ĐỘ YÊU CẦU: \${level}
+\${getModelRequirements(level)}
 
-${GLOBAL_ACADEMIC_STYLE}
+\${GLOBAL_ACADEMIC_STYLE}
+
+VÍ DỤ MẪU:
+VÍ DỤ 1: LÝ THUYẾT NỀN TẢNG
+"Dựa trên Thuyết Kiến tạo Xã hội (Social Constructivism), nghiên cứu này khám phá cách nhân viên hiểu về trí tuệ nhân tạo..."
+
+VÍ DỤ 2: CÂU HỎI NGHIÊN CỨU (RQ)
+"RQ1: Người lao động nhận thức thế nào về nguy cơ mất việc làm khi AI được áp dụng?"
+
+QUY TẮC "LIÊM CHÍNH KHOA HỌC"(BẮT BUỘC):
+- ** KHÔNG ĐƯỢC BỊA DOI(Fake DOI).** Đây là lỗi nghiêm trọng nhất.
+- Nếu không chắc chắn về một nguồn, trích dẫn Tác giả + Năm và KHÔNG ghi DOI.
+
+YÊU CẦU ĐẦU RA:
+1. Giải thích lý thuyết nền tảng.
+2. Danh sách các Chủ đề (Themes) và Câu hỏi nghiên cứu (RQ1, RQ2...). (Tuyệt đối KHÔNG viết Giả thuyết H1, H2).
+3. SƠ ĐỒ MERMAID(BẮT BUỘC): Vẽ Khung khái niệm bằng \\\`graph TD\\\`.
+   \\\`\\\`\\\`mermaid
+   graph TD
+   classDef default fill:#ffffff,stroke:#000000;
+   A[Lý thuyết nền] --> B[Theme 1: Nhận thức]
+   A --> C[Theme 2: Hành động]
+   \\\`\\\`\\\`
+4. Trích dẫn nguồn (Citation) chuẩn APA.
+\`;
+    }
+
+    if (method === 'mixed') {
+        return \`
+NHIỆM VỤ: Xây dựng Cơ sở lý thuyết và Mô hình nghiên cứu HỖN HỢP (Mixed Methods).
+TRÌNH ĐỘ YÊU CẦU: \${level}
+\${getModelRequirements(level)}
+
+\${GLOBAL_ACADEMIC_STYLE}
+
+YÊU CẦU ĐẦU RA:
+1. Giải thích lý thuyết nền tảng.
+2. Nêu các Chủ đề khám phá (Định tính) VÀ các Giả thuyết kiểm định (Định lượng).
+3. SƠ ĐỒ MERMAID(BẮT BUỘC): Vẽ mô hình bằng \\\`graph LR\\\` kết hợp các biến độc lập và phụ thuộc.
+4. Trích dẫn nguồn (Citation) chuẩn APA.
+\`;
+    }
+
+    // Default quantitative
+    return \`
+NHIỆM VỤ: Xây dựng Cơ sở lý thuyết và Mô hình nghiên cứu.
+TRÌNH ĐỘ YÊU CẦU: \${level}
+\${getModelRequirements(level)}
+
+\${GLOBAL_ACADEMIC_STYLE}
 
 VÍ DỤ MẪU(FEW - SHOT EXAMPLES):
 
@@ -159,27 +211,56 @@ YÊU CẦU ĐẦU RA:
 3. SƠ ĐỒ MERMAID(BẮT BUỘC):
    
    VÍ DỤ CHUẨN:
-\`\`\`mermaid
+   \\\`\\\`\\\`mermaid
    graph LR
    classDef default fill:#ffffff,stroke:#000000;
      A(Nhận thức<br>Hữu ích) -->|H1 (+)| C(Ý định<br>Sử dụng)
      B(Dễ<br>Sử dụng) -->|H2 (+)| C
      C -->|H3 (+)| D[Hành vi<br>Thực tế]
-\`\`\`
+   \\\`\\\`\\\`
    
    QUY TẮC BẮT BUỘC (ĐỂ ĐẢM BẢO CHUẨN BÀI CÔNG BỐ KHOA HỌC SEM):
    - LUÔN dùng 'graph LR' (Trái sang Phải) cho mô hình SEM/Conceptual Framework.
-   - BẮT BUỘC chèn lệnh \`classDef default fill:#ffffff,stroke:#000000;\` để đổi hình khối thành nền trắng, viền đen.
-   - Biến tiềm ẩn (Latent Constructs): DÙNG HÌNH OVAL bằng dấu ngoặc đơn, VD: \`A(Tên biến)\`.
-   - Biến quan sát (Observed/Hành vi): DÙNG HÌNH CHỮ NHẬT bằng dấu ngoặc vuông, VD: \`B[Tên biến]\`.
-   - Mũi tên tác động: BẮT BUỘC PHẢI DÁN NHÃN tên giả thuyết và chiều tác động, VD: \`-->|H1 (+)|\` hoặc \`-->|H2 (-)|\`.
-   - Tên biến: Phải ngắt dòng bằng thẻ \`<br>\` nếu dài hơn 3 chữ (VD: \`A(Nhận thức<br>Hữu ích)\`).
+   - BẮT BUỘC chèn lệnh \\\`classDef default fill:#ffffff,stroke:#000000;\\\` để đổi hình khối thành nền trắng, viền đen.
+   - Biến tiềm ẩn (Latent Constructs): DÙNG HÌNH OVAL bằng dấu ngoặc đơn, VD: \\\`A(Tên biến)\\\`.
+   - Biến quan sát (Observed/Hành vi): DÙNG HÌNH CHỮ NHẬT bằng dấu ngoặc vuông, VD: \\\`B[Tên biến]\\\`.
+   - Mũi tên tác động: BẮT BUỘC PHẢI DÁN NHÃN tên giả thuyết và chiều tác động, VD: \\\`-->|H1 (+)|\\\` hoặc \\\`-->|H2 (-)|\\\`.
+   - Tên biến: Phải ngắt dòng bằng thẻ \\\`<br>\\\` nếu dài hơn 3 chữ (VD: \\\`A(Nhận thức<br>Hữu ích)\\\`).
    - Tuyệt đối không dùng dấu ngoặc kép ("") bên trong nhãn.
    
 4. Trích dẫn nguồn (Citation) dạng giả định chuẩn APA.
-`;
+\`;
+}
 
-export const getModelCriticPrompt = (level: AcademicLevel) => `
+export function getModelCriticPrompt(level: AcademicLevel, method: string): string {
+    if (method === 'qual') {
+        return \`
+PHẢN BIỆN KHUNG KHÁI NIỆM ĐỊNH TÍNH - RUBRIC CHI TIẾT:
+
+1. CƠ SỞ LÝ THUYẾT (THEORY) - 4 điểm:
+   - Lý thuyết nền có phù hợp với phương pháp định tính không?
+
+2. CHỦ ĐỀ & CÂU HỎI NGHIÊN CỨU - 3 điểm:
+   - Các Themes có rõ ràng không?
+   - RQ có mang tính khám phá (exploratory) thay vì kiểm định (confirmatory) không?
+   - TUYỆT ĐỐI KHÔNG YÊU CẦU GIẢ THUYẾT (H1, H2) CHO BÀI ĐỊNH TÍNH. NẾU CÓ, HÃY TRỪ ĐIỂM.
+
+3. LIÊM CHÍNH TRÍCH DẪN (CITATION) - 3 điểm:
+   - Có fake DOI không?
+
+TỔNG ĐIỂM: .../10
+
+NẾU < 9 ĐIỂM: ❌ REJECT - Chỉ ra lỗi cụ thể.
+
+OUTPUT FORM:
+📊 ĐIỂM SỐ: .../10
+❌ Lỗi chính: ...
+➡️ Đề xuất: ...
+\`;
+    }
+
+    // Default quantitative and mixed
+    return \`
 PHẢN BIỆN MÔ HÌNH - RUBRIC CHI TIẾT (NGHIÊM KHẮC):
 
 1. CƠ SỞ LÝ THUYẾT (THEORY) - 3 điểm:
@@ -213,16 +294,17 @@ OUTPUT FORM:
 ❌ Lỗi chính: ...
 ➡️ Đề xuất: ...
 ⚠️ Cảnh báo DOI: ...
-`;
+\`;
+}
 
 // --- Outline ---
 
-export const getOutlineWriterPrompt = (outputType: string) => `
+export const getOutlineWriterPrompt = (outputType: string) => \`
 NHIỆM VỤ: Lập Đề cương nghiên cứu (Research Proposal/Outline) PHIÊN BẢN CUỐI CÙNG HOÀN HẢO NHẤT.
 
 BỐI CẢNH: Bạn đã trải qua các vòng tranh biện và nhận phản hồi từ Critic. Nhiệm vụ bây giờ là TỔNG HỢP tất cả những điểm tốt nhất để tạo ra một bản đề cương hoàn chỉnh.
 
-${GLOBAL_ACADEMIC_STYLE}
+\${GLOBAL_ACADEMIC_STYLE}
 
 YÊU CẦU ĐẶC BIỆT VỀ FORMAT (QUAN TRỌNG):
 1. **KHÔNG** thêm bất kỳ lời dẫn nhập, kết luận, hay ghi chú cá nhân nào (ví dụ: "Dưới đây là đề cương...", "Tôi đã chỉnh sửa...").
@@ -230,13 +312,13 @@ YÊU CẦU ĐẶC BIỆT VỀ FORMAT (QUAN TRỌNG):
 3. **FONT CHỮ & NGÔN NGỮ**: Dùng Tiếng Việt chuẩn mực học thuật. Tuyệt đối KHÔNG dùng ký tự lạ, font lỗi, hoặc bullet points không chuẩn. Dùng hệ thống đánh số 1, 1.1, 1.1.1.
 4. **MỨC ĐỘ CHI TIẾT**: Cực kỳ chi tiết. Mỗi mục phải có ít nhất 3-4 gạch đầu dòng diễn giải nội dung cần viết.
 
-CẤU TRÚC BẮT BUỘC (${outputType}):
-${getOutlineStructure(outputType)}
+CẤU TRÚC BẮT BUỘC (\${outputType}):
+\${getOutlineStructure(outputType)}
 
 HÃY VIẾT NHƯ MỘT NHÀ NGHIÊN CỨU CHUYÊN NGHIỆP ĐANG NỘP ĐỀ CƯƠNG CHO HỘI ĐỒNG.
-`;
+\`;
 
-export const OUTLINE_CRITIC_PROMPT = `
+export const OUTLINE_CRITIC_PROMPT = \`
 PHẢN BIỆN ĐỀ CƯƠNG - RUBRIC CHI TIẾT (BẮT BUỘC CHẤM ĐIỂM):
 
 1. LOGIC FLOW (3 điểm):
@@ -281,40 +363,118 @@ OUTPUT FORM:
 
 ➡️ YÊU CẦU SỬA:
 ...
-`;
+\`;
 
 // --- Survey ---
 
-export function getSurveyPrompt(level: AcademicLevel): string {
-   const surveyPromptText = ` 
-NHIỆM VỤ: Xây dựng Chương "Phương pháp nghiên cứu" (Methodology).
-MỤC TIÊU: Thiết kế phương pháp phù hợp nhất để trả lời câu hỏi nghiên cứu.
-TRÌNH ĐỘ YÊU CẦU: ${level}
+export function getSurveyPrompt(level: AcademicLevel, method: string): string {
+    if (method === 'qual') {
+        return \` 
+NHIỆM VỤ: Xây dựng Chương "Phương pháp nghiên cứu" (Methodology) theo hướng ĐỊNH TÍNH (QUALITATIVE).
+TRÌNH ĐỘ YÊU CẦU: \${level}
 
-${GLOBAL_ACADEMIC_STYLE}
+\${GLOBAL_ACADEMIC_STYLE}
 
-QUY TRÌNH (Tùy chọn phương pháp):
+QUY TRÌNH BẮT BUỘC (ĐỊNH TÍNH):
+1. Phương pháp thu thập dữ liệu: Phỏng vấn sâu (In-depth Interviews) hoặc Thảo luận nhóm (Focus Group).
+2. Xây dựng Kịch bản phỏng vấn (Interview Guide) theo các Chủ đề (Themes).
+3. Tiêu chí chọn mẫu chuyên gia/người dùng.
+4. Phương pháp phân tích dữ liệu (Thematic Analysis / Content Analysis).
 
-OPTION A: ĐỊNH LƯỢNG (QUANTITATIVE - Mặc định cho Model Kiểm định)
+CẤU TRÚC OUTPUT (MARKDOWN):
+# 3. Research Methodology
+
+## 3.1 Research Design
+(Giải thích lý do chọn phương pháp Định tính cho đề tài này)
+
+## 3.2 In-depth Interview Guide
+| Theme (Chủ đề) | Interview Questions (Câu hỏi phỏng vấn mở) | Mục đích khai thác |
+|---|---|---|
+| ... | ... | ... |
+
+## 3.3 Sampling Strategy
+- Target Participants: ...
+- Sample Size: ... (Giải thích theo điểm bão hòa dữ liệu - Data Saturation)
+- Sampling Technique: ... (Purposive / Snowball sampling...)
+
+## 3.4 Data Analysis Techniques
+- Tools: NVivo / MAXQDA...
+- Methods: Thematic Analysis / Coding process...
+
+MINH HỌA QUY TRÌNH (MERMAID):
+\\\`\\\`\\\`mermaid
+graph TD
+    classDef default fill:#ffffff,stroke:#000000;
+    A[Tổng quan Lý thuyết] --> B[Thiết kế Khung Phỏng vấn]
+    B --> C[Tiến hành Phỏng vấn Sâu]
+    C --> D[Mã hóa Dữ liệu (Coding)]
+    D --> E[Phân tích Chủ đề (Thematic)]
+    E --> F[Kết luận]
+\\\`\\\`\\\`
+        \`;
+    }
+    
+    if (method === 'mixed') {
+        return \` 
+NHIỆM VỤ: Xây dựng Chương "Phương pháp nghiên cứu" (Methodology) theo hướng HỖN HỢP (MIXED METHODS).
+TRÌNH ĐỘ YÊU CẦU: \${level}
+
+\${GLOBAL_ACADEMIC_STYLE}
+
+QUY TRÌNH BẮT BUỘC (MIXED METHODS):
+Yêu cầu thiết kế theo mô hình Exploratory Sequential (Định tính trước, Định lượng sau) hoặc Explanatory Sequential (Định lượng trước, Định tính sau).
+
+CẤU TRÚC OUTPUT (MARKDOWN):
+# 3. Research Methodology
+
+## 3.1 Research Design (Mixed Methods)
+(Giải thích mô hình hỗn hợp được chọn và tại sao)
+
+## 3.2 Phase 1: Qualitative (Định tính)
+- In-depth Interview Guide: (Bảng câu hỏi mở sơ bộ)
+- Sampling & Analysis (Định tính)
+
+## 3.3 Phase 2: Quantitative (Định lượng)
+| Construct | Items / Variables | Nguồn tham khảo |
+|---|---|---|
+| ... | ... | ... |
+- Sampling & Analysis (Định lượng)
+
+## 3.4 Integration of Findings
+(Cách kết hợp kết quả của 2 pha)
+
+MINH HỌA QUY TRÌNH (MERMAID):
+\\\`\\\`\\\`mermaid
+graph TD
+    classDef default fill:#ffffff,stroke:#000000;
+    A[Phase 1: Qualitative Study] --> B[Develop Survey Instrument]
+    B --> C[Phase 2: Quantitative Study]
+    C --> D[Data Integration & Analysis]
+    D --> E[Final Conclusion]
+\\\`\\\`\\\`
+        \`;
+    }
+
+    // Default to Quantitative
+    return \` 
+NHIỆM VỤ: Xây dựng Chương "Phương pháp nghiên cứu" (Methodology) theo hướng ĐỊNH LƯỢNG (QUANTITATIVE).
+TRÌNH ĐỘ YÊU CẦU: \${level}
+
+\${GLOBAL_ACADEMIC_STYLE}
+
+QUY TRÌNH BẮT BUỘC (ĐỊNH LƯỢNG):
 1. Xây dựng Thang đo (Measure Scales) từ các bài báo gốc (Author, Year).
 2. Thiết kế Bảng câu hỏi (Questionnaire Design).
 3. Chiến lược lấy mẫu (Sampling Strategy).
-
-OPTION B: ĐỊNH TÍNH (QUALITATIVE - Cho đề tài khám phá)
-1. Xây dựng Kịch bản phỏng vấn sâu (In-depth Interview Guide).
-2. Xác định đối tượng chuyên gia/người dùng cần phỏng vấn.
-3. Phương pháp phân tích dữ liệu (Coding, Thematic Analysis).
-
-OPTION C: MIXED METHODS (Kết hợp A & B) - Khuyến nghị cho PhD.
 
 CẤU TRÚC OUTPUT (MARKDOWN):
 
 # 3. Research Methodology
 
 ## 3.1 Research Design
-(Mô tả ngắn gọn: Định lượng/Định tính/Hỗn hợp? Tại sao chọn?)
+(Mô tả ngắn gọn phương pháp Định lượng, SEM/PLS-SEM)
 
-## 3.2 Measurement Scales / Interview Questions
+## 3.2 Measurement Scales
 | Construct | Code | Items / Questions | Source (Include DOI) |
 |---|---|---|---|
 | ... | ... | ... | ... |
@@ -323,13 +483,12 @@ CẤU TRÚC OUTPUT (MARKDOWN):
 - Target Population: ...
 - Sample Size (N): ... (Giải thích công thức tính)
 - Sampling Technique: ...
-- Procedure: ... (Cách thức tiếp cận và thu thập)
 
 ## 3.4 Data Analysis Techniques
-- Tools: SPSS/AMOS/SmartPLS/NVivo...
+- Tools: SPSS/AMOS/SmartPLS...
 - Methods: Cronbach's Alpha, EFA, CFA, SEM...
 
-MINH HỌA QUY TRÌNH BAO GỒM SƠ ĐỒ MERMAID (Nếu được phân tích):
+MINH HỌA QUY TRÌNH BAO GỒM SƠ ĐỒ MERMAID:
 \\\`\\\`\\\`mermaid
 graph TD
     classDef default fill:#ffffff,stroke:#000000;
@@ -344,39 +503,38 @@ graph TD
 *2. Tên các bước QUÁ DÀI bắt buộc dùng <br> để ngắt dòng làm 2-3 hàng chữ.*
 *3. TUYỆT ĐỐI không dùng hình khối thoi (decision diamonds) hay rẽ nhánh phức tạp. Vẽ thành một luồng tuyến tính rõ ràng các hộp hình chữ nhật [ ] chuẩn khoa học.*
 *4. KHÔNG viết text lơ lửng trên luồng mũi tên (-->) làm rối sơ đồ).*
-  `;
-   return surveyPromptText;
+  \`;
 }
 
-export const SURVEY_CRITIC_PROMPT = ` 
-  PHẢN BIỆN PHƯƠNG PHÁP NGHIÊN CỨU - RUBRIC CHI TIẾT:
+export const SURVEY_CRITIC_PROMPT = \` 
+PHẢN BIỆN PHƯƠNG PHÁP NGHIÊN CỨU - RUBRIC CHI TIẾT:
 
-  1. VALIDITY(HỢP LỆ) - 3 điểm:
-  - Thang đo có đo đúng biến không ? (Face Validity)
-  - Nguồn gốc có uy tín không ? (Construct Validity)
+1. VALIDITY(HỢP LỆ) - 3 điểm:
+- Thang đo có đo đúng biến không ? (Face Validity)
+- Nguồn gốc có uy tín không ? (Construct Validity)
 
-  2. RELIABILITY(TIN CẬY) - 3 điểm:
-  - Câu hỏi có rõ ràng, dễ hiểu ?
-    - Có bị dẫn dắt(Leading question) không ?
-      - Số lượng items có đủ không(thường >= 3 items / biến) ?
+2. RELIABILITY(TIN CẬY) - 3 điểm:
+- Câu hỏi có rõ ràng, dễ hiểu ?
+- Có bị dẫn dắt(Leading question) không ?
+- Số lượng items có đủ không(thường >= 3 items / biến) ?
 
-        3. FORMAT & ADAPTATION(2 điểm):
-  - Thang đo Likert(1 - 5 hoặc 1 - 7) có thống nhất ?
-    - Dịch có chuẩn không ?
+3. FORMAT & ADAPTATION(2 điểm):
+- Thang đo Likert(1 - 5 hoặc 1 - 7) có thống nhất ?
+- Dịch có chuẩn không ?
 
-      4. DEMOGRAPHICS & SAMPLING(2 điểm):
-  - Các biến kiểm soát có phù hợp ?
-    - Kích thước mẫu có đủ lớn cho SEM / Regression ?
-      - Quy trình lấy mẫu có rõ ràng và khả thi ?
+4. DEMOGRAPHICS & SAMPLING(2 điểm):
+- Các biến kiểm soát có phù hợp ?
+- Kích thước mẫu có đủ lớn cho SEM / Regression ?
+- Quy trình lấy mẫu có rõ ràng và khả thi ?
 
-        TỔNG ĐIỂM: .../10
+TỔNG ĐIỂM: .../10
 
-  NẾU < 9 ĐIỂM:
-   YÊU CẦU SỬA: Chỉ ra cụ thể item nào cần sửa / xóa / thêm.
+NẾU < 9 ĐIỂM:
+YÊU CẦU SỬA: Chỉ ra cụ thể item nào cần sửa / xóa / thêm.
 
-    OUTPUT:
-   ĐIỂM SỐ: .../10
-   LỖI CỤ THỂ:
-  1. ...
-  2. ...
-  `;
+OUTPUT:
+ĐIỂM SỐ: .../10
+LỖI CỤ THỂ:
+1. ...
+2. ...
+\`;

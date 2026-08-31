@@ -12,6 +12,7 @@ interface SettingsModalProps {
 export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     const [apiKey, setApiKey] = useState("");
     const [apiKeyCritic, setApiKeyCritic] = useState("");
+    const [customModel, setCustomModel] = useState("gemini-3.6-flash");
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -24,21 +25,26 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
             if (savedKey) setApiKey(savedKey);
             const savedKeyCritic = localStorage.getItem("gemini_api_key_critic");
             if (savedKeyCritic) setApiKeyCritic(savedKeyCritic);
+            const savedModel = localStorage.getItem("gemini_custom_model");
+            if (savedModel) setCustomModel(savedModel);
         }
     }, [isOpen]);
 
     const handleSave = () => {
-        if (apiKey.trim()) {
-            localStorage.setItem("gemini_api_key", apiKey.trim());
+        if (apiKey.trim() || customModel.trim()) {
+            if (apiKey.trim()) localStorage.setItem("gemini_api_key", apiKey.trim());
             if (apiKeyCritic.trim()) localStorage.setItem("gemini_api_key_critic", apiKeyCritic.trim());
-            alert("Đã lưu cấu hình API Key!\n\nHệ thống sẽ dùng quota của bạn thay vì key chung.");
+            if (customModel.trim()) localStorage.setItem("gemini_custom_model", customModel.trim());
+            else localStorage.removeItem("gemini_custom_model");
+            alert("Đã lưu cấu hình API Key và Model!\n\nHệ thống sẽ dùng cấu hình của bạn.");
             onClose();
             window.location.reload(); // Reload to apply changes
         } else {
             // Clear if empty
             localStorage.removeItem("gemini_api_key");
             localStorage.removeItem("gemini_api_key_critic");
-            alert("Đã xóa API Key riêng. Hệ thống sẽ dùng key chung.\n\nLưu ý: Model Pro có thể không khả dụng với key chung.");
+            localStorage.removeItem("gemini_custom_model");
+            alert("Đã xóa API Key riêng. Hệ thống sẽ dùng key và model mặc định.\n\nLưu ý: Model Pro có thể không khả dụng với key chung.");
             onClose();
             window.location.reload();
         }
@@ -47,9 +53,11 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     const handleClear = () => {
         localStorage.removeItem("gemini_api_key");
         localStorage.removeItem("gemini_api_key_critic");
+        localStorage.removeItem("gemini_custom_model");
         setApiKey("");
         setApiKeyCritic("");
-        alert("Đã chuyển về dùng API Key chung của hệ thống.\n\nLưu ý: Key chung có giới hạn quota.");
+        setCustomModel("gemini-3.6-flash");
+        alert("Đã chuyển về dùng cấu hình mặc định của hệ thống.\n\nLưu ý: Key chung có giới hạn quota.");
         onClose();
         window.location.reload();
     };
@@ -104,6 +112,19 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                                     value={apiKey}
                                     onChange={(e) => setApiKey(e.target.value)}
                                     placeholder="AIzaSy... (để trống nếu dùng key chung)"
+                                    className="w-full px-4 py-3 rounded-lg border border-border bg-card focus:ring-2 focus:ring-blue-500 outline-none font-mono text-sm text-foreground"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-foreground mb-1">
+                                    Phiên bản Gemini (Model Version)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={customModel}
+                                    onChange={(e) => setCustomModel(e.target.value)}
+                                    placeholder="gemini-3.6-flash"
                                     className="w-full px-4 py-3 rounded-lg border border-border bg-card focus:ring-2 focus:ring-blue-500 outline-none font-mono text-sm text-foreground"
                                 />
                             </div>

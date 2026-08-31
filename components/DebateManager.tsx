@@ -48,6 +48,12 @@ export function DebateManager({
     paperType = 'quant' // Default to quantitative
 }: DebateManagerProps & { paperType?: string }) {
     const [messages, setMessages] = useState<AgentMessage[]>([]);
+    const [isDraftReady, setIsDraftReady] = useState(false);
+    const [isStreaming, setIsStreaming] = useState(false);
+    const [streamingContent, setStreamingContent] = useState<string>("");
+
+    const [userFeedbackInput, setUserFeedbackInput] = useState("");
+
     const [currentStep, setCurrentStep] = useState<WorkflowStep>('1_TOPIC');
     const [isProcessing, setIsProcessing] = useState(false);
     const [stepCompleted, setStepCompleted] = useState(false);
@@ -73,7 +79,7 @@ export function DebateManager({
     const [benchmarkContent, setBenchmarkContent] = useState<string>("");
 
     const [session] = useState(() => new AgentSession(
-        topic, goal, audience, level, language as 'vi' | 'en', projectType, apiKey, apiKeyCritic, sessionId, userId
+        topic, goal, audience, level, language as 'vi' | 'en', projectType, apiKey, apiKeyCritic, sessionId, userId, paperType
     ));
 
     const bottomRef = useRef<HTMLDivElement>(null);
@@ -240,78 +246,105 @@ export function DebateManager({
         setMessages(prev => [...prev, { role, content, timestamp: Date.now(), round: roundCount }]);
     };
 
-    const runStepLoop = async () => {
-        if (isProcessing || stepCompleted) return;
+        const generateInitialDraft = async () => {
+        if (isProcessing || stepCompleted || isDraftReady) return;
         setIsProcessing(true);
-        setStepCompleted(false);
-
         try {
-            let currentRound = 0;
-            let lastCriticFeedback = "";
-            let writerContent = "";
-
-            // Initial Writer Turn
-            writerContent = await session.generateWriterTurn(currentStep);
+            setRoundCount(1);
+            setIsStreaming(true);
+            const writerContent = await session.generateWriterTurn(currentStep, undefined, undefined, (text) => setStreamingContent(text));
+            setIsStreaming(false);
+            setStreamingContent("");
             setMessages(prev => [...prev, { role: 'writer', content: writerContent, timestamp: Date.now(), round: 1 }]);
-
+            
             if (currentStep === '1_LIT_REVIEW') setLitReviewContent(writerContent);
             if (currentStep === '2_ARCH') setArchContent(writerContent);
             if (currentStep === '4_BENCHMARK') setBenchmarkContent(writerContent);
-            if (currentStep === '2_MODEL') {
-                const chart = extractMermaidCode(writerContent);
-                if (chart) setVariableChart(chart);
-            }
-            if (currentStep === '3_OUTLINE') {
-                setOutlineContent(writerContent);
-                const chart = extractMermaidCode(writerContent);
-                if (chart) setOutlineChart(chart);
-            }
+            if (currentStep === '2_MODEL') { const c = extractMermaidCode(writerContent); if (c) setVariableChart(c); }
+            if (currentStep === '3_OUTLINE') { setOutlineContent(writerContent); const c = extractMermaidCode(writerContent); if (c) setOutlineChart(c); }
             if (currentStep === '4_SURVEY' || currentStep === '4_BENCHMARK') setSurveyContent(writerContent);
             if (currentStep === '5_GTM') setGtmContent(writerContent);
 
-            let actualMaxRounds = maxRounds;
-            if (roundsConfig) {
-                if (roundsConfig[currentStep]) actualMaxRounds = roundsConfig[currentStep];
-                else if (currentStep === '1_LIT_REVIEW') actualMaxRounds = roundsConfig['1_TOPIC'] || maxRounds;
-                else if (currentStep === '2_ARCH' || currentStep === '5_GTM') actualMaxRounds = roundsConfig['2_MODEL'] || maxRounds;
-                else if (currentStep === '4_BENCHMARK') actualMaxRounds = roundsConfig['4_SURVEY'] || maxRounds;
-            }
-
-            // Debate Loop
-            while (currentRound < actualMaxRounds) {
-                const delayTime = session.isUsingSameKey() ? 4000 : 1000;
-                await new Promise(r => setTimeout(r, delayTime));
-                currentRound++;
-                setRoundCount(currentRound);
-
-                // Critic
-                const criticMsg = await session.generateCriticTurn(currentStep, writerContent);
-                setMessages(prev => [...prev, { role: 'critic', content: criticMsg, timestamp: Date.now(), round: currentRound }]);
-                lastCriticFeedback = criticMsg;
-
-                if (currentRound < actualMaxRounds) {
-                    await new Promise(r => setTimeout(r, delayTime));
-                    writerContent = await session.generateWriterTurn(currentStep, lastCriticFeedback);
-                    setMessages(prev => [...prev, { role: 'writer', content: writerContent, timestamp: Date.now(), round: currentRound + 1 }]);
-
-                    if (currentStep === '1_LIT_REVIEW') setLitReviewContent(writerContent);
-                    if (currentStep === '2_ARCH') setArchContent(writerContent);
-                    if (currentStep === '4_BENCHMARK') setBenchmarkContent(writerContent);
-                    if (currentStep === '2_MODEL') { const c = extractMermaidCode(writerContent); if (c) setVariableChart(c); }
-                    if (currentStep === '3_OUTLINE') { setOutlineContent(writerContent); const c = extractMermaidCode(writerContent); if (c) setOutlineChart(c); }
-                    if (currentStep === '4_SURVEY' || currentStep === '4_BENCHMARK') setSurveyContent(writerContent);
-                    if (currentStep === '5_GTM') setGtmContent(writerContent);
-                }
-            }
-            setStepCompleted(true);
-            setShowReview(true);
+            setIsDraftReady(true);
         } catch (error) {
-            console.error("Error in debate:", error);
-            toast.error("Hệ thống gặp lỗi kết nối với AI. Vui lòng kiểm tra lại API Key hoặc thử lại sau!");
-            addMessage('critic', "Hệ thống gặp lỗi kết nối. Đang thử lại...");
+            console.error("Error in draft generation:", error);
+            toast.error("Hệ thống gặp lỗi kết nối với AI.");
         } finally {
             setIsProcessing(false);
         }
+    };
+
+    const handleCriticReview = async () => {
+        if (isProcessing) return;
+        setIsProcessing(true);
+        try {
+            const writerMsg = messages.filter(m => m.role === 'writer').pop();
+            const writerContent = writerMsg ? writerMsg.content : "";
+            
+            setRoundCount(prev => prev + 1);
+            const currentRound = roundCount + 1;
+
+            setIsStreaming(true);
+            const criticMsg = await session.generateCriticTurn(currentStep, writerContent, (text) => setStreamingContent(text));
+            setIsStreaming(false);
+            setStreamingContent("");
+            setMessages(prev => [...prev, { role: 'critic', content: criticMsg, timestamp: Date.now(), round: currentRound }]);
+
+            setIsStreaming(true);
+            const newWriterContent = await session.generateWriterTurn(currentStep, criticMsg, false, (text) => setStreamingContent(text));
+            setIsStreaming(false);
+            setStreamingContent("");
+            setMessages(prev => [...prev, { role: 'writer', content: newWriterContent, timestamp: Date.now(), round: currentRound }]);
+
+            if (currentStep === '1_LIT_REVIEW') setLitReviewContent(newWriterContent);
+            if (currentStep === '2_ARCH') setArchContent(newWriterContent);
+            if (currentStep === '4_BENCHMARK') setBenchmarkContent(newWriterContent);
+            if (currentStep === '2_MODEL') { const c = extractMermaidCode(newWriterContent); if (c) setVariableChart(c); }
+            if (currentStep === '3_OUTLINE') { setOutlineContent(newWriterContent); const c = extractMermaidCode(newWriterContent); if (c) setOutlineChart(c); }
+            if (currentStep === '4_SURVEY' || currentStep === '4_BENCHMARK') setSurveyContent(newWriterContent);
+            if (currentStep === '5_GTM') setGtmContent(newWriterContent);
+
+        } catch (error) {
+            console.error("Error in critic review:", error);
+            toast.error("Hệ thống gặp lỗi kết nối với AI.");
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const handleUserReview = async () => {
+        if (isProcessing || !userFeedbackInput.trim()) return;
+        setIsProcessing(true);
+        try {
+            setMessages(prev => [...prev, { role: 'critic', content: `Yêu cầu từ người dùng: ${userFeedbackInput}`, timestamp: Date.now(), round: roundCount + 1 }]);
+            setRoundCount(prev => prev + 1);
+            
+            setIsStreaming(true);
+            const newWriterContent = await session.generateWriterTurn(currentStep, userFeedbackInput, true, (text) => setStreamingContent(text));
+            setIsStreaming(false);
+            setStreamingContent("");
+            setMessages(prev => [...prev, { role: 'writer', content: newWriterContent, timestamp: Date.now(), round: roundCount + 1 }]);
+
+            if (currentStep === '1_LIT_REVIEW') setLitReviewContent(newWriterContent);
+            if (currentStep === '2_ARCH') setArchContent(newWriterContent);
+            if (currentStep === '4_BENCHMARK') setBenchmarkContent(newWriterContent);
+            if (currentStep === '2_MODEL') { const c = extractMermaidCode(newWriterContent); if (c) setVariableChart(c); }
+            if (currentStep === '3_OUTLINE') { setOutlineContent(newWriterContent); const c = extractMermaidCode(newWriterContent); if (c) setOutlineChart(c); }
+            if (currentStep === '4_SURVEY' || currentStep === '4_BENCHMARK') setSurveyContent(newWriterContent);
+            if (currentStep === '5_GTM') setGtmContent(newWriterContent);
+            
+            setUserFeedbackInput("");
+        } catch (error) {
+            console.error("Error in user review:", error);
+            toast.error("Hệ thống gặp lỗi kết nối với AI.");
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const handleApprove = () => {
+        setStepCompleted(true);
+        setShowReview(true);
     };
 
     const handleFinalize = async (userFinal: string, note?: string) => {
@@ -476,9 +509,11 @@ export function DebateManager({
                                     <Home size={16} /> Trang chủ
                                 </button>
                             )}
-                            <button onClick={runStepLoop} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors">
-                                <Play size={18} /> Bắt Đầu
-                            </button>
+                            {!isDraftReady ? (
+                                <button onClick={generateInitialDraft} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors">
+                                    <Play size={18} /> Bắt Đầu Viết Nháp
+                                </button>
+                            ) : null}
                         </div>
                     )}
                     {stepCompleted && (
@@ -551,7 +586,47 @@ export function DebateManager({
                                 </div>                            </div>
                         </div>
                     ))}
+                    
+                    
+                    {isStreaming && (
+                        <div className="flex gap-4 animate-fade-in-up">
+                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0 border border-blue-200">
+                                <Bot size={20} />
+                            </div>
+                            <div className="flex-1 bg-white dark:bg-slate-800 p-4 rounded-xl border border-blue-100 dark:border-blue-900 shadow-sm relative markdown-content">
+                                <div className="text-sm text-gray-500 mb-2 border-b pb-2 flex items-center gap-2">
+                                    <span className="font-semibold text-blue-600">AI đang viết...</span>
+                                </div>
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>{streamingContent || "Đang kết nối..."}</ReactMarkdown>
+                            </div>
+                        </div>
+                    )}
+                    {isDraftReady && !stepCompleted && (
+
+                        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-blue-200 dark:border-blue-800 mt-4 shadow-sm animate-fade-in-up">
+                            <h4 className="text-sm font-semibold mb-2 text-blue-800 dark:text-blue-300">🎮 Bảng Điều Khiển (Human-in-the-Loop)</h4>
+                            <textarea 
+                                value={userFeedbackInput}
+                                onChange={(e) => setUserFeedbackInput(e.target.value)}
+                                placeholder="Gõ yêu cầu sửa đổi của bạn vào đây (VD: Đổi mô hình, bỏ biến A, thêm câu hỏi B...)"
+                                className="w-full p-2 border rounded-lg text-sm mb-3 bg-slate-50 dark:bg-slate-900"
+                                rows={2}
+                            />
+                            <div className="flex flex-wrap gap-2">
+                                <button onClick={handleUserReview} disabled={isProcessing || !userFeedbackInput.trim()} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded flex items-center gap-2 text-sm">
+                                    <User size={16}/> Yêu Cầu AI Sửa
+                                </button>
+                                <button onClick={handleCriticReview} disabled={isProcessing} className="bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 rounded flex items-center gap-2 text-sm">
+                                    <Bot size={16}/> Nhờ AI Tự Soi Lỗi
+                                </button>
+                                <button onClick={handleApprove} disabled={isProcessing} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded flex items-center gap-2 text-sm ml-auto">
+                                    <Check size={16}/> Chốt Kết Quả!
+                                </button>
+                            </div>
+                        </div>
+                    )}
                     <div ref={bottomRef} />
+
                 </div>
             )}
             {isProcessing && <div className="fixed bottom-6 left-1/2 -translate-x-1/2"><ThinkingAnimation /></div>}

@@ -191,14 +191,13 @@ export const ResearchForm = ({ onStart, onOpenGuidelines, isPreview = false, api
                             value={paperType}
                             onChange={(e) => setPaperType(e.target.value)}
                         >
-                            <option value="quant">Original Research (Quantitative)</option>
+                            <option value="quant">Định lượng (Quantitative / SEM)</option>
+                            <option value="qual">Định tính (Qualitative / Phỏng vấn sâu)</option>
+                            <option value="mixed">Hỗn hợp (Mixed Methods)</option>
                             <option value="software">Software / Tool Publication (New)</option>
-                            <option value="qual" disabled>Qualitative Research (Coming Soon)</option>
-                            <option value="review" disabled>Systematic Review (Coming Soon)</option>
-                            <option value="method" disabled>Methodological Paper (Coming Soon)</option>
                         </select>
                         <p className="text-[10px] text-slate-400 italic px-1">
-                            *Chọn "Software" nếu bài viết về công cụ, phần mềm, hoặc giải pháp kỹ thuật
+                            *Chọn phương pháp phù hợp với định hướng công bố của bạn
                         </p>
                     </div>
                 </div>

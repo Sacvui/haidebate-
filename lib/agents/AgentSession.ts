@@ -24,6 +24,7 @@ import {
     STARTUP_SURVEY_CRITIC_PROMPT,
 } from './startupPrompts';
 import { SOFTWARE_ARCH_WRITER_PROMPT, SOFTWARE_ARCH_CRITIC_PROMPT, SOFTWARE_BENCHMARK_WRITER_PROMPT, SOFTWARE_BENCHMARK_CRITIC_PROMPT } from '../software_prompts';
+import { searchPapersBySemanticScholar } from '../doiVerifier';
 
 export class AgentSession {
     private messages: AgentMessage[] = [];
@@ -52,7 +53,8 @@ export class AgentSession {
         private writerKey?: string,
         private criticKey?: string,
         sessionId?: string,
-        userId?: string
+        userId?: string,
+        public paperType: string = 'quant'
     ) {
         this.sessionId = sessionId || `session_${Date.now()} `;
         this.userId = userId;
@@ -129,7 +131,7 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
     `;
 
         try {
-            const summary = await this.callGeminiAPI(AgentSession.PRIMARY_MODEL, summaryPrompt, this.writerKey);
+            const summary = await this.callGeminiAPI(this.getPrimaryModel(), summaryPrompt, this.writerKey);
             this.contextSummary = summary;
             return summary;
         } catch (e) {
@@ -143,11 +145,18 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
     }
 
     // Primary and fallback models
-    private static PRIMARY_MODEL = 'gemini-3.5-flash';
-    private static FALLBACK_MODEL = 'gemini-3.1-pro';
+    private getPrimaryModel(): string {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('gemini_custom_model') || 'gemini-3.6-flash';
+        }
+        return 'gemini-3.6-flash';
+    }
+    private getFallbackModel(): string {
+        return 'gemini-3.5-pro';
+    }
 
-    private async callGeminiAPI(model: string, prompt: string, customKey?: string, retries = 3, useFallback = false): Promise<string> {
-        const currentModel = useFallback ? AgentSession.FALLBACK_MODEL : model;
+    private async callGeminiAPI(model: string, prompt: string, customKey?: string, retries = 3, useFallback = false, onProgress?: (text: string) => void): Promise<string> {
+        const currentModel = useFallback ? this.getFallbackModel() : model;
 
         try {
             const headers: HeadersInit = {
@@ -169,54 +178,71 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
                 })
             });
 
-            let data;
-            try {
-                const rawText = await response.text();
-                data = JSON.parse(rawText);
-            } catch (jsonError) {
-                console.error("Failed to parse server response as JSON:", jsonError);
-                throw new Error("SERVER_TIMEOUT_OR_502");
-            }
-
             if (!response.ok) {
+                let data;
+                try {
+                    const rawText = await response.text();
+                    data = JSON.parse(rawText);
+                } catch (jsonError) {
+                    throw new Error("SERVER_TIMEOUT_OR_502");
+                }
                 const errorMsg = data?.error || 'Unknown error';
-
-                console.error(`🚨 Gemini Proxy Error: `, {
-                    model: currentModel,
-                    status: response.status,
-                    message: errorMsg,
-                    retriesLeft: retries,
-                    useFallback
-                });
 
                 if (response.status === 429 || response.status === 503) {
                     if (retries > 0 && !useFallback) {
-                        const waitTime = 10000 * (4 - retries);
-                        console.warn(`⚠️ Rate Limit on ${currentModel}.Retrying in ${waitTime / 1000}s... (${retries} retries left)`);
-                        await new Promise(resolve => setTimeout(resolve, waitTime));
-                        return this.callGeminiAPI(model, prompt, customKey, retries - 1, false);
+                        await new Promise(resolve => setTimeout(resolve, 10000 * (4 - retries)));
+                        return this.callGeminiAPI(model, prompt, customKey, retries - 1, false, onProgress);
                     }
-
                     if (!useFallback) {
-                        console.warn(`🔄 Switching to fallback model: ${AgentSession.FALLBACK_MODEL} `);
-                        return this.callGeminiAPI(model, prompt, customKey, 2, true);
+                        return this.callGeminiAPI(model, prompt, customKey, 2, true, onProgress);
                     }
-
                     throw new Error(`Cả hai model đều hết quota. Vui lòng thử lại sau hoặc dùng API Key riêng.`);
                 }
-
                 if (response.status === 401) {
                     throw new Error(`Vui lòng đăng nhập để sử dụng tính năng AI.`);
                 }
-
                 throw new Error(errorMsg);
             }
 
-            if (useFallback) {
-                console.log(`✅ Fallback model ${currentModel} succeeded!`);
+            // Stream reading
+            const reader = response.body?.getReader();
+            if (!reader) throw new Error("No response body");
+            
+            const decoder = new TextDecoder();
+            let fullText = "";
+            let buffer = "";
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                
+                // Keep the last incomplete line in buffer
+                buffer = lines.pop() || "";
+                
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const jsonStr = line.replace('data: ', '').trim();
+                        if (jsonStr === '[DONE]') continue;
+                        if (!jsonStr) continue;
+                        
+                        try {
+                            const parsed = JSON.parse(jsonStr);
+                            const chunkText = parsed?.candidates?.[0]?.content?.parts?.[0]?.text;
+                            if (chunkText) {
+                                fullText += chunkText;
+                                if (onProgress) onProgress(fullText);
+                            }
+                        } catch (e) {
+                            // ignore parse errors for partial chunks
+                        }
+                    }
+                }
             }
 
-            return data.text || "Lỗi: Không có phản hồi từ AI.";
+            return fullText || "Lỗi: Không có phản hồi từ AI.";
 
         } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
             const isRetryableError = error.message?.includes('fetch') || 
@@ -227,13 +253,13 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
             if (retries > 0 && isRetryableError) {
                 console.warn(`Transient error, retrying... (${retries} left)`);
                 await new Promise(resolve => setTimeout(resolve, 3000));
-                return this.callGeminiAPI(model, prompt, customKey, retries - 1, useFallback);
+                return this.callGeminiAPI(model, prompt, customKey, retries - 1, useFallback, onProgress);
             }
             throw error;
         }
     }
 
-    async generateWriterTurn(step: WorkflowStep, previousCriticFeedback?: string): Promise<string> {
+    async generateWriterTurn(step: WorkflowStep, previousCriticFeedback?: string, isUserFeedback?: boolean, onProgress?: (text: string) => void): Promise<string> {
         try {
             const finalKey = this.writerKey;
             if (!finalKey) {
@@ -307,10 +333,26 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
                         sysPrompt = LIT_REVIEW_WRITER_PROMPT;
                         if (this.finalizedTopic) {
                             contextAddition += `\n\nĐỀ TÀI CHÍNH THỨC: "${this.finalizedTopic}"`;
+                            
+                            // RAG Injection for real papers
+                            if (!previousCriticFeedback) { // Only fetch on the first round to save time/bandwidth
+                                try {
+                                    console.log("Fetching real papers from Semantic Scholar for RAG...");
+                                    const papers = await searchPapersBySemanticScholar(this.finalizedTopic, 5);
+                                    if (papers.length > 0) {
+                                        contextAddition += `\n\n[DỮ LIỆU RAG - BẮT BUỘC SỬ DỤNG]\nDưới đây là thông tin và tóm tắt (Abstract) của ${papers.length} bài báo CÓ THẬT được trích xuất từ Semantic Scholar. \nBạn BẮT BUỘC phải trích dẫn và tổng hợp từ các bài báo này, TUYỆT ĐỐI không bịa thêm nguồn khác:\n\n`;
+                                        papers.forEach((p: any, idx: number) => {
+                                            contextAddition += `Bài ${idx + 1}:\n- Tiêu đề: ${p.title}\n- Tác giả: ${p.authors} (${p.year})\n- Tạp chí/Hội nghị: ${p.venue}\n- DOI: ${p.doi}\n- Tóm tắt: ${p.abstract}\n\n`;
+                                        });
+                                    }
+                                } catch (e) {
+                                    console.error("Failed to fetch RAG context:", e);
+                                }
+                            }
                         }
                         break;
                     case '2_MODEL':
-                        sysPrompt = getModelWriterPrompt(this.level);
+                        sysPrompt = getModelWriterPrompt(this.level, this.paperType);
                         if (this.finalizedTopic) {
                             contextAddition = `\n\nĐỀ TÀI ĐÃ ĐƯỢC PHÊ DUYỆT (sử dụng làm nền tảng):\n"${this.finalizedTopic}"`;
                         }
@@ -350,7 +392,7 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
                         else if (this.finalizedModel) contextAddition += `\n\nKIẾN TRÚC: ${this.finalizedModel.substring(0, 1500)}...`;
                         break;
                     case '4_SURVEY':
-                        sysPrompt = getSurveyPrompt(this.level);
+                        sysPrompt = getSurveyPrompt(this.level, this.paperType);
                         if (this.finalizedTopic) {
                             contextAddition += `\n\nĐỀ TÀI: "${this.finalizedTopic}"`;
                         }
@@ -367,11 +409,18 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
 
             const context = `CHỦ ĐỀ GỐC: ${this.topic}\nLOẠI HÌNH (OUTPUT): ${this.goal}\nĐỐI TƯỢNG: ${this.audience}\nTRÌNH ĐỘ: ${this.level}\nNGÔN NGỮ ĐẦU RA (OUTPUT LANGUAGE): ${languageInstruction}${contextAddition}`;
 
-            const prompt = previousCriticFeedback
-                ? `${context}\n\nPHẢN HỒI CỦA CRITIC (Vòng trước): ${previousCriticFeedback}\n\n${sysPrompt}\nHãy cải thiện/viết tiếp dựa trên phản hồi này.`
-                : `${context}\n\n${sysPrompt}\nHãy bắt đầu thực hiện nhiệm vụ cho giai đoạn này.`;
+            let feedbackStr = "";
+            if (previousCriticFeedback) {
+                if (isUserFeedback) {
+                    feedbackStr = `\n\nYÊU CẦU TỪ GIÁO SƯ HƯỚNG DẪN (BẮT BUỘC TUÂN THỦ):\n${previousCriticFeedback}\n\nHãy sửa lại bản nháp dựa trên yêu cầu này.`;
+                } else {
+                    feedbackStr = `\n\nPHẢN HỒI CỦA CRITIC (Vòng trước): \n${previousCriticFeedback}\n\nHãy cải thiện/viết tiếp dựa trên phản hồi này.`;
+                }
+            }
 
-            return await this.callGeminiAPI(AgentSession.PRIMARY_MODEL, prompt, finalKey);
+            const prompt = `${context}${feedbackStr}\n\n${sysPrompt}\nHãy bắt đầu thực hiện nhiệm vụ cho giai đoạn này.`;
+
+            return await this.callGeminiAPI(this.getPrimaryModel(), prompt, finalKey, 3, false, onProgress);
 
         } catch (error: any) {
             console.error("Gemini Writer Error:", error);
@@ -379,7 +428,7 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
         }
     }
 
-    async generateCriticTurn(step: WorkflowStep, writerDraft: string): Promise<string> {
+    async generateCriticTurn(step: WorkflowStep, writerDraft: string, onProgress?: (text: string) => void): Promise<string> {
         const geminiKey = this.criticKey || this.writerKey;
 
         if (!geminiKey) {
@@ -400,7 +449,7 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
                 switch (step) {
                     case '1_TOPIC': sysPrompt = TOPIC_CRITIC_PROMPT; break;
                     case '1_LIT_REVIEW': sysPrompt = LIT_REVIEW_CRITIC_PROMPT; break;
-                    case '2_MODEL': sysPrompt = getModelCriticPrompt(this.level); break;
+                    case '2_MODEL': sysPrompt = getModelCriticPrompt(this.level, this.paperType); break;
                     case '3_OUTLINE': sysPrompt = OUTLINE_CRITIC_PROMPT; break;
                     case '4_SURVEY': sysPrompt = SURVEY_CRITIC_PROMPT; break;
                     case '2_ARCH': sysPrompt = SOFTWARE_ARCH_CRITIC_PROMPT; break;
@@ -416,7 +465,7 @@ YÊU CẦU: Tóm tắt trong 5 - 7 bullet points ngắn gọn. Tập trung vào 
 
             const prompt = `${context}\n\n${sysPrompt}\n\nBÀI LÀM CỦA WRITER:\n${writerDraft}\n\nHãy đóng vai trò Critic và đưa ra nhận xét chi tiết, khắt khe.`;
 
-            return await this.callGeminiAPI(AgentSession.PRIMARY_MODEL, prompt, geminiKey);
+            return await this.callGeminiAPI(this.getPrimaryModel(), prompt, geminiKey, 3, false, onProgress);
 
         } catch (error) {
             return `Lỗi Critic (Quota/Network): ${error}`;

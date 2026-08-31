@@ -86,11 +86,8 @@ export async function verifyByQuery(query: string): Promise<DOIVerificationResul
         const items = data.message.items;
 
         if (!items || items.length === 0) {
-            return {
-                doi: 'N/A',
-                valid: false,
-                error: 'Không tìm thấy kết quả phù hợp'
-            };
+            // Fallback to Semantic Scholar if CrossRef fails
+            return await verifyBySemanticScholar(query);
         }
 
         const work = items[0];
@@ -113,10 +110,53 @@ export async function verifyByQuery(query: string): Promise<DOIVerificationResul
             url: work.URL || (work.DOI ? `https://doi.org/${work.DOI}` : undefined)
         };
     } catch (error) {
+        // Fallback to Semantic Scholar if CrossRef fails
+        return await verifyBySemanticScholar(query);
+    }
+}
+
+/**
+ * Fallback verification using Semantic Scholar API
+ */
+export async function verifyBySemanticScholar(query: string): Promise<DOIVerificationResult> {
+    try {
+        const encodedQuery = encodeURIComponent(query);
+        const response = await fetch(`https://api.semanticscholar.org/graph/v1/paper/search?query=${encodedQuery}&limit=1&fields=title,authors,year,venue,externalIds,url`, {
+            headers: {
+                'User-Agent': 'HaiDebate/1.0'
+            }
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+        
+        if (!data.data || data.data.length === 0) {
+            return {
+                doi: 'N/A',
+                valid: false,
+                error: 'Không tìm thấy kết quả phù hợp trên CrossRef lẫn Semantic Scholar'
+            };
+        }
+
+        const work = data.data[0];
+        const authors = work.authors?.map((a: any) => a.name).filter(Boolean) || [];
+        const doi = work.externalIds?.DOI || 'N/A';
+
+        return {
+            doi,
+            valid: true,
+            title: work.title || 'No title',
+            authors,
+            year: work.year,
+            journal: work.venue || 'Unknown journal',
+            url: work.url || (doi !== 'N/A' ? `https://doi.org/${doi}` : undefined)
+        };
+    } catch (error) {
         return {
             doi: 'N/A',
             valid: false,
-            error: error instanceof Error ? error.message : 'Lỗi kết nối CrossRef search'
+            error: error instanceof Error ? error.message : 'Lỗi kết nối API'
         };
     }
 }
@@ -207,4 +247,44 @@ export function getVerificationSummary(results: DOIVerificationResult[]): {
     const errorRate = total > 0 ? (invalid / total) * 100 : 0;
 
     return { total, valid, invalid, errorRate };
+}
+
+/**
+ * Search and retrieve top N papers for RAG context (Title, Abstract, Authors, Year, DOI)
+ */
+export async function searchPapersBySemanticScholar(query: string, limit: number = 5): Promise<any[]> {
+    try {
+        const encodedQuery = encodeURIComponent(query);
+        // We request abstract to feed into RAG
+        const response = await fetch(`https://api.semanticscholar.org/graph/v1/paper/search?query=${encodedQuery}&limit=${limit}&fields=title,abstract,authors,year,venue,externalIds,url`, {
+            headers: {
+                'User-Agent': 'HaiDebate/1.0'
+            }
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+        
+        if (!data.data || data.data.length === 0) {
+            return [];
+        }
+
+        return data.data.map((work: any) => {
+            const authors = work.authors?.map((a: any) => a.name).filter(Boolean).join(', ') || 'Unknown authors';
+            const doi = work.externalIds?.DOI || 'N/A';
+            return {
+                title: work.title || 'No title',
+                abstract: work.abstract || 'No abstract available.',
+                authors,
+                year: work.year || 'Unknown year',
+                venue: work.venue || 'Unknown journal',
+                doi,
+                url: work.url || (doi !== 'N/A' ? `https://doi.org/${doi}` : '')
+            };
+        });
+    } catch (error) {
+        console.error("Error fetching papers for RAG:", error);
+        return [];
+    }
 }
