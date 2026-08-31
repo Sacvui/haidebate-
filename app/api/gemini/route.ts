@@ -139,10 +139,19 @@ export async function POST(request: NextRequest) {
             // Create a ReadableStream that starts immediately
             const stream = new ReadableStream({
                 async start(controller) {
+                    // Send an immediate SSE comment to flush headers
+                    controller.enqueue(new TextEncoder().encode(': keep-alive\n\n'));
+                    
+                    // Pump keep-alives every 5 seconds to bypass Vercel timeout during long generations
+                    const keepAliveInterval = setInterval(() => {
+                        try {
+                            controller.enqueue(new TextEncoder().encode(': keep-alive\n\n'));
+                        } catch (e) {
+                            clearInterval(keepAliveInterval);
+                        }
+                    }, 5000);
+
                     try {
-                        // Send an immediate SSE comment to flush headers and bypass Vercel 504 timeout
-                        controller.enqueue(new TextEncoder().encode(': keep-alive\n\n'));
-                        
                         const res = await fetch(url, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -153,6 +162,8 @@ export async function POST(request: NextRequest) {
                                 }
                             })
                         });
+
+                        clearInterval(keepAliveInterval);
 
                         if (!res.ok) {
                             const rawText = await res.text();
@@ -180,6 +191,7 @@ export async function POST(request: NextRequest) {
                         }
                         controller.close();
                     } catch (error: any) {
+                        clearInterval(keepAliveInterval);
                         const errorObj = { error: { code: 500, message: error.message || "Fetch failed" } };
                         controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(errorObj)}\n\n`));
                         controller.close();
