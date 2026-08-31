@@ -7,9 +7,20 @@ class KVAdapter {
     private client: ReturnType<typeof createClient>;
 
     constructor() {
-        const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL || process.env.REDIS_URL;
-        const token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
+        // Try exact matches first
+        let url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL || process.env.REDIS_URL;
+        let token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
         
+        // If not found, try to find any prefixed environment variables (e.g. debatse_KV_REST_API_URL)
+        if (!url || !token) {
+            const envKeys = Object.keys(process.env);
+            const urlKey = envKeys.find(k => k.endsWith('_KV_REST_API_URL') || k.endsWith('_UPSTASH_REDIS_REST_URL'));
+            const tokenKey = envKeys.find(k => k.endsWith('_KV_REST_API_TOKEN') || k.endsWith('_UPSTASH_REDIS_REST_TOKEN'));
+            
+            if (urlKey) url = process.env[urlKey];
+            if (tokenKey) token = process.env[tokenKey];
+        }
+
         if (!url || !token) {
             console.warn("Upstash/Vercel KV is not configured. Database features will fail.");
         }
